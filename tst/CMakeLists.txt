@@ -12,6 +12,8 @@ add_executable(cpp_template_workshop_ut
     cpp_template_workshop_ut.cpp 
 )
 
+target_include_directories(cpp_template_workshop_ut INTERFACE inc)
+
 target_link_libraries(cpp_template_workshop_ut
     gtest 
     gtest_main

@@ -1,4 +1,4 @@
-# cpp_template_workshop_2023
+# C++ template workshop 2023
 
 ## Introduction To Templates - building a toolbox
 

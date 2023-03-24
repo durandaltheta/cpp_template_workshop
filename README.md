@@ -5,13 +5,14 @@
 ### When to use templates?
 Shorthand Rule:
 - library code should use templates in its API to improve its capabilities
-- normal project code should often avoid writing templates
+- normal project code should often avoid writing custom templates
 
-However, in cases where the code in question is any two of the following then templates are often a good solution:
-- difficult
-- dangerous
+However, in cases where the code in question is any of the following then templates and inlining are often a good solution:
 - frequently used algorithm follows a similar pattern with different types 
 - frequently used algorithm follows a similar pattern with different executing code
+- difficult 
+- dangerous
+- compiler speed optimization is required (at the expense of longer startup load times)
 
 An example of several of the above: you need to launch a child thread which does some initialization. However, the parent thread wants to wait till the child completes initialization before moving on. 
 
@@ -101,22 +102,27 @@ void launch_my_child_threads() {
 
 The power of templates!
 
-
 ## Lesson Notes
-- Basic Templates
+### Basic Templates
+- Basic Templates - manual type specification
 - Basic Templates - type deduction
-- Basic Templates - default arguments
+- Basic Templates - default type assignment
 - Basic Templates - rvalues and lvalues
 - Basic Templates - Techniques - forwarding
 - Basic Templates - Techniques - type decay
-- SFINAE - "Substitution Failure Is Not An Error"
-- SFINAE - Techniques - SFINAE specialization
+- Basic Templates - inlining and compiler behavior
+### SFINAE 
+- SFINAE - Substitution Failure Is Not An Error
+- SFINAE - Techniques - SFINAE specialization selection
 - SFINAE - Techniques - SFINAE method detection
-- Variadics
+### Variadics
+- Variadics - Handling any number of arguments
 - Variadics - Techniques - variadic rvalue iterator trampolines
-- Callables
+### Callables
+- Callables - function pointers, functors, lambdas, std::function and you
 - Callables - Techniques - SFINAE Callable argument type detection 
 - Callables - Techniques - SFINAE Callable return value type detection
+### Putting it all together 
 - Putting it all together - map 
 - Putting it all together - fold 
 

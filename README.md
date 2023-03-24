@@ -102,20 +102,20 @@ The power of templates!
 
 
 ## Lesson Notes
-Basic Templates
-Basic Templates - type deduction
-Basic Templates - default arguments
-Basic Templates - rvalues and lvalues
-Basic Templates - Techniques - forwarding
-Basic Templates - Techniques - type decay
-SFINAE - "Substitution Failure Is Not An Error"
-SFINAE - Techniques - SFINAE specialization
-SFINAE - Techniques - SFINAE method detection
-Variadics
-Variadics - Techniques - variadic rvalue iterator trampolines
-Callables
-Callables - Techniques - SFINAE Callable argument type detection 
-Callables - Techniques - SFINAE Callable return value type detection
-Putting it all together - map 
-Putting it all together - fold 
+- Basic Templates
+- Basic Templates - type deduction
+- Basic Templates - default arguments
+- Basic Templates - rvalues and lvalues
+- Basic Templates - Techniques - forwarding
+- Basic Templates - Techniques - type decay
+- SFINAE - "Substitution Failure Is Not An Error"
+- SFINAE - Techniques - SFINAE specialization
+- SFINAE - Techniques - SFINAE method detection
+- Variadics
+- Variadics - Techniques - variadic rvalue iterator trampolines
+- Callables
+- Callables - Techniques - SFINAE Callable argument type detection 
+- Callables - Techniques - SFINAE Callable return value type detection
+- Putting it all together - map 
+- Putting it all together - fold 
 

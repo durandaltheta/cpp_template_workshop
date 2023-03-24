@@ -67,6 +67,7 @@ std::thread init_thread(InitFunction&& init_f, Function&& f, OptionalArgs&&... a
 Then you can use your new (and safe!) function throughout your program:
 ```
 #include <pthread.h>
+#include <unistd.h>
 #include <thread>
 #include "some_header_with_your_init_thread_template.hpp"
 
@@ -88,13 +89,13 @@ void child_thread_function(int arg0, const char* arg1) {
     // do everything your thread needs to do...
 }
 
+std::thread g_my_child_0;
 std::thread g_my_child_1;
-std::thread g_my_child_2;
 
 void launch_my_child_threads() {
     // use some lambdas to call stick_this_thread_to_core() during thread initialization
-    g_my_child_1 = init_thread([]{ stick_this_thread_to_core(1); }, child_thread_function, 42, "the meaning of life");
-    g_my_child_2 = init_thread([]{ stick_this_thread_to_core(2); }, child_thread_function, 0, "hello world");
+    g_my_child_0 = init_thread([]{ stick_this_thread_to_core(0); }, child_thread_function, 42, "the meaning of life");
+    g_my_child_1 = init_thread([]{ stick_this_thread_to_core(1); }, child_thread_function, 0, "hello world");
 }
 ```
 

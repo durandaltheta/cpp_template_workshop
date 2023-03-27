@@ -12,13 +12,13 @@ However, in cases where the code in question is any of the following then templa
 - frequently used algorithm follows a similar pattern with different executing code
 - difficult 
 - dangerous
-- compiler speed optimization is required (at the expense of longer startup load times)
+- compiler maximum runtime speed optimization is required (at the expense of longer startup load times)
 
 An example of several of the above: you need to launch a child thread which does some initialization. However, the parent thread wants to wait till the child completes initialization before moving on. 
 
-This can happen when using `std::thread`s where there is some operation on the underlying `pthread` that must be completed. Now you are in a pickle, `std::thread`s automatically launch their system `pthread` without allowing for pre-configuration of it's attribute values. You could directly use `pthread` operations but you want the runtime simplicity `std::thread` in the rest of your program, and would like to avoid poluting your code with a combination of both `std::thread` and `pthread`. Worse still, you have to do something similar (but different) on multiple threads throughout your program!
+This can happen when using `std::thread`s where a signal handler needs to be set on the child thread in a synchronized way to avoid a race condition. Now you are in a pickle, `std::thread` automatically launches its system thread without allowing for pre-configuration of it's signal handlers. Worse still, you have to do something similar (but different) on multiple threads throughout your program!
 
-You decide that sticking with `std::thread` is worth it but now you have to do some scary `std::condition_variable` blocking to wait for your child `std::thread` to complete the necessary initialization. Wouldn't it be nice to write a pattern of code which could do this *dangerous* operation *multiple times* in *different ways*?
+Now you have to do some scary `std::condition_variable` blocking to wait for your child `std::thread` to complete the necessary initialization. Wouldn't it be nice to write a pattern of code which could do this *dangerous* operation *multiple times* in *different ways* that was maintainable from a *single function*?
 
 Example Solution:
 ```
@@ -72,31 +72,48 @@ Then you can use your new (and safe!) function throughout your program:
 #include <thread>
 #include "some_header_with_your_init_thread_template.hpp"
 
-// set your thread affinity, from https://stackoverflow.com/a/11583550
-int stick_this_thread_to_core(int core_id) {
-   int num_cores = sysconf(_SC_NPROCESSORS_ONLN);
-   if (core_id < 0 || core_id >= num_cores)
-      return EINVAL;
-
-   cpu_set_t cpuset;
-   CPU_ZERO(&cpuset);
-   CPU_SET(core_id, &cpuset);
-
-   pthread_t current_thread = pthread_self();
-   return pthread_setaffinity_np(current_thread, sizeof(cpu_set_t), &cpuset);
-}
-
-void child_thread_function(int arg0, const char* arg1) {
-    // do everything your thread needs to do...
-}
-
 std::thread g_my_child_0;
 std::thread g_my_child_1;
 
+void my_child_0_sighdl(int sig) {
+    std::cout << "child 0 received signal[" << sig << "]" << std::endl;
+}
+
+void my_child_1_sighdl(int sig) {
+    std::cout << "child 1 received signal[" << sig << "]" << std::endl;
+}
+
+// https://www.gnu.org/software/libc/manual/html_node/Sigaction-Function-Example.html
+void set_handler(void(*sig_handler)(int)) {
+    sigaction new_action, old_action;
+    new_action.sa_handler = sig_handler;
+    sigemptyset (&new_action.sa_mask);
+    new_action.sa_flags = 0;
+
+    sigaction (SIGINT, NULL, &old_action);
+    if (old_action.sa_handler != SIG_IGN) {
+        sigaction (SIGINT, &new_action, NULL);
+    }
+
+    sigaction (SIGHUP, NULL, &old_action);
+    if (old_action.sa_handler != SIG_IGN) {
+        sigaction (SIGHUP, &new_action, NULL);
+    }
+
+    sigaction (SIGTERM, NULL, &old_action);
+    if (old_action.sa_handler != SIG_IGN) {
+        sigaction (SIGTERM, &new_action, NULL);
+    }
+}
+
+void child_func(int arg0, const char* arg1) {
+    // do everything your thread needs to do...
+}
+
 void launch_my_child_threads() {
-    // use some lambdas to call stick_this_thread_to_core() during thread initialization
-    g_my_child_0 = init_thread([]{ stick_this_thread_to_core(0); }, child_thread_function, 42, "the meaning of life");
-    g_my_child_1 = init_thread([]{ stick_this_thread_to_core(1); }, child_thread_function, 0, "hello world");
+    // use some lambdas to easily call set_handler() during thread initialization
+    g_my_child_0 = init_thread([]{ set_handler(my_child_0_sighdl); }, child_func, 42, "the meaning of life");
+    g_my_child_1 = init_thread([]{ set_handler(my_child_1_sighdl); }, child_func, 0, "hello world");
 }
 ```
 

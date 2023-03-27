@@ -10,13 +10,13 @@ Shorthand Rule:
 However, in cases where the code in question is any of the following then templates and inlining are often a good solution:
 - frequently used algorithm follows a similar pattern with different types 
 - frequently used algorithm follows a similar pattern with different executing code
-- difficult 
-- dangerous
 - compiler maximum runtime speed optimization is required (at the expense of longer startup load times)
 
-An example of several of the above: you need to launch a child thread which does some initialization. However, the parent thread wants to wait till the child completes initialization before moving on. 
+Furthermore, templates are ultimately just functions (that will been finalized by the compiler as needed), and can be used to also abstract difficult and/or dangerous code just like normal functions.
 
-This can happen when using `std::thread`s where a signal handler needs to be set on the child thread in a synchronized way to avoid a race condition. Now you are in a pickle, `std::thread` automatically launches its system thread without allowing for pre-configuration of it's signal handlers. Worse still, you have to do something similar (but different) on multiple threads throughout your program!
+An example of several of the above issues: you need to launch a child thread which does some initialization but the parent thread wants to wait till the child completes initialization before moving on. 
+
+This can happen when using `std::thread`s where a signal handler needs to be set on the child thread in a synchronized way to avoid a race condition. Unfortunately, `std::thread` automatically launches its system thread without allowing for pre-configuration of it's signal handlers. Worse still, you have to do something similar (but different) on multiple threads throughout your program!
 
 Now you have to do some scary `std::condition_variable` blocking to wait for your child `std::thread` to complete the necessary initialization. Wouldn't it be nice to write a pattern of code which could do this *dangerous* operation *multiple times* in *different ways* that was maintainable from a *single function*?
 
@@ -83,7 +83,7 @@ void my_child_1_sighdl(int sig) {
     std::cout << "child 1 received signal[" << sig << "]" << std::endl;
 }
 
-// https://www.gnu.org/software/libc/manual/html_node/Sigaction-Function-Example.html
+// from https://www.gnu.org/software/libc/manual/html_node/Sigaction-Function-Example.html
 void set_handler(void(*sig_handler)(int)) {
     sigaction new_action, old_action;
     new_action.sa_handler = sig_handler;

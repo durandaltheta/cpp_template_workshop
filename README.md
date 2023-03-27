@@ -9,10 +9,10 @@ Shorthand Rule:
 
 However, in cases where the code in question is any of the following then templates and inlining are often a good solution:
 - frequently used algorithm follows a similar pattern with different types 
-- frequently used algorithm follows a similar pattern with different executing code
+- frequently used algorithm follows a similar pattern which wraps executing code inside another function
 - compiler maximum runtime speed optimization is required (at the expense of longer startup load times)
 
-Furthermore, templates are ultimately just functions (that will been finalized by the compiler as needed), and can be used to also abstract difficult and/or dangerous code just like normal functions.
+Furthermore, templates are ultimately just functions (that will been finalized by the compiler as needed), and can be used to also abstract difficult and/or dangerous code just like normal functions. What this means, more generally, is that *templates expand your ability to abstract code*.
 
 An example of several of the above issues: you need to launch a child thread which does some initialization but the parent thread wants to wait till the child completes initialization before moving on. 
 

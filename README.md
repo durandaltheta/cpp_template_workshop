@@ -121,9 +121,11 @@ The power of templates!
 
 ## Lesson Notes
 ### Basic Templates
+#### Part 1
 - Basic Templates - manual type specification
 - Basic Templates - type deduction
 - Basic Templates - default type assignment
+#### Part 2
 - Basic Templates - rvalues and lvalues
 - Basic Templates - Techniques - forwarding
 - Basic Templates - Techniques - type decay

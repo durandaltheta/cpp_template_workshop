@@ -142,6 +142,6 @@ The power of templates!
 - Callables - Techniques - SFINAE Callable argument type detection 
 - Callables - Techniques - SFINAE Callable return value type detection
 ### Putting it all together 
-- Putting it all together - map 
-- Putting it all together - fold 
+- Putting it all together - filtering (accept, reject)
+- Putting it all together - map and foldl 
 

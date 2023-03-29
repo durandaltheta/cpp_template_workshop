@@ -120,28 +120,36 @@ void launch_my_child_threads() {
 The power of templates!
 
 ## Lesson Notes
+
 ### Basic Templates
 #### Part 1
-- Basic Templates - manual type specification
-- Basic Templates - type deduction
-- Basic Templates - default type assignment
+#### Basic Templates - manual type specification
+#### Basic Templates - type deduction
+#### Basic Templates - default type assignment
 #### Part 2
-- Basic Templates - rvalues and lvalues
-- Basic Templates - Techniques - forwarding
-- Basic Templates - Techniques - type decay
-- Basic Templates - inlining and compiler behavior
+#### Basic Templates - rvalues and lvalues
+#### Basic Templates - Techniques - forwarding
+#### Basic Templates - Techniques - type decay
+#### Basic Templates - inlining and compiler behavior
+
 ### SFINAE 
-- SFINAE - Substitution Failure Is Not An Error
-- SFINAE - Techniques - SFINAE specialization selection
-- SFINAE - Techniques - SFINAE method detection
+#### SFINAE - Substitution Failure Is Not An Error
+#### SFINAE - Techniques - SFINAE specialization selection
+#### SFINAE - Techniques - SFINAE method detection
+
 ### Variadics
-- Variadics - Handling any number of arguments
-- Variadics - Techniques - variadic rvalue iterator trampolines
+#### Variadics - Handling any number of arguments
+#### Variadics - Techniques - variadic rvalue iterator trampolines
+
 ### Callables
-- Callables - function pointers, functors, lambdas, std::function and you
-- Callables - Techniques - SFINAE Callable argument type detection 
-- Callables - Techniques - SFINAE Callable return value type detection
+#### Callables - function pointers, functors, lambdas, std::function and you
+#### Callables - Techniques - SFINAE Callable argument type detection 
+#### Callables - Techniques - SFINAE Callable return value type detection
 ### Putting it all together 
-- Putting it all together - filtering (accept, reject)
-- Putting it all together - map and foldl 
+#### Part 1
+##### Putting it all together - copy
+##### Putting it all together - filtering (accept, reject)
+#### Part 2
+##### Putting it all together - map 
+##### Putting it all together - foldl
 

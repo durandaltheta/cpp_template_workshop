@@ -121,35 +121,39 @@ The power of templates!
 
 ## Lesson Notes
 
-### Basic Templates
-#### Part 1
+### Basic Templates - Part 1
 #### Basic Templates - manual type specification
 #### Basic Templates - type deduction
 #### Basic Templates - default type assignment
-#### Part 2
+
+### Basic Templates - Part 2
 #### Basic Templates - rvalues and lvalues
-#### Basic Templates - Techniques - forwarding
-#### Basic Templates - Techniques - type decay
+#### Basic Templates - forwarding
+#### Basic Templates - type decay
 #### Basic Templates - inlining and compiler behavior
 
 ### SFINAE 
 #### SFINAE - Substitution Failure Is Not An Error
-#### SFINAE - Techniques - SFINAE specialization selection
-#### SFINAE - Techniques - SFINAE method detection
-
-### Variadics
-#### Variadics - Handling any number of arguments
-#### Variadics - Techniques - variadic rvalue iterator trampolines
+#### SFINAE - specialization selection
+#### SFINAE - method detection
+##### Exercise - size()
+##### Exercise - resize()
+##### Extra Credit - reverse(container)
 
 ### Callables
 #### Callables - function pointers, functors, lambdas, std::function and you
 #### Callables - Techniques - SFINAE Callable argument type detection 
-#### Callables - Techniques - SFINAE Callable return value type detection
-### Putting it all together 
-#### Part 1
-##### Putting it all together - copy
-##### Putting it all together - filtering (accept, reject)
-#### Part 2
-##### Putting it all together - map 
-##### Putting it all together - foldl
+#### Callables - Techniques - SFINAE Callable return value type detection 
+##### Exercise - filter(func, container)
+###### Extra Credit - filter_range(idx, len, func, container)
 
+### Variadics
+#### Variadics - Handling any number of arguments
+#### Variadics - Techniques - variadic rvalue iterator trampolines
+##### Exercise - detail::advance_group(It0, ..., ItN)
+##### Exercise - detail::map(func, ItOut, It0, ItEnd0, It1, It2, ..., ItN)
+
+### Putting it all together 
+##### Exercise - map(func, container0, ..., containerN)
+##### Exercise - fold(func, container0, ..., containerN)
+###### Extra Credit - map_range(idx, len, func, container0, ..., containerN)

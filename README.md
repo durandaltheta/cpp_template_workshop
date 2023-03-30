@@ -1,7 +1,7 @@
 # C++ template workshop 2023
 
 ## Introduction to templates - building a toolbox 
-Templates are a very powerful tool for writing code in c++. They allow you to do just about everything a C macro would allow, but with type safety and namespace awareness. My goal in this workshop is to give my knowledge of c++ templates away so that others might benefit. I hope to build the toolbox of attendees to significantly advance their understanding and skills with c++.
+Templates are a very powerful tool for writing code in c++. They allow you to do just about everything a C macro would allow (and more!), but with type safety and namespace awareness. My goal in this workshop is to give my knowledge of c++ templates away so that others might benefit. I hope to build the toolbox of attendees to significantly advance their understanding and skills with c++.
 
 Be warned, this is *not* a templates basics course. This course will cover very advanced templating (though the first couple of lessons will cover the basics). The intended audience for this course is *advanced c++ developers*. 
 
@@ -27,21 +27,40 @@ This book’s job is to teach you the three most essential skills that a beginni
 and Writing, Attention to Detail, Spotting Differences.
 ```
 
-### What is expected of participants and grading 
-Each participant will be expected to get a series of unit tests passing on a (remote) branch. The `main` branch of this code repository contains all the unit tests, so create your branch off of `main` with `git clone git@github.com:durandaltheta/cpp_template_workshop_2023.git && git checkout -b your_branch_name && git push`
+### What is expected of participants 
+Each participant will be expected to get a series of unit tests passing on a (remote) branch. The `main` branch of this code repository contains all the unit tests in `tst/`, so create your branch off of `main` with `git clone --recurse-submodules git@github.com:durandaltheta/cpp_template_workshop_2023.git && git checkout -b your_branch_name && git push --set-upstream origin your_branch_name`.
+
+This repository has github actions setup to automatically build and run unit tests on each branch. Therefore, no local editor and tooling is technically necessary, you can simply edit your branch in the browser and commit most of the time and see the results. It will probably be faster to develop, build and test locally though.
+
+I have provided the solutions for most exercises in the branch `solutions`. It is *intended* that you use this branch as reference. I do not want you to write your own solutions (though I have no problem if you do that on your own time). I literally expect participants to do the following:
+- open `solutions` branch in their browser on right side of your screen (or other monitor)
+- open your branch in your code editor on the left side of your screen (or other monitor)
+- type *BY HAND* each exercise solution into your branch
+    - *NO COPY PASTE*. The point of this exercise is to force all parts of your brain to engage with the learning process
+    - much of the code you need to enter will need to be in the `inc/` and `inc/detail` directories, as that is where our template definitions will live 
+- optionally, compile and run the unit tests locally with `cmake . && make cpp_template_2023_ut && tst/cpp_template_workshop_ut unit_test_name`
+- `git add`, `commit`, and `push` your changes to your remote branch 
+- see if the github action succeeds in compiling and the relevant unit tests pass
+
+There are a series of `Extra Credit` unit tests. These will need to be implemented *by you*, as no solution will be available. However, the intention with each `Extra Credit` is that what you have learned previously should get you most of the way across the finish line. Completing `Extra Credit` unit tests will influence your final grade.
+
+### Grading
+Grading for this workshop reflects Elektrobit's employee yearly performance goals scale of 1-5 (1 is bad, 3 is you did your job, 5 is perfect). As such, your score, if used by your manager to influence any of your yearly goals, can easily reason about how well you did and how they should adjust your end of year scores.
 
 - a branch checkout in their user name exists at end of workshop: 1 point
--- if no branch checkout in their user name exists at the end of the workshop I will assume the user has not participated. This means no score, good or bad, will be forwarded to any line manager
+    - if no branch checkout in their user name exists at the end of the workshop I will assume the user has not participated. This means no score, good or bad, will be forwarded to any line manager
 - implement solution provided unit tests
--- if at least 50% of the solution provided unit tests pass: 1 point
--- if 100% of the solution provided unit tests pass: 2 points
+    - if at least 50% of the solution provided unit tests pass: 1 point
+    - if 100% of the solution provided unit tests pass: 2 points
 - implement bonus unit tests
--- if at least 50% of the bonus unit tests pass: 1 point
--- if 100% of the bonus unit tests pass: 2 points
+    - if at least 50% of the bonus unit tests pass: 1 point
+    - if 100% of the bonus unit tests pass: 2 points 
 
+Possible point total: 5
 
+### Template theory - when to use templates? 
+Here are my opinions on the topic:
 
-### When to use templates?
 Shorthand Rule:
 - library code should use templates in its API to improve its capabilities
 - normal project code should often avoid writing custom templates

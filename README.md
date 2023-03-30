@@ -41,7 +41,7 @@ I have provided the solutions for most exercises in the branch `solutions`. It i
 - `git add`, `commit`, and `push` your changes to your remote branch 
 - see if the github action succeeds in compiling and the relevant unit tests pass
 
-There are a series of `Extra Credit` unit tests. These will need to be implemented *by you*, as no solution will be available. However, the intention with each `Extra Credit` is that what you have learned previously should get you most of the way across the finish line. Completing `Extra Credit` unit tests will influence your final grade.
+There are a series of `Extra Credit` unit tests. These will need to be implemented *by you*, as no solution will be available. However, the intention with each `Extra Credit` is that what you have learned previously should get you most of the way across the finish line. Completing `Extra Credit` unit tests will influence your final grade. You can always skip them if you're struggling and come back later, though it would probably be helpful to you (if you intend to complete them) to give your best after each lesson.
 
 ### Grading
 Grading for this workshop reflects Elektrobit's employee yearly performance goals scale of 1-5 (1 is bad, 3 is you did your job, 5 is perfect). As such, your score, if used by your manager to influence any of your yearly goals, can easily reason about how well you did and how they should adjust your end of year scores.
@@ -175,6 +175,7 @@ void launch_my_child_threads() {
 ```
 
 ## Lesson Notes
+Here are the links to all the lesson notes. We will meet regularly (probably every 2 weeks or so) where I will go through the lesson notes and have extended question/answer session (if necessary). We can live debug together if necessary, though I can't promise I can immediately solve every problem on th spot :D. The goal is you should do your exercises sometime in the intervening days, though I won't track your progress (and I don't care! I only care about helping your learn this skill).
 
 ### Basic Templates - Part 1
 #### Basic Templates - manual type specification

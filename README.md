@@ -1,6 +1,45 @@
 # C++ template workshop 2023
 
-## Introduction To Templates - building a toolbox
+## Introduction to templates - building a toolbox 
+Templates are a very powerful tool for writing code in c++. They allow you to do just about everything a C macro would allow, but with type safety and namespace awareness. My goal in this workshop is to give my knowledge of c++ templates away so that others might benefit. I hope to build the toolbox of attendees to significantly advance their understanding and skills with c++.
+
+Be warned, this is *not* a templates basics course. This course will cover very advanced templating (though the first couple of lessons will cover the basics). The intended audience for this course is *advanced c++ developers*. 
+
+### A note on course design 
+I modeled this course after my favorite programming book [Learn Python the Hard Way](https://www.webpages.uidaho.edu/~stevel/504/LearnPythonTheHardWay.pdf). Said book is for very inexperienced students looking to learn the Python programming language. However, I was so impressed by how *successful* the book was at educating readers that I decided to steal his ideas :).
+
+It's true the intended audience of this workshop is not c++ beginners. However, many (or all) will be beginners when it comes to c++ templating, which is a very niche skill :). Here's the opening paragraph from his book, of which the core ideas I'm seeking to emulate:
+```
+The Hard Way Is Easier
+
+This simple book is meant to get you started in programming. The title says it’s the hard way to learn to write code;
+but it’s actually not. It’s only the “hard” way because it’s the way people used to teach things. With the help of this
+book, you will do the incredibly simple things that all programmers need to do to learn a language:
+
+1. Go through each exercise.
+2. Type in each sample exactly.
+3. Make it run.
+
+That’s it. This will be very difficult at first, but stick with it. If you go through this book, and do each exercise for
+one or two hours a night, you will have a good foundation for moving onto another book. You might not really learn
+“programming” from this book, but you will learn the foundation skills you need to start learning the language.
+This book’s job is to teach you the three most essential skills that a beginning programmer needs to know: Reading
+and Writing, Attention to Detail, Spotting Differences.
+```
+
+### What is expected of participants and grading 
+Each participant will be expected to get a series of unit tests passing on a (remote) branch. The `main` branch of this code repository contains all the unit tests, so create your branch off of `main` with `git clone git@github.com:durandaltheta/cpp_template_workshop_2023.git && git checkout -b your_branch_name && git push`
+
+- a branch checkout in their user name exists at end of workshop: 1 point
+-- if no branch checkout in their user name exists at the end of the workshop I will assume the user has not participated. This means no score, good or bad, will be forwarded to any line manager
+- implement solution provided unit tests
+-- if at least 50% of the solution provided unit tests pass: 1 point
+-- if 100% of the solution provided unit tests pass: 2 points
+- implement bonus unit tests
+-- if at least 50% of the bonus unit tests pass: 1 point
+-- if 100% of the bonus unit tests pass: 2 points
+
+
 
 ### When to use templates?
 Shorthand Rule:
@@ -20,7 +59,7 @@ This can happen when using `std::thread`s where a signal handler needs to be set
 
 Now you have to do some scary `std::condition_variable` blocking to wait for your child `std::thread` to complete the necessary initialization. Wouldn't it be nice to write a pattern of code which could do this *dangerous* operation *multiple times* in *different ways* that was maintainable from a *single function*?
 
-Example Solution:
+Example Solution (if this doesn't make sense right away, consider coming back here throughout the workshop to re-examine with your new knowledge):
 ```
 // in some header 
 #include <thread>
@@ -117,25 +156,26 @@ void launch_my_child_threads() {
 }
 ```
 
-The power of templates!
-
 ## Lesson Notes
 
 ### Basic Templates - Part 1
 #### Basic Templates - manual type specification
 #### Basic Templates - type deduction
 #### Basic Templates - default type assignment
+#### Exercises
 
 ### Basic Templates - Part 2
 #### Basic Templates - rvalues and lvalues
 #### Basic Templates - forwarding
 #### Basic Templates - type decay
 #### Basic Templates - inlining and compiler behavior
+#### Exercises
 
 ### SFINAE 
 #### SFINAE - Substitution Failure Is Not An Error
 #### SFINAE - specialization selection
 #### SFINAE - method detection
+#### Exercises
 ##### Exercise - size()
 ##### Exercise - resize()
 ##### Extra Credit - reverse(container)
@@ -144,16 +184,19 @@ The power of templates!
 #### Callables - function pointers, functors, lambdas, std::function and you
 #### Callables - Techniques - SFINAE Callable argument type detection 
 #### Callables - Techniques - SFINAE Callable return value type detection 
+#### Exercises
 ##### Exercise - filter(func, container)
-###### Extra Credit - filter_range(idx, len, func, container)
+##### Extra Credit - filter_range(idx, len, func, container)
 
 ### Variadics
 #### Variadics - Handling any number of arguments
 #### Variadics - Techniques - variadic rvalue iterator trampolines
+#### Exercises
 ##### Exercise - detail::advance_group(It0, ..., ItN)
 ##### Exercise - detail::map(func, ItOut, It0, ItEnd0, It1, It2, ..., ItN)
 
 ### Putting it all together 
+#### Exercises
 ##### Exercise - map(func, container0, ..., containerN)
 ##### Exercise - fold(func, container0, ..., containerN)
-###### Extra Credit - map_range(idx, len, func, container0, ..., containerN)
+##### Extra Credit - map_range(idx, len, func, container0, ..., containerN)

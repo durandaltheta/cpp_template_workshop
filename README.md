@@ -27,7 +27,9 @@ It's true the intended audience of this workshop is not c++ beginners. However, 
 > and Writing, Attention to Detail, Spotting Differences.
 
 ### What is expected of participants 
-Each participant will be expected to get a series of unit tests passing on a (remote) branch. The `main` branch of this code repository contains all the unit tests in `tst/`, so create your branch off of `main` with `git clone --recurse-submodules git@github.com:durandaltheta/cpp_template_workshop_2023.git && git checkout -b your_branch_name && git push --set-upstream origin your_branch_name`.
+Each participant will be expected to get a series of unit tests passing on a (remote) branch. The `main` branch of this code repository contains all the unit tests in `tst/`, so create your branch off of `main` with `git clone --recurse-submodules git@github.com:durandaltheta/cpp_template_workshop_2023.git && git checkout -b your_branch_name && git push --set-upstream origin your_branch_name`. 
+
+NOTE: as implied by the `git` argument `--recurse-submodules`, this repo uses submodules, so clones of this repo will always require `--recurse-submodules` argument if you want unit tests to work :D
 
 This repository has github actions setup to automatically build and run unit tests on each branch. Therefore, no local editor and tooling is technically necessary, you can simply edit your branch in the browser and commit most of the time and see the results. It will probably be faster to develop, build and test locally though.
 
@@ -37,7 +39,8 @@ I have provided the solutions for most exercises in the branch `solutions`. It i
 - type *BY HAND* each exercise solution into your branch
     - *NO COPY PASTE*. The point of this exercise is to force all parts of your brain to engage with the learning process
     - much of the code you need to enter will need to be in the `inc/` and `inc/detail` directories, as that is where our template definitions will live 
-- optionally, compile and run the unit tests locally with `cmake . && make cpp_template_2023_ut && tst/cpp_template_workshop_ut unit_test_name`
+- optionally, compile and run the unit tests locally with `cmake . && make cpp_template_2023_ut && tst/cpp_template_workshop_ut`
+    - a single unit test can be run with `tst/cpp_template_workshop_ut unit_test_name`
 - `git add`, `commit`, and `push` your changes to your remote branch 
 - see if the github action succeeds in compiling and the relevant unit tests pass
 

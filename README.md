@@ -9,23 +9,22 @@ Be warned, this is *not* a templates basics course. This course will cover very 
 I modeled this course after my favorite programming book [Learn Python the Hard Way](https://www.webpages.uidaho.edu/~stevel/504/LearnPythonTheHardWay.pdf). Said book is for very inexperienced students looking to learn the Python programming language. However, I was so impressed by how *successful* the book was at educating readers that I decided to steal his ideas :).
 
 It's true the intended audience of this workshop is not c++ beginners. However, many (or all) will be beginners when it comes to c++ templating, which is a very niche skill :). Here's the opening paragraph from his book, of which the core ideas I'm seeking to emulate:
-```
-The Hard Way Is Easier
 
-This simple book is meant to get you started in programming. The title says it’s the hard way to learn to write code;
-but it’s actually not. It’s only the “hard” way because it’s the way people used to teach things. With the help of this
-book, you will do the incredibly simple things that all programmers need to do to learn a language:
-
-1. Go through each exercise.
-2. Type in each sample exactly.
-3. Make it run.
-
-That’s it. This will be very difficult at first, but stick with it. If you go through this book, and do each exercise for
-one or two hours a night, you will have a good foundation for moving onto another book. You might not really learn
-“programming” from this book, but you will learn the foundation skills you need to start learning the language.
-This book’s job is to teach you the three most essential skills that a beginning programmer needs to know: Reading
-and Writing, Attention to Detail, Spotting Differences.
-```
+> The Hard Way Is Easier
+> 
+> This simple book is meant to get you started in programming. The title says it’s the hard way to learn to write code;
+> but it’s actually not. It’s only the “hard” way because it’s the way people used to teach things. With the help of this
+> book, you will do the incredibly simple things that all programmers need to do to learn a language:
+> 
+> 1. Go through each exercise.
+> 2. Type in each sample exactly.
+> 3. Make it run.
+> 
+> That’s it. This will be very difficult at first, but stick with it. If you go through this book, and do each exercise for
+> one or two hours a night, you will have a good foundation for moving onto another book. You might not really learn
+> “programming” from this book, but you will learn the foundation skills you need to start learning the language.
+> This book’s job is to teach you the three most essential skills that a beginning programmer needs to know: Reading
+> and Writing, Attention to Detail, Spotting Differences.
 
 ### What is expected of participants 
 Each participant will be expected to get a series of unit tests passing on a (remote) branch. The `main` branch of this code repository contains all the unit tests in `tst/`, so create your branch off of `main` with `git clone --recurse-submodules git@github.com:durandaltheta/cpp_template_workshop_2023.git && git checkout -b your_branch_name && git push --set-upstream origin your_branch_name`.

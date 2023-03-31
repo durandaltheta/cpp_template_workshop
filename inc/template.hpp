@@ -15,9 +15,13 @@
  * unit tests. It defines the public API of our template library.
  */
 
-namespace ctw { // cpp template workshop 
+namespace cta { // cpp template algorithm
 
-// size
+/**
+ * @brief call C::size() if member exists, else calculate the size using iterators
+ * @param c a container 
+ * @return the size of the container
+ */
 template <typename C>
 inline size_t // size_t is generally convertable from all container `size_type`s
 size(C&& c) { 
@@ -31,6 +35,26 @@ size(C&& c) {
                     detail::template::has_size<C>::has 
             >()
     ); 
+}
+
+/**
+ * @brief call C::resize if member exists, else resize by reassignment
+ * @param c a container 
+ * @param n new target size 
+ */
+template <typename C>
+void 
+resize(C&& c, size_t n) 
+{ 
+    using UC = detail::templates::unqualified<C>;
+    detail::algorithm::resize_(
+            c, 
+            n, 
+            std::integral_constant
+            <
+                bool, 
+                detail::algorithm::has_resize<UC>::has 
+            >()); 
 }
 
 // map

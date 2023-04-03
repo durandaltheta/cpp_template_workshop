@@ -1,65 +1,21 @@
-#ifndef CPP_TEMPLATE_WORKSHOP_DETAIL_TEMPLATE
-#define CPP_TEMPLATE_WORKSHOP_DETAIL_TEMPLATE 
+#ifndef CPP_TEMPLATE_WORKSHOP_DETAIL_ALGORITHM
+#define CPP_TEMPLATE_WORKSHOP_DETAIL_ALGORITHM
 
 // cpp stl
 #include <type_traits>
 #include <functional>
+
+// local 
+#include "template.hpp"
 
 /**
  * This where code goes which should *not* be directly included by a user, but
  * is needed by other code included by a user.
  */
 
-namespace ctw { // cpp template workshop
+namespace cta { // cpp template algorithm
 namespace detail { 
-
-// ----------------------------------------------------------------------------- 
-// type traits
-
-// get the unqualified base type of a type
-template <typename T>
-using unqualified = typename std::decay<T>::type;
-
-template <typename T>
-using enable_if_rvalue = typename std::enable_if
-                         <
-                             !std::is_lvalue_reference<T>::value
-                         >::type;
-
-template<typename T>
-struct function_traits;
-
-// get access to more type information about a function, IE:
-//
-// typedef std::function<R(A,B)> fun;
-// 
-// function_traits<fun>::arg<1>::type
-template<typename R, typename... Args>
-struct function_traits<std::function<R(Args...)>>
-{
-    static const size_t nargs = sizeof...(Args);
-
-    typedef std::function<R(Args...)> function_type;
-    typedef R result_type;
-
-    template <std::size_t i>
-    struct arg
-    {
-        typedef typename std::tuple_element<i, std::tuple<Args...>>::type type;
-    };
-}; 
-
-// handle pre and post c++17 
-#if __cplusplus >= 201703L
-template <typename F, typename... Ts>
-using function_return_type = typename std::invoke_result<unqualified<F>,Ts...>::type;
-#else 
-template <typename F, typename... Ts>
-using function_return_type = typename std::result_of<unqualified<F>(Ts...)>::type;
-#endif
-
-template <typename F, std::size_t i>
-using function_arg_type = typename function_traits<F>::template arg<i>::type;
+namespace algorithm {
 
 // -----------------------------------------------------------------------------
 // size  
@@ -162,6 +118,7 @@ Here is the final magic. All the above code has been careful to be valid at
 inside *other* templates to determine whether an object has a `size()` method or 
 not!
 */
+/*
 template<typename T>
 struct has_size {
     template<typename U, U::size_type (U::*)() const> struct SFINAE {};
@@ -169,15 +126,19 @@ struct has_size {
     template<typename U> static int test(...);
     static const bool has = sizeof(test<T>(0)) == sizeof(char);
 };
+*/
 
 // Get the size of an object with its `size()` method
+/*
 template <typename C>
 inline size_t 
 size(C& c, std::true_type) { 
     return c.size(); 
 }
+*/
 
 // Get the size of an object the *slow* way by iterating through it
+/*
 template <typename C>
 inline size_t 
 size(C& c, std::false_type) {
@@ -191,9 +152,41 @@ size(C& c, std::false_type) {
 
     return cnt;
 }
+*/
+
+template <typename C>
+std::size_t size(C& c) {
+    return c.size();
+}
+
+template <typename C>
+std::size_t 
+size(C& c) {
+    size_t cnt = 0;
+    auto first = c.begin();
+    auto last = c.end();
+
+    for(; first != last; ++first) { 
+        ++cnt; 
+    }
+
+    return cnt;
+}
 
 // ----------------------------------------------------------------------------- 
-// advance
+// resize
+template <typename C>
+void resize(C& c, std::size_t new_size) {
+    c.resize(new_size);
+}
+
+template <typename C>
+void resize(C& c, std::size_t new_size) {
+    c = C(new_size); // use size constructor and move assignment
+}
+
+// ----------------------------------------------------------------------------- 
+// advance group
 void advance_group() { }
 
 template <typename IT, typename... ITs>
@@ -205,11 +198,12 @@ void advance_group(IT& it, ITs&... its) {
 // ----------------------------------------------------------------------------- 
 // map
 template <typename RIT, typename F, typename IT, typename... ITs>
-void map(RIT&& rit, F&& f, IT&& it, ITs&&... its) {
+void map(F&& f, RIT&& rit, IT&& it, ITs&&... its) {
     *rit = f(*it, *its...);
-    advance_group(it, its...);
+    advance_group(rit, it, its...);
 }
 
+}
 }
 }
 

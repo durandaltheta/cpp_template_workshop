@@ -1,5 +1,5 @@
-#ifndef CPP_TEMPLATE_WORKSHOP_TEMPLATE
-#define CPP_TEMPLATE_WORKSHOP_TEMPLATE 
+#ifndef CPP_TEMPLATE_WORKSHOP_ALGORITHM
+#define CPP_TEMPLATE_WORKSHOP_ALGORITHM
 
 // cpp stl 
 #include <type_traits>
@@ -9,6 +9,7 @@
 
 // local
 #include "detail/template.hpp"
+#include "detail/algorithm.hpp"
 
 /**
  * This is where code goes which can be included by a user, like this project's
@@ -69,26 +70,57 @@ map_to(F&& f, C& c, Cs&&... cs) {
     return ret;
 }
 
+
+//------------------------------------------------------------------------------
+// map 
+
+/**
+ * @brief evaluate function with the elements of containers grouped by index
+ * @param f a function to call 
+ * @param idx the first index to evaluated
+ * @param len the count of indexes to evaluate
+ * @param c the first container 
+ * @param cs... the remaining containers
+ * @return a container R of the results from calling f with elements in c and cs...
+ */
+template <typename R, typename F, typename C, typename... Cs>
+R 
+map_range_to(F&& f, std::size_t idx, std::size_t len, C&& c, Cs&&... cs) {
+    R ret(len);
+    detail::algorithm::map(ret.begin(),
+                           len,
+                           std::forward<F>(f),
+                           std::next(c.begin(),idx),
+                           std::next(cs.begin(),idx)...);
+    return ret;
+}
+
+template <typename F, typename... Cs>
+using map_default_return_type = std::vector<
+    detail::templates::function_return_type<F,Cs...>>;
+
+/**
+ * @brief evaluate function with the elements of containers grouped by index 
+ *
+ * Evaluation begins at index 0, and ends when every element in container c has 
+ * been iterated.
+ *
+ * @param f a function to call 
+ * @param c the first container 
+ * @param cs... the remaining containers
+ * @return an std::vector of the results from calling f with elements in c and cs...
+ */
 template <typename F,
           typename C,
           typename... Cs>
-std::vector<
-   detail::templates::function_return_type<
-       F,
-       typename C::value_type,
-       typename Cs::value_type...
-   >
->
+map_default_return_type<F,C,Cs...>
 map(F&& f, C& c, Cs&&... cs) {
-    using R = std::vector<
-       detail::templates::function_return_type<
-           F,
-           typename C::value_type,
-           typename Cs::value_type...
-       >
-    >;
-
-    return map_to<R>(std::forward<F>(f), std::forward<C>(c), std::forward<Cs>(cs)...);
+    return map_range_to<map_default_return_type<F,C,Cs...>>(
+            std::forward<F>(f), 
+            0,
+            size(c),
+            std::forward<C>(c), 
+            std::forward<Cs>(cs)...);
 }
 
 }

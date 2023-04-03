@@ -199,7 +199,7 @@ Here are the links to all the lesson notes. We will meet regularly (probably eve
 #### SFINAE - Substitution Failure Is Not An Error
 #### SFINAE - specialization selection
 #### SFINAE - method detection
-#### Exercises
+#### Exercises 
 ##### Exercise - size()
 ##### Exercise - resize()
 ##### Extra Credit - reverse(container)
@@ -208,19 +208,31 @@ Here are the links to all the lesson notes. We will meet regularly (probably eve
 #### Callables - function pointers, functors, lambdas, std::function and you
 #### Callables - Techniques - SFINAE Callable argument type detection 
 #### Callables - Techniques - SFINAE Callable return value type detection 
-#### Exercises
-##### Exercise - filter(func, container)
-##### Extra Credit - filter_range(idx, len, func, container)
+#### Exercises 
+##### Exercise - psuedo-std::function functor
+##### Exercise - lambda argument capturing 
+##### Extra Credit - detail::filter(func, ItBegin, ItEnd)
+##### Extra Credit - filter_range_to(func, idx, len, container)
+##### Extra Credit - filter(func, container)
 
 ### Variadics
 #### Variadics - Handling any number of arguments
 #### Variadics - Techniques - variadic rvalue iterator trampolines
 #### Exercises
 ##### Exercise - detail::advance_group(It0, ..., ItN)
-##### Exercise - detail::map(func, ItOut, It0, ItEnd0, It1, It2, ..., ItN)
+##### Exercise - detail::map(func, ItOut, It0Begin, It0End, It1, It2, ..., ItN)
+##### Exercise - detail::fold(func, out, It0Begin, It0End, It1, It2, ..., ItN)
+##### Extra Credit - detail::map_and(func, ItOut, It0Begin, It0End, It1, It2, ..., ItN)
+##### Extra Credit - detail::map_or(func, ItOut, It0Begin, It0End, It1, It2, ..., ItN)
 
 ### Putting it all together 
+#### Building API - broad functionality versus selecting sane defaults
 #### Exercises
+##### Exercise - map_range_to<R>(func, idx, len, container0, ..., containerN)
 ##### Exercise - map(func, container0, ..., containerN)
+##### Exercise - fold_range(func, idx, len, icontainer0, ..., containerN)
 ##### Exercise - fold(func, container0, ..., containerN)
-##### Extra Credit - map_range(idx, len, func, container0, ..., containerN)
+##### Extra Credit - map_and_range_to<R>(func, idx, len, container0, ..., containerN)
+##### Extra Credit - map_and(func, container0, ..., containerN)
+##### Extra Credit - map_or_range_to<R>(func, idx, len, container0, ..., containerN)
+##### Extra Credit - map_or(func, container0, ..., containerN)

@@ -10,7 +10,7 @@ Be warned, this is *not* a templates basics course. This course will cover very 
 ### A note on course design 
 I modeled this course after my favorite programming book [Learn Python the Hard Way](https://www.webpages.uidaho.edu/~stevel/504/LearnPythonTheHardWay.pdf). Said book is for very inexperienced students looking to learn the Python programming language. However, I was so impressed by how *successful* the book was at educating readers that I decided to steal his ideas :).
 
-It's true the intended audience of this workshop is not c++ beginners. However, many (or all) will be beginners when it comes to c++ templating, which is a very niche skill :). Here's the opening paragraph from his book, of which the core ideas I'm seeking to emulate:
+It's true the intended audience of this workshop is not c++ beginners. However, many (or all) will be beginners when it comes to c++ templating, which is a very niche skill :). Here's the opening paragraph from his book, which contains the core ideas I'm seeking to emulate:
 
 > The Hard Way Is Easier
 > 

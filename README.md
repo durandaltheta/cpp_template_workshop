@@ -71,6 +71,7 @@ Shorthand Rule:
 - normal project code should often avoid writing custom templates
 
 However, in cases where the code in question is any of the following then templates and inlining are often a good solution:
+- API can handle a variable number of arguments
 - frequently used algorithm follows a similar pattern with different types 
 - frequently used algorithm follows a similar pattern which wraps executing code inside another function
 - compiler maximum runtime speed optimization is required (at the expense of longer startup load times)

@@ -3,7 +3,7 @@
 ## Introduction to templates - building a toolbox 
 Templates are a very powerful tool for writing code in c++. They allow you to do just about everything a C macro would allow (and more!), but with type safety and namespace awareness. My goal in this workshop is to give my knowledge of c++ templates away so that others might benefit. I hope to build the toolbox of attendees to significantly advance their understanding and skills with c++. 
 
-Even if you never write a single template in production code (though you probably will), the this knowledge is *extremely* useful for understanding template code, including standard library code. I did not become an expert in the standard library until I learned templates, for the simple reason that the standard library uses them all over the place :D.
+Even if you never write a single template in production code (though you probably will), this knowledge is *extremely* useful for reading and understanding existing template code, including standard library code. I did not become an expert in the standard library until I learned templates, for the simple reason that the standard library uses them all over the place :D.
 
 Be warned, this is *not* a templates basics course. This course will cover very advanced templating (though the first couple of lessons will cover the basics). The intended audience for this course is *advanced c++ developers*. 
 

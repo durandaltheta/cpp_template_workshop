@@ -92,8 +92,7 @@ Example Solution (if this doesn't make sense right away, consider coming back he
 #include <memory>
 
 template <typename InitFunction, typename Function, typename... OptionalArgs>
-std::thread init_thread(InitFunction&& init_f, Function&& f, OptionalArgs&&... args) :
-{
+std::thread init_thread(InitFunction&& init_f, Function&& f, OptionalArgs&&... args) {
     // figure out the scary synchronization once
     std::mutex mtx;
     std::condition_variable cv;

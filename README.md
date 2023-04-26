@@ -5,7 +5,7 @@ Templates are a very powerful tool for writing code in c++. They allow you to do
 
 Even if you never write a single template in production code (though you probably will), this knowledge is *extremely* useful for reading and understanding existing template code, including standard library code. I did not become an expert in the standard library until I learned templates, for the simple reason that the standard library uses them all over the place :D.
 
-Be warned, this is *not* a templates basics course. This course will cover very advanced templating (though the first couple of lessons will cover the basics). The intended audience for this course is *advanced c++ developers*. 
+Be warned, this is *not* a templates basics course. This course will cover very advanced templating, though the first couple of lessons will cover the basics. The intended audience for this course is *advanced c++ developers*. 
 
 ### A note on course design 
 I modeled this course after my favorite programming book [Learn Python the Hard Way](https://www.webpages.uidaho.edu/~stevel/504/LearnPythonTheHardWay.pdf). Said book is for very inexperienced students looking to learn the Python programming language. However, I was so impressed by how *successful* the book was at educating readers that I decided to steal his ideas :).

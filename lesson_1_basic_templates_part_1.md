@@ -1,6 +1,6 @@
 # Basic Templates Part 1
 ## What Are Templates?
-In `c++` a template is a recipe for code that the compiler will finish writing for you *as needed* (and not before!). Templates always begin with the keyword `template`, followed by a template parameter list beginning with a `<` and ending with a `>`.  Within the `template` parameter list you can specify templated types with the keywords `typename` or `class`:
+In `c++` a template is a recipe for code that the compiler will finish writing for you *as needed* (and not before!). Templates always begin with the keyword `template`, followed by a template parameter list beginning with a `<` and ending with a `>`.  Within the `template` parameter list you can specify templated types with the keywords `typename` or `class`.
 
 After the `template` header follows a function, a `struct`/`class` definition, or a `using typename =` type alias.
 

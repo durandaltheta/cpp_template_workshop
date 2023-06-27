@@ -1,10 +1,10 @@
-#ifndef CPP_TEMPLATE_WORKSHOP_DETAIL_TEMPLATE
-#define CPP_TEMPLATE_WORKSHOP_DETAIL_TEMPLATE 
+#ifndef SIMPLE_CPLUSPLUS_ALGORITHM_DETAIL_TEMPLATE
+#define SIMPLE_CPLUSPLUS_ALGORITHM_DETAIL_TEMPLATE
 
 #include <type_traits>
 #include <functional>
 
-namespace cta { // cpp template algorithm
+namespace sca { // simple cpp algorithm
 namespace detail { 
 namespace templates {
 

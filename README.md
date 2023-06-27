@@ -74,15 +74,15 @@ However, in cases where the code in question is any of the following then templa
 - API can handle a variable number of arguments
 - frequently used algorithm follows a similar pattern with different types 
 - frequently used algorithm follows a similar pattern which wraps executing code inside another function
-- compiler maximum runtime speed optimization is required (at the expense of longer startup load times)
+- compiler maximum runtime speed optimization is required (at the expense of potentially longer startup load times)
 
-Furthermore, templates are ultimately just functions (that will been finalized by the compiler as needed), and can be used to write difficult and/or dangerous code just like normal functions. What this means, more generally, is that *templates expand your ability to abstract code*.
+Additionally, templates are just functions (that will been finalized by the compiler as needed), and can be used to write difficult and/or dangerous code just like normal functions. This means, more generally, that *templates expand your ability to abstract code* by leveraging their expanded featureset.
 
 An example of several of the above issues: you need to launch a child thread which does some initialization but the parent thread wants to wait till the child completes initialization before moving on. 
 
 This can happen when using `std::thread`s where a signal handler needs to be set on the child thread in a synchronized way to avoid a race condition. Unfortunately, `std::thread` automatically launches its system thread without allowing for pre-configuration of it's signal handlers. Worse still, you have to do something similar (but different) on multiple threads throughout your program!
 
-Now you have to do some scary `std::condition_variable` blocking to wait for your child `std::thread` to complete the necessary initialization. Wouldn't it be nice to write a pattern of code which could do this *dangerous* operation *multiple times* in *different ways* with an *undefined nuber of arguments* that was maintainable from a *single function*?
+Now you have to do some scary `std::condition_variable` blocking to wait for your child `std::thread` to complete the necessary initialization. Wouldn't it be nice to write a pattern of code which could do this *dangerous* operation *multiple times* in *different ways* with an *undefined nuber of arguments* that was maintainable from a *single template function*?
 
 Example Solution (if this doesn't make sense right away, consider coming back here throughout the workshop to re-examine with your new knowledge):
 ```
@@ -97,7 +97,7 @@ std::thread init_thread(InitFunction&& init_f, Function&& f, OptionalArgs&&... a
     // figure out the scary synchronization once
     std::mutex mtx;
     std::condition_variable cv;
-    bool flag = false
+    bool flag = false;
 
     std::thread thd([=, &mtx, &cv, &flag]() mutable {
         // do thread initialization

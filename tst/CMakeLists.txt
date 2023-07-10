@@ -9,7 +9,7 @@ set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -pthread -Wall")
 add_subdirectory(googletest)
 
 add_executable(cpp_template_workshop_ut
-    cpp_template_workshop_ut.cpp 
+    lesson_1_ut.cpp 
 )
 
 target_include_directories(cpp_template_workshop_ut INTERFACE inc)
@@ -17,5 +17,5 @@ target_include_directories(cpp_template_workshop_ut INTERFACE inc)
 target_link_libraries(cpp_template_workshop_ut
     gtest 
     gtest_main
-    cpp_template_workshop 
+    sca
 )

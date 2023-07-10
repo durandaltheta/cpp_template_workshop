@@ -100,7 +100,7 @@ hello world
 $
 ```
 
-## Multiple Type Templates 
+## Multiple Template Types
 There's no limitation on the number of templated types a template can have. This allows us to write templates which can take more than one unknown argument type. Rewriting out `add` template:
 ```
 #include <string>
@@ -130,7 +130,7 @@ $
 ```
 
 ## Type Specialization 
-Sometimes you need explicitly write different behavior for specific template subcases. This can be accomplished by writing more specific versions of your template alongside more general ones.
+Sometimes you need explicitly write different behavior for specific subcases. This can be accomplished by writing more specific versions of your template alongside more general ones.
 ```
 #include <string>
 #include <iostream>
@@ -179,3 +179,33 @@ template<
 ```
 
 This means that a `std::vector<int>` (where `T` is set to `int`) is more of a nickname for the actual `std::vector` type. The *actual* type is `std::vector<int, std::allocator<int>>`, but the compiler doesn't require you specify the `Allocator` type if you use the default allocator.
+
+A minor note, you can specify "templates within templates". This is a feature that generally does not need to be used (and will not be covered by this course) but is useful for illustrating default template type assignment in action. In simple terms, you put another template header inside your type list (though the internal template does not need its types specified, just putting a placeholder `typename` keyword in the sub-header will suffice):
+```
+#include <vector> 
+#include <list>
+#include <iostream>
+
+template <typename T, template <typename, typename> class Container = std::vector<T>>
+Container construct_container_with_one_element(T& t) {
+    return Container{t};
+}
+
+int main() {
+    std::vector v = construct_container_with_one_element(1);
+    std::list<int> l = construct_container_with_one_element<int, std::list<int>>(2);
+
+    std::cout << v.front() << std::endl;
+    std::cout << l.front() << std::endl;
+
+    return 0;
+}
+```
+
+Executing this program:
+```
+$ ./a.out
+1
+2
+$
+```

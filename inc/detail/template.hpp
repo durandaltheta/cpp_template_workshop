@@ -2,6 +2,7 @@
 #define SIMPLE_CPLUSPLUS_ALGORITHM_DETAIL_TEMPLATE
 
 #include <type_traits>
+#include <iterator>
 #include <functional>
 
 namespace sca { // simple cpp algorithm

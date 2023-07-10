@@ -461,27 +461,12 @@ split(C&& c, size_t part1len, size_t... partlens) {
 template <typename C>
 auto
 reverse(C&& container) {
-    using Result = default_container<typename C::value_type>;
-    using T = typename Result::value_type;
-    using IT = typename Result::iterator;
+    default_container<typename C::value_type> res(sz);
+    
+    range_copy_or_move<std::is_lvalue_reference<C>>(res.begin(), container.begin(), container.end());
+    std::reverse(res.begin(), res.end());
 
-    auto first = container.begin();
-    auto last = container.end();
-    size_t sz = size(container);
-
-    Result tmp(sz);
-    auto out_first = tmp.begin();
-    auto out_last = tmp.end();
-
-    detail::algorithm::reverse<T, std::is_lvalue_reference<C>>(
-            sz,
-            first,
-            last,
-            out_first,
-            out_last,
-            detail::templates::iterator_category<IT>());
-
-    return tmp; 
+    return res; 
 }
 
 
@@ -502,7 +487,7 @@ auto
 filter(F&& f, C&& container) {
     default_container<typename C::value_type> ret(size(container));
 
-    size_t c = 0;
+    size_t actual_size = 0;
     auto first = container.begin();
     auto last = container.end();
     auto ret_first = ret.begin();
@@ -511,11 +496,11 @@ filter(F&& f, C&& container) {
         if(f(*first)) {
             copy_or_move<std::is_lvalue_reference<C>>(*ret_first, *first);
             ++ret_first;
-            ++c;
+            ++actual_size;
         }
     }
 
-    resize(ret, c);
+    resize(ret, actual_size);
     return ret;
 }
 

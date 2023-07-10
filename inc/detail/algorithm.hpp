@@ -255,13 +255,13 @@ size_t sum(V sum, V v, V v2, Values... vs) {
 // group operations 
 
 template <typename IT>
-void group(IT&& cur, IT&& end) {
+void group(IT&& cur) {
 }
 
 template <typename IT, typename C, typename... Cs>
 void group(IT&& cur, C&& c, Cs&&... cs) {
     detail::algorithm::range_copy_or_move<std::is_lvalue_reference<C>>(cur, c.begin(), c.end());
-    group(++cur, end, std::forward<Cs>(cs)...);
+    group(cur, std::forward<Cs>(cs)...);
 }
 
 
@@ -281,154 +281,21 @@ void split(PART_IT&& cur_part, SRC_IT&& src_cur, SRC_IT&& src_end, size_t len, L
 
 
 // ----------------------------------------------------------------------------- 
-// to_tuple 
-
-template <typename A, typename... As>
-std::tuple<A,As...> to_tuple(std::tuple<A,As...>& t) {
-    return t;
-}
-
-template <typename A, typename... As>
-std::tuple<A,As...> to_tuple(std::tuple<A,As...>&& t) {
-    return std::move(t);
-}
-
-template <typename A>
-std::tuple<A> to_tuple(A&& a) {
-    return std::make_tuple(std::forward<A>(a));
-}
-
-
-// ----------------------------------------------------------------------------- 
 // advance group 
 
 /*
  * The purpose of this algorithm is to increment any number of iterators by reference
  */
-void advance_group() { }
-
-template <typename IT, typename... ITs>
-void advance_group(IT& it, ITs&... its) {
+template <typename IT>
+void advance_group(IT& it) { 
     ++it;
-    advance_group(std::forward<ITs>(its)...);
 }
 
-
-// ----------------------------------------------------------------------------
-// reverse 
-
-// `std::true_type` denotes that the implementation is for lvalues
-// `std::false_type` denotes that the implementation is for rvalues
-
-// random access iterators are valid bidirectional iterators
-template <typename T,
-          std::true_type,
-          typename IT, 
-          typename IT2>
-void 
-reverse(size_t size,
-        IT& first, 
-        IT& last, 
-        IT2& out_first, 
-        IT2& out_last, 
-        std::bidirectional_iterator_tag tag)
-{
-    auto t_out_first = out_first;
-    std::copy(first,last,t_out_first);
-    std::reverse(out_first,out_last);
-}   
-
-// forward iterators are valid input iterators
-template <typename T,
-          std::true_type,
-          typename IT, 
-          typename IT2>
-void 
-reverse(size_t size,
-        IT& first, 
-        IT& last, 
-        IT2& out_first, 
-        IT2& out_last, 
-        std::input_iterator_tag tag)
-{
-    std::vector<T> tmp(size);
-    std::copy(first,last,tmp.begin());
-    std::reverse(tmp.begin(),tmp.end());
-    std::move(tmp.begin(),tmp.end(),out_first);
-}   
-
-template <typename T,
-          std::true_type,
-          typename IT, 
-          typename IT2>
-void 
-reverse(size_t size,
-        IT& first, 
-        IT& last, 
-        IT2& out_first, 
-        IT2& out_last, 
-        std::output_iterator_tag tag)
-{
-    std::vector<T> tmp(size);
-    std::copy(first,last,tmp.begin());
-    std::reverse(tmp.begin(),tmp.end());
-    std::move(tmp.begin(),tmp.end(),out_first);
+template <typename IT, typename IT2, typename... ITs>
+void advance_group(IT& it, IT2& it2, ITs&... its) {
+    ++it;
+    advance_group(it2, its...);
 }
-
-// random access iterators are valid bidirectional iterators
-template <typename T,
-          std::false_type,
-          typename IT, 
-          typename IT2>
-void 
-reverse(size_t size,
-        IT& first, 
-        IT& last, 
-        IT2& out_first, 
-        IT2& out_last, 
-        std::bidirectional_iterator_tag tag)
-{
-    auto t_out_first = out_first;
-    std::move(first,last,t_out_first);
-    std::reverse(out_first,out_last);
-}
-
-// forward iterators are valid input iterators
-template <typename T,
-          std::false_type,
-          typename IT, 
-          typename IT2>
-void 
-reverse(size_t size,
-        IT& first, 
-        IT& last, 
-        IT2& out_first, 
-        IT2& out_last, 
-        std::input_iterator_tag tag)
-{
-    std::vector<T> tmp(size);
-    std::move(first,last,tmp.begin());
-    std::reverse(tmp.begin(),tmp.end());
-    std::move(tmp.begin(),tmp.end(),out_first);
-}   
-
-template <typename T,
-          std::false_type,
-          typename IT, 
-          typename IT2>
-void 
-reverse(size_t size,
-        IT& first, 
-        IT& last, 
-        IT2& out_first, 
-        IT2& out_last, 
-        std::output_iterator_tag tag)
-{
-    std::vector<T> tmp(size);
-    std::move(first,last,tmp.begin());
-    std::reverse(tmp.begin(),tmp.end());
-    std::move(tmp.begin(),tmp.end(),out_first);
-}   
 
 
 // ----------------------------------------------------------------------------- 
@@ -449,13 +316,12 @@ template <typename F,
           typename R,
           typename... ITs>
 R
-fold(size_t len, F& f, R& init, ITs&&... its) {
+fold(size_t len, F& f, R&& init, ITs&&... its) {
     // make an unqualified, mutable copy of the starter state 
-    using M = R;
-    M mutable_state = init;
+    using M = templates::unqualified<R>;
+    M mutable_state = std::forward<R>(init);
 
-    for(size_t i=0; i<len; ++i)
-    {
+    for(size_t i=0; i<len; ++i) {
         mutable_state = f(std::move(mutable_state), *its...);
         advance_group(++its...);
     }
@@ -468,8 +334,7 @@ fold(size_t len, F& f, R& init, ITs&&... its) {
 // each
 template <typename F, typename IT, typename... ITs>
 void each(F&& f, size_t len, IT&& it, ITs&&... its) {
-    while(len) {
-        --len;
+    for(; len; --len) {
         f(*it, *its...);
         advance_group(rit, it, its...);
     }
@@ -488,6 +353,7 @@ all(size_t len, F&& f, CITs&&... cits) {
             ret = false;
             break;
         }
+
         advance_group(++cits...);
     }
 
@@ -507,6 +373,7 @@ some(size_t len, F&& f, CITs&&... cits) {
             ret = true;
             break;
         }
+
         advance_group(++cits...);
     }
 

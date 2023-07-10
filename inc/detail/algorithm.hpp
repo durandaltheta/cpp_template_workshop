@@ -197,7 +197,13 @@ void resize(C& c, std::size_t new_size) {
 }
 
 // ----------------------------------------------------------------------------- 
-// copy_or_move 
+// copy_or_move  
+
+// Copy or move only one value. Keeping this as a separate template removes 
+// having to rewrite templates which need to forward value categories based on 
+// different types than their own type. IE, use the value category of a 
+// `container<T>` to determine the copy/move operation when assigning values 
+// between `container::<T>::iterator`s.
 template <std::true_type, typename DEST, typename SRC>
 void copy_or_move(DEST& dst, SRC& src) {
     dst = src;
@@ -212,8 +218,10 @@ void copy_or_move(DEST& dst, SRC& src) {
 // ----------------------------------------------------------------------------- 
 // range_copy_or_move 
 
-// don't use `std::copy()` or `std::move()` because we want to ensure that 
+// Don't use `std::copy()` or `std::move()` because we want to ensure that 
 // side effects of incrementing iterators are preserved.
+//
+// Think of this as a container and value category aware memcpy() :).
 template <std::true_type, typename DIT, typename IT>
 void range_copy_or_move(DIT& dst_cur, IT& src_cur, IT& src_end) {
     for(; cur != end; ++cur, ++dst_cur) {

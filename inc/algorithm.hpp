@@ -15,7 +15,7 @@
 #include "detail/algorithm.hpp"
 
 /**
- * A NOTE ON DESIGN
+ * A NOTE ON API DESIGN
  * As a note, much of the complexity of these templates is caused by more
  * effort being put into usability for the user, rather than implementing 
  * minimalist algorithms. 
@@ -33,30 +33,31 @@
  * advance. 
  * 
  * However it is my opinion that this is a valuable exercise because if the 
- * library doesn't do these calculations automatically, then it is up to the 
+ * library doesn't do these calculations automatically then it is up to the 
  * user to do them manually, opening the door for unwanted bugs.
  *
- * This decision to avoid iterators also removes some of the inherent control 
- * that direct usage of iterators enables, such as pre-advancing iterators to a 
- * desired index, or selecting a custom end iterator. To address such 
- * limitations, users can construct slices of containers with calls to 
- * `slice()`. The returned `slice_of` object(s) return iterators over a subset 
- * range of the source container when their `begin()` and `end()` methods are 
- * called. `slice_of` objects can be passed as arguments to algorithms in this 
- * library which accept containers.
+ * This decision to avoid iterators in algorithm API also removes some of the 
+ * inherent control that direct usage of iterators enables, such as 
+ * pre-advancing iterators to a desired index, or selecting a custom end 
+ * iterator. To address such limitations, users can construct slices of 
+ * containers with calls to `slice()` and `mutable_slie()`. The returned 
+ * `slice_of` or `const_slice_of` objects return iterators over a subset range 
+ * of the source container when their `begin()` and `end()` methods are called. 
+ * `slice_of`/`const_slice_of` objects can be passed as arguments to any 
+ * algorithm which accepts containers.
  *
  * PROVIDED ALGORITHMS 
  * The algorithms in this header library are intended for general usecases and 
  * composability (the results of one algorithm can often be used as an argument 
  * in another). They are not exhaustive, but should cover the majority of
- * usecases.
+ * simple data processing usecases.
  *
  * Algorithms provided by this header:
  * size() - return a container's size
  * resize() - resize a container
- * to() - copy from an iterable object to a designated container type
- * flatten() - convert a list of arbitrary arguments into a single tuple
- * slice() - return an object capable of iterating a subset of a container
+ * to() - copy from an iterable object to a designated output container type
+ * slice() - return a (potentially const) object capable of iterating a subset of a container
+ * mutable_slice() - return a mutable object capable of iterating a subset of a container
  * group() - return a container composed of all elements of all argument containers
  * split() - return partitions of a container
  * reverse() - return a container whose elements are in reverse order of input container
@@ -67,7 +68,6 @@
  * all() - return true if all elements return true when applied to a function
  * some() - return true if at least one element returns true when applie to a function
  *
- * A NOTE ON MISSING ALGORITHMS
  * As stated in the note on design, this library specifically addresses the 
  * fact that the standard library algorithms don't deal directly with 
  * containers. 
@@ -75,7 +75,7 @@
  * However, there are many algorithms in the standard library which don't 
  * *need* to deal directly with containers without impacting the user or
  * increasing risk of bugs. Those algorithms are good enough and are not 
- * addressed here. 
+ * addressed here.
  */
 
 namespace sca { // simple cpp algorithm
@@ -86,10 +86,6 @@ namespace sca { // simple cpp algorithm
  * In C++, algorithms are typically fastest with vectors, so algorithms 
  * implemented in this library typically convert to them internally and return 
  * the result vectors. 
- *
- * The user can often override this behavior by specifying the Result template 
- * type explicitly, though it is not guaranteed that every algorithm will 
- * function with every container type specified as the Result type.
  * 
  * If the user requires a container of elements be converted to another 
  * container type after the data has been processed they can use the `to<T>()` 
@@ -144,32 +140,6 @@ to(C&& c) {
     detail::algorithm::range_copy_or_move<std::is_lvalue_reference<C>>(ret.begin(), container.begin(), container.end());
 
     return ret;
-}
-
-
-//------------------------------------------------------------------------------
-// flatten
-
-/**
- * If a given argument is an `std::tuple`, no changes are made to that argument.
- * Otherwise, the argument is made into a tuple.
- *
- * After all arguments are tuples, the tuples are concatenated into a single 
- * tuple composed of all elements from every tuple.
- *
- * This mechanism is useful for generating a tuple which acts as a Callable's 
- * argument list when passed to `std::apply`. Given a function (a Callable) f, 
- * and a tuple of arguments t:
- * ```
- * auto result = std::apply(f, t);
- * ```
- *
- * @param as... list of arbitrary arguments
- * @brief return a flattened tuple of all arguments
- */
-template <typename... As>
-std::tuple<As&...> flatten(As&&... as) {
-    return std::tuple_cat(detail::algorithm::to_tuple(std::forward<As>(as)...));
 }
 
 
@@ -288,12 +258,12 @@ struct const_slice_of {
 
 private:
     template <orientation::forward>
-    auto begin_internal() {
+    auto begin_internal() const {
         return std::next(m_cref.cbegin(), m_idx);
     }
     
     template <orientation::reverse>
-    auto begin_internal() {
+    auto begin_internal() const {
         return std::next(m_cref.crbegin(), m_idx);
     }
 
@@ -377,38 +347,13 @@ slice(size_t idx, size_t len, const C& c) {
     return const_slice_of<C, ORIENTATION>(idx, len, c);
 }
 
-
-/** 
- * @brief create multiple slices from an arbitrary number of containers
- *
- * The result of this can be passed to any algorithm in this library which 
- * accepts multiple containers, as it automatically flattens its arguments into 
- * a big tuple.
- *
- * @param idx the first index to evaluated
- * @param len the count of indexes to evaluate
- * @param c first container to slice
- * @param c2 second container to slice
- * @param cs... additional optional containers to take slices of
- * @return a tuple of slices from one or more input containers
- */
-template <typename ORIENTATION = orientation::forward, typename C, typename C2, typename... Cs>
-auto
-slice(size_t idx, size_t len, C&& c, C&& c2, Cs&&... cs) {
-    return std::make_tuple(
-        slice<ORIENTATION>(idx, len, std::forward<C>(c)),
-        slice<ORIENTATION>(idx, len, std::forward<C2>(c2)),
-        slice<ORIENTATION>(idx, len, std::forward<Cs>(cs))... 
-    );
-}
-
 /**
  * @brief create a mutable `slice_of` object from a container which allows iteration over a subset of another container
  *
  * This implementation enforces the creation of a `slice_of` instead of a 
  * `const_slice_of`, which is more dangerous than normal calls to `slice()`.
  * This function should only be used (carefully) if normal calls to `slice()` 
- * won't work.
+ * won't work, such as cases where in-place container modification is necessary.
  *
  * Specifically, if the returned `slice_of` object is passed inline to an 
  * algorithm, the algorithm will see the `slice_of` object as an rvalue and 
@@ -451,15 +396,10 @@ mutable_slice(size_t idx, size_t len, C&& c) {
  * @param cs optional, additional containers whose elements should be grouped together with the others
  * @return a container containing all elements of the arguments
  */
-template <
-    typename Result = default_container<typename C::value_type>,
-    typename C,
-    typename C2,
-    typename... Cs
->
+template <typename C, typename C2, typename... Cs>
 auto
 group(C&& c, C2&& c2, Cs&&... cs) {
-    Result ret(detail::algorithm::sum(size(c), size(c2), size(cs)...));
+    default_container<typename C::value_type> ret(detail::algorithm::sum(size(c), size(c2), size(cs)...));
     auto cur = ret.begin();
     auto end = ret.end();
 
@@ -475,27 +415,24 @@ group(C&& c, C2&& c2, Cs&&... cs) {
 /**
  * @brief split a container into two or more partitions 
  *
- * The size of the final partition is determined by the size of the preceding 
- * partitions. 
+ * The size of the final partition is determined by the aggregate sizes of the 
+ * preceding partitions. 
  *
  * If the aggregate partition lengths are greater than or equal to the size of 
  * the source container the resulting `std::optional<...>` will be empty.
  *
  * @param len size of partition1
  * @param lens optional sizes of more partitions
- * @return an `std::optional<container<container<T>>>` of the resulting partitions
+ * @return an `std::optional<container<container<T>>>` of the resulting partitions 
  */
-template <
-    typename Result = default_container<default_container<typename C::value_type>>,
-    typename C
->
+template <typename C>
 auto
 split(C&& c, size_t part1len, size_t... partlens) {
-    using R = std::optional<Result>;
+    using R = std::optional<default_container<default_container<typename C::value_type>>>;
 
     // only partition if we can guarantee all partitions have space to exist
     if(size(c) > detail::algorithm::sum(part1len, partlens...)) {
-        R res(sizeof...(partlens) + 1);
+        R res(std::in_place_t, 1 + sizeof...(partlens));
         detail::algorithm::split<std::is_lvalue_reference<C>>(
                 res.begin(), 
                 c.begin(), 
@@ -521,12 +458,10 @@ split(C&& c, size_t part1len, size_t... partlens) {
  * @param container an input container 
  * @return a new container with elements reversed from the input container
  */
-template <
-    typename Result = default_container<typename C::value_type>, 
-    typename C
->
+template <typename C>
 auto
 reverse(C&& container) {
+    using Result = default_container<typename C::value_type>;
     using T = typename Result::value_type;
     using IT = typename Result::iterator;
 
@@ -562,14 +497,10 @@ reverse(C&& container) {
  * @param f a predicate function which gets applied to each element of the input container
  * @param container the input container
  */
-template <
-    typename Result = default_container<typename C::value_type>,
-    typename F, 
-    typename C
->
+template <typename F, typename C>
 auto
 filter(F&& f, C&& container) {
-    Result ret(size(container));
+    default_container<typename C::value_type> ret(size(container));
 
     size_t c = 0;
     auto first = container.begin();
@@ -604,24 +535,13 @@ filter(F&& f, C&& container) {
  * @param cs... the remaining containers
  * @return a container R of the results from calling f with elements in c and cs...
  */
-template <
-    typename Result = default_container<
-        detail::templates::function_return_type<F,typename C::value_type>
-    >,
-    typename F, 
-    typename C, 
-    typename... Cs>
+template <typename F, typename C, typename... Cs>
 auto
 map(F&& f, C&& c, Cs&&... cs) {
+    using Result = default_container<detail::templates::function_return_type<F,typename C::value_type>>;
     size_t len = size(c);
     Result ret(len);
-    std::apply(
-        detail::algorithm::map,
-        flatten(std::forward<F>(f),
-                len,
-                ret.begin(),
-                c.begin(),
-                cs.begin()...));
+    detail::algorithm::map(len, ret.begin(), c.begin(), cs.begin()...);
     return ret;
 
 }
@@ -651,13 +571,7 @@ template <typename F, typename Result, typename C, typename... Cs>
 auto
 fold(F&& f, Result&& init, C&& c, Cs&&... cs) {
     size_t len = size(c);
-    return std::apply(
-            detail::algorithm::fold,
-            flatten(len,
-                    f,
-                    init,
-                    c.begin(),
-                    cs.begin()...));
+    return detail::algorithm::fold(f, init, c.begin(), cs.begin()...);
 }
 
 
@@ -682,13 +596,9 @@ template <typename F, typename C, typename... Cs>
 void
 each(F&& f, C&& c, Cs&&... cs) {
     size_t len = size(c);
-    Result ret(len);
-    std::apply(
-        detail::algorithm::each,
-        flatten(std::forward<F>(f),
-                len,
-                c.begin(),
-                cs.begin()...));
+    default_container<typename C::value_type> ret(len);
+
+    detail::algorithm::each(len, c.begin(), cs.begin()...);
     return ret;
 
 }
@@ -713,14 +623,7 @@ each(F&& f, C&& c, Cs&&... cs) {
 template <typename F, typename C, typename... Cs>
 bool 
 all(F&& f, C&& c, Cs&&... cs) {
-    size_t len = size(c);
-    return std::apply(
-            detail::algorithm::all,
-            std::flatten(
-                len,
-                f,
-                c.begin(),
-                cs.begin()...));
+    return detail::algorithm::all(size(c), f, c.begin(), cs.begin()...);
 }
 
 
@@ -743,13 +646,7 @@ all(F&& f, C&& c, Cs&&... cs) {
 template <typename F, typename C, typename... Cs>
 bool 
 some(F&& f, C&& c, Cs&&... cs) {
-    size_t len = size(c);
-    return std::apply(
-            detail::algorithm::some,
-            flatten(len,
-                    f,
-                    c.begin(),
-                    cs.begin()...));
+    return detail::algorithm::some(size(c), f, c.begin(), cs.begin()...);
 }
 
 }

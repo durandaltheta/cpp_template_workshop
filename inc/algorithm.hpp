@@ -105,7 +105,7 @@ using default_container = std::vector<T>;
 template <typename C>
 size_t // size_t is generally convertable from all container `size_type`s
 size(C&& c) { 
-    return detail::template::size<std::integral_constant<bool, detail::algorithm::has_size<C>::has>>(c); 
+    return detail::algorithm::size(c, std::integral_constant<bool, detail::algorithm::has_size<C>::has>()); 
 }
 
 
@@ -120,7 +120,7 @@ size(C&& c) {
 template <typename C, typename... Cs>
 void 
 resize(C&& c, size_t sz) { 
-    detail::algorithm::resize<std::integral_constant<bool, detail::algorithm::has_resize<C>::has>>(c, nz);
+    detail::algorithm::resize(c, sz, std::integral_constant<bool, detail::algorithm::has_resize<C>::has>());
 }
 
 //------------------------------------------------------------------------------
@@ -134,10 +134,10 @@ resize(C&& c, size_t sz) {
 template <typename Result, typename C>
 auto
 to(C&& c) {
-    Result ret(size(container));
+    Result ret(size(c));
     auto it = ret.begin();
 
-    detail::algorithm::range_copy_or_move<std::is_lvalue_reference<C>>(ret.begin(), container.begin(), container.end());
+    detail::algorithm::range_copy_or_move(std::is_lvalue_reference<C>(), ret.begin(), c.begin(), c.end());
 
     return ret;
 }
@@ -152,6 +152,26 @@ namespace orientation {
     
     /// type hint struct for indicating reverse iteration
     struct reverse { };
+    
+    template <typename T>
+    auto begin(orientation::forward, T& t, size_t idx) {
+        return std::next(t.begin(), idx);
+    }
+    
+    template <typename T>
+    auto begin(orientation::reverse, T& t, size_t idx) {
+        return std::next(t.rbegin(), idx);
+    }
+    
+    template <typename T>
+    auto cbegin(orientation::forward, T& t, size_t idx) {
+        return std::next(t.cbegin(), idx);
+    }
+    
+    template <typename T>
+    auto cbegin(orientation::reverse, T& t, size_t idx) {
+        return std::next(t.crbegin(), idx);
+    }
 }
 
 /**
@@ -165,8 +185,8 @@ namespace orientation {
  */
 template<typename ORIENTATION, typename C>
 struct slice_of {
-    typedef C::value_type value_type;
-    typedef C::size_type size_type;
+    typedef typename C::value_type value_type;
+    typedef typename C::size_type size_type;
 
     slice_of() = delete; // no default initialization
     slice_of(size_t idx, size_t len, const C& c) = delete; // must use const_slice_of
@@ -195,7 +215,7 @@ struct slice_of {
 
     /// return an iterator to the beginning of the container subset
     inline auto begin() {
-        return begin_internal<ORIENTATION>()
+        return orientation::begin(ORIENTATION(), m_ref, m_idx);
     }
 
     /// return an iterator to the end of the container subset
@@ -204,16 +224,6 @@ struct slice_of {
     }
 
 private:
-    template <orientation::forward>
-    auto begin_internal() {
-        return std::next(m_ref.begin(), m_idx);
-    }
-    
-    template <orientation::reverse>
-    auto begin_internal() {
-        return std::next(m_ref.rbegin(), m_idx);
-    }
-
     const size_t m_idx;
     const size_t m_len;
     // place to hold container memory if constructed with an rvalue 
@@ -229,8 +239,8 @@ private:
  */
 template <typename ORIENTATION, typename C>
 struct const_slice_of {
-    typedef C::value_type value_type;
-    typedef C::size_type size_type;
+    typedef typename C::value_type value_type;
+    typedef typename C::size_type size_type;
 
     const_slice_of() = delete; // no default initialization
    
@@ -248,7 +258,7 @@ struct const_slice_of {
 
     /// return a const_iterator to the beginning of the container subset
     inline auto begin() const {
-        return begin_internal<ORIENTATION>();
+        return orientation::cbegin(ORIENTATION(), m_cref, m_idx);
     }
 
     /// return a const_iterator to the end of the container subset
@@ -257,16 +267,6 @@ struct const_slice_of {
     }
 
 private:
-    template <orientation::forward>
-    auto begin_internal() const {
-        return std::next(m_cref.cbegin(), m_idx);
-    }
-    
-    template <orientation::reverse>
-    auto begin_internal() const {
-        return std::next(m_cref.crbegin(), m_idx);
-    }
-
     const size_t m_idx;
     const size_t m_len;
     const C&  m_cref; // reference to const container
@@ -301,7 +301,7 @@ private:
  * @param c container to take slice of
  * @return a tuple of slices from one or more input containers
  */
-template <typename ORIENTATION = orientation::forward, typename C, class = detail::templates::enable_if_rvalue<C2>>
+template <typename ORIENTATION = orientation::forward, typename C, class = detail::templates::enable_if_rvalue<C>>
 auto
 slice(size_t idx, size_t len, C&& c) {
     return slice_of<C, ORIENTATION>(idx, len, std::forward<C>(c));
@@ -425,15 +425,16 @@ group(C&& c, C2&& c2, Cs&&... cs) {
  * @param lens optional sizes of more partitions
  * @return an `std::optional<container<container<T>>>` of the resulting partitions 
  */
-template <typename C>
+template <typename C, typename... size_ts>
 auto
-split(C&& c, size_t part1len, size_t... partlens) {
+split(C&& c, size_t part1len, size_ts... partlens) {
     using R = std::optional<default_container<default_container<typename C::value_type>>>;
 
     // only partition if we can guarantee all partitions have space to exist
     if(size(c) > detail::algorithm::sum(part1len, partlens...)) {
         R res(std::in_place_t, 1 + sizeof...(partlens));
-        detail::algorithm::split<std::is_lvalue_reference<C>>(
+        detail::algorithm::split(
+                std::is_lvalue_reference<C>(),
                 res.begin(), 
                 c.begin(), 
                 c.end(), 
@@ -463,7 +464,7 @@ auto
 reverse(C&& container) {
     default_container<typename C::value_type> res(sz);
     
-    range_copy_or_move<std::is_lvalue_reference<C>>(res.begin(), container.begin(), container.end());
+    range_copy_or_move(std::is_lvalue_reference<C>(), res.begin(), container.begin(), container.end());
     std::reverse(res.begin(), res.end());
 
     return res; 
@@ -494,7 +495,7 @@ filter(F&& f, C&& container) {
 
     for(; first != last; ++first) {
         if(f(*first)) {
-            copy_or_move<std::is_lvalue_reference<C>>(*ret_first, *first);
+            copy_or_move(std::is_lvalue_reference<C>(), *ret_first, *first);
             ++ret_first;
             ++actual_size;
         }

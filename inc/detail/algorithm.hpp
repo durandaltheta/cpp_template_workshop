@@ -62,7 +62,7 @@ because we need to use SFINAE to determine if type `T` has a method named
 `size()` which returns an unsigned number.
 
 ```
-    template<typename U, U::size_type (U::*)() const> struct SFINAE {};
+    template<typename U, typename U::size_type (U::*)() const> struct SFINAE {};
 ```
 
 We are declaring a template struct *inside* of the template struct `has_size` 
@@ -147,23 +147,23 @@ code which calls `has_size` and selects which of the final
 */
 template<typename T>
 struct has_size {
-    template<typename U, U::size_type (U::*)() const> struct SFINAE {};
+    template<typename U, typename U::size_type (U::*)() const> struct SFINAE {};
     template<typename U> static char test(SFINAE<U, &U::size>*);
     template<typename U> static int test(...);
     static const bool has = sizeof(test<T>(0)) == sizeof(char);
 };
 
 // Get the size of an object with its `size()` method
-template <std::true_type typename C>
+template <typename C>
 inline size_t 
-size(C& c) { 
+size(C& c, std::true_type) { 
     return c.size(); 
 }
 
 // Get the size of an object the *slow* way by iterating through it
-template <std::false_type, typename C>
+template <typename C>
 inline size_t 
-size(C& c) {
+size(C& c, std::false_type) {
     size_t cnt = 0;
     auto first = c.begin();
     auto last = c.end();
@@ -180,19 +180,19 @@ size(C& c) {
 
 template<typename T>
 struct has_resize {
-    template<typename U, void (U::*)(U::size_type) const> struct SFINAE {};
+    template<typename U, void (U::*)(typename U::size_type) const> struct SFINAE {};
     template<typename U> static char test(SFINAE<U, &U::resize>*);
     template<typename U> static int test(...);
     static const bool has = sizeof(test<T>(0)) == sizeof(char);
 };
 
-template <std::true_type, typename C>
-void resize(C& c, std::size_t new_size) {
+template <typename C>
+void resize(C& c, std::size_t new_size, std::true_type) {
     c.resize(new_size);
 }
 
-template <std::false_type, typename C>
-void resize(C& c, std::size_t new_size) {
+template <typename C>
+void resize(C& c, std::size_t new_size, std::false_type) {
     c = C(new_size); // use size constructor and move assignment
 }
 
@@ -204,13 +204,13 @@ void resize(C& c, std::size_t new_size) {
 // different types than their own type. IE, use the value category of a 
 // `container<T>` to determine the copy/move operation when assigning values 
 // between `container::<T>::iterator`s.
-template <std::true_type, typename DEST, typename SRC>
-void copy_or_move(DEST& dst, SRC& src) {
+template <typename DEST, typename SRC>
+void copy_or_move(std::true_type, DEST& dst, SRC& src) {
     dst = src;
 }
 
-template <std::false_type, typename DEST, typename SRC>
-void copy_or_move(DEST& dst, SRC& src) {
+template <typename DEST, typename SRC>
+void copy_or_move(std::false_type, DEST& dst, SRC& src) {
     dst = std::move(src);
 }
 
@@ -222,16 +222,16 @@ void copy_or_move(DEST& dst, SRC& src) {
 // side effects of incrementing iterators are preserved.
 //
 // Think of this as a container and value category aware memcpy() :).
-template <std::true_type, typename DIT, typename IT>
-void range_copy_or_move(DIT& dst_cur, IT& src_cur, IT& src_end) {
-    for(; cur != end; ++cur, ++dst_cur) {
+template <typename DIT, typename IT>
+void range_copy_or_move(std::true_type, DIT& dst_cur, IT& src_cur, IT& src_end) {
+    for(; src_cur != src_end; ++src_cur, ++dst_cur) {
         *dst_cur = *src_cur;
     }
 }
 
-template <std::false_type, typename DIT, typename IT>
-void range_copy_or_move(DIT& dst_cur, IT& src_cur, IT& src_end) {
-    for(; cur != end; ++cur, ++dst_cur) {
+template <typename DIT, typename IT>
+void range_copy_or_move(std::false_type, DIT& dst_cur, IT& src_cur, IT& src_end) {
+    for(; src_cur != src_end; ++src_cur, ++dst_cur) {
         *dst_cur = std::move(*src_cur);
     }
 }
@@ -260,7 +260,7 @@ void group(IT&& cur) {
 
 template <typename IT, typename C, typename... Cs>
 void group(IT&& cur, C&& c, Cs&&... cs) {
-    detail::algorithm::range_copy_or_move<std::is_lvalue_reference<C>>(cur, c.begin(), c.end());
+    detail::algorithm::range_copy_or_move(std::is_lvalue_reference<C>(), cur, c.begin(), c.end());
     group(cur, std::forward<Cs>(cs)...);
 }
 
@@ -269,14 +269,14 @@ void group(IT&& cur, C&& c, Cs&&... cs) {
 // split operations 
 
 template <typename TRUE_FALSE_TYPE, typename PART_IT, typename SRC_IT>
-void split(PART_IT&& cur_part, SRC_IT&& src_cur, SRC_IT&& src_end) {
+void split(TRUE_FALSE_TYPE tft, PART_IT&& cur_part, SRC_IT&& src_cur, SRC_IT&& src_end) {
 }
 
 template <typename TRUE_FALSE_TYPE, typename PART_IT, typename SRC_IT, typename... Lens>
-void split(PART_IT&& cur_part, SRC_IT&& src_cur, SRC_IT&& src_end, size_t len, Lens... lens) {
+void split(TRUE_FALSE_TYPE tft, PART_IT&& cur_part, SRC_IT&& src_cur, SRC_IT&& src_end, size_t len, Lens... lens) {
     resize(*cur_part, len);
-    detail::algorithm::range_copy_or_move<TRUE_FALSE_TYPE>(cur_part->begin(), src_cur, src_end);
-    split<TRUE_FALSE_TYPE>(++cur_part, src_part, src_end, lens...);
+    detail::algorithm::range_copy_or_move(tft, cur_part->begin(), src_cur, src_end);
+    split(tft, ++cur_part, src_cur, src_end, lens...);
 }
 
 
@@ -336,7 +336,7 @@ template <typename F, typename IT, typename... ITs>
 void each(F&& f, size_t len, IT&& it, ITs&&... its) {
     for(; len; --len) {
         f(*it, *its...);
-        advance_group(rit, it, its...);
+        advance_group(it, its...);
     }
 }
 

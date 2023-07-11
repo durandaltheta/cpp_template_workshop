@@ -432,7 +432,7 @@ split(C&& c, size_t part1len, size_ts... partlens) {
 
     // only partition if we can guarantee all partitions have space to exist
     if(size(c) > detail::algorithm::sum(part1len, partlens...)) {
-        R res(std::in_place_t, 1 + sizeof...(partlens));
+        R res(std::in_place, 1 + sizeof...(partlens));
         detail::algorithm::split(
                 std::is_lvalue_reference<C>(),
                 res.begin(), 
@@ -462,7 +462,7 @@ split(C&& c, size_t part1len, size_ts... partlens) {
 template <typename C>
 auto
 reverse(C&& container) {
-    default_container<typename C::value_type> res(sz);
+    default_container<typename C::value_type> res(size(container));
     
     range_copy_or_move(std::is_lvalue_reference<C>(), res.begin(), container.begin(), container.end());
     std::reverse(res.begin(), res.end());
@@ -576,7 +576,6 @@ fold(F&& f, Result&& init, C&& c, Cs&&... cs) {
  * @param f a function to call 
  * @param c the first container 
  * @param cs... the remaining containers
- * @return a container R of the results from calling f with elements in c and cs...
  */
 template <typename F, typename C, typename... Cs>
 void
@@ -585,8 +584,6 @@ each(F&& f, C&& c, Cs&&... cs) {
     default_container<typename C::value_type> ret(len);
 
     detail::algorithm::each(len, c.begin(), cs.begin()...);
-    return ret;
-
 }
 
 

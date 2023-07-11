@@ -62,14 +62,14 @@ std::string add(T t, std::string s) {
 
 TEST(lesson_1, type_specialization) {
     EXPECT_EQ(nm_type_specialization::add(1, 2), 3);
-    EXPECT_EQ(nm_type_specialization::add(std::string("number: "), 3.0), std::string("number: 3.0"));
-    EXPECT_EQ(nm_type_specialization::add(3, std::string("is also a number ")), std::string("3 is also a number"));
+    EXPECT_EQ(nm_type_specialization::add(std::string("number: "), 3), std::string("number: 3"));
+    EXPECT_EQ(nm_type_specialization::add(3, std::string(" is also a number")), std::string("3 is also a number"));
 }
 
 namespace nm_default_type_assignment {
 
-template <typename T, template <typename, typename> class Container = std::vector<T>>
-Container construct_container_with_one_element(T& t) {
+template <typename T, typename Container = std::vector<T>>
+Container construct_container_with_one_element(T t) {
     return Container{t};
 }
 

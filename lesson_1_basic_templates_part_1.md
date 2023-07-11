@@ -180,14 +180,14 @@ template<
 
 This means that a `std::vector<int>` (where `T` is set to `int`) is more of a nickname for the actual `std::vector` type. The *actual* type is `std::vector<int, std::allocator<int>>`, but the compiler doesn't require you specify the `Allocator` type if you use the default allocator.
 
-A minor note, you can specify "templates within templates". This is a feature that generally does not need to be used (and will not be covered by this course) but is useful for illustrating default template type assignment in action. In simple terms, you put another template header inside your type list (though the internal template does not need its types specified, just putting a placeholder `typename` keyword in the sub-header will suffice):
+Here is an example where a template has a default type:
 ```
 #include <vector> 
 #include <list>
 #include <iostream>
 
-template <typename T, template <typename, typename> class Container = std::vector<T>>
-Container construct_container_with_one_element(T& t) {
+template <typename T, typename Container = std::vector<T>>
+Container construct_container_with_one_element(T t) {
     return Container{t};
 }
 

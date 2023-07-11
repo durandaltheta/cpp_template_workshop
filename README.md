@@ -183,8 +183,8 @@ void launch_my_child_threads() {
 ## Lesson Notes
 Here are the links to all the lesson notes. We will meet regularly (probably every 2 weeks or so) where I will go through the lesson notes and have extended question/answer session (if necessary). We can live debug together if necessary, though I can't promise I can immediately solve every problem on th spot :D. The goal is you should do your exercises sometime in the intervening days, though I won't track your progress (and I don't care! I only care about helping you learn this skill).
 
-- [Lesson 1: Basic Templates Part 1](basic_templates_part_1.md)
--- [exercises](tst/lesson_1_exercises.cpp)
+- [Lesson 1: Basic Templates Part 1](lesson_1_basic_templates_part_1.md)
+-- [exercises](tst/lesson_1_ut.cpp)
 
 ### Basic Templates - Part 2
 #### Basic Templates - rvalues and lvalues

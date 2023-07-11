@@ -77,6 +77,7 @@ Container construct_container_with_one_element(T t) {
 
 TEST(lesson_1, default_type_assignment) {
     EXPECT_EQ(1, nm_default_type_assignment::construct_container_with_one_element(1).front());
+
     {
         auto l = nm_default_type_assignment::construct_container_with_one_element<int, std::list<int>>(2);
 

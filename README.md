@@ -135,18 +135,9 @@ Then you can use your new (and safe!) function throughout your program:
 #include <thread>
 #include "some_header_with_your_init_thread_template.hpp"
 
-std::thread g_my_child_0;
 std::thread g_my_child_1;
+std::thread g_my_child_2;
 
-void my_child_0_sighdl(int sig) {
-    std::cout << "child 0 received signal[" << sig << "]" << std::endl;
-}
-
-void my_child_1_sighdl(int sig) {
-    std::cout << "child 1 received signal[" << sig << "]" << std::endl;
-}
-
-// from https://www.gnu.org/software/libc/manual/html_node/Sigaction-Function-Example.html
 void set_handler(void(*sig_handler)(int)) {
     sigaction new_action, old_action;
     new_action.sa_handler = sig_handler;
@@ -158,25 +149,29 @@ void set_handler(void(*sig_handler)(int)) {
         sigaction (SIGINT, &new_action, NULL);
     }
 
-    sigaction (SIGHUP, NULL, &old_action);
-    if (old_action.sa_handler != SIG_IGN) {
-        sigaction (SIGHUP, &new_action, NULL);
-    }
-
-    sigaction (SIGTERM, NULL, &old_action);
-    if (old_action.sa_handler != SIG_IGN) {
-        sigaction (SIGTERM, &new_action, NULL);
-    }
+    //set other handlers...
 }
 
-void child_func(int arg0, const char* arg1) {
-    // do everything your thread needs to do...
+void my_child_1_sighdl(int sig) {
+    std::cout << "child 0 received signal[" << sig << "]" << std::endl;
+}
+
+void my_child_2_sighdl(int sig) {
+    std::cout << "child 1 received signal[" << sig << "]" << std::endl;
+}
+
+void child_func_0(int arg0, const char* arg1) {
+    // do everything your thread 1 needs to do...
+}
+
+void child_func_1(int arg0, const char* arg1) {
+    // do everything your thread 2 needs to do...
 }
 
 void launch_my_child_threads() {
     // use some lambdas to easily call set_handler() during thread initialization
-    g_my_child_0 = init_thread([]{ set_handler(my_child_0_sighdl); }, child_func, 42, "the meaning of life");
-    g_my_child_1 = init_thread([]{ set_handler(my_child_1_sighdl); }, child_func, 0, "hello world");
+    g_my_child_1 = init_thread([]{ set_handler(my_child_1_sighdl); }, child_func_1, 42, "the meaning of life");
+    g_my_child_2 = init_thread([]{ set_handler(my_child_2_sighdl); }, child_func_2, 0, "hello world");
 }
 ```
 

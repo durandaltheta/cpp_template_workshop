@@ -176,27 +176,6 @@ size(C& c, std::false_type) {
 }
 
 // ----------------------------------------------------------------------------- 
-// resize
-
-template<typename T>
-struct has_resize {
-    template<typename U, void (U::*)(typename U::size_type) const> struct SFINAE {};
-    template<typename U> static char test(SFINAE<U, &U::resize>*);
-    template<typename U> static int test(...);
-    static const bool has = sizeof(test<T>(0)) == sizeof(char);
-};
-
-template <typename C>
-void resize(C& c, std::size_t new_size, std::true_type) {
-    c.resize(new_size);
-}
-
-template <typename C>
-void resize(C& c, std::size_t new_size, std::false_type) {
-    c = C(new_size); // use size constructor and move assignment
-}
-
-// ----------------------------------------------------------------------------- 
 // copy_or_move  
 
 // Copy or move only one value. Keeping this as a separate template removes 
@@ -274,7 +253,7 @@ void split(TRUE_FALSE_TYPE tft, PART_IT&& cur_part, SRC_IT&& src_cur, SRC_IT&& s
 
 template <typename TRUE_FALSE_TYPE, typename PART_IT, typename SRC_IT, typename... Lens>
 void split(TRUE_FALSE_TYPE tft, PART_IT&& cur_part, SRC_IT&& src_cur, SRC_IT&& src_end, size_t len, Lens... lens) {
-    resize(*cur_part, len);
+    cur_part->resize(len);
     detail::algorithm::range_copy_or_move(tft, cur_part->begin(), src_cur, src_end);
     split(tft, ++cur_part, src_cur, src_end, lens...);
 }

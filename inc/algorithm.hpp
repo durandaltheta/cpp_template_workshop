@@ -54,7 +54,6 @@
  *
  * Algorithms provided by this header:
  * size() - return a container's size
- * resize() - resize a container
  * to() - copy from an iterable object to a designated output container type
  * slice() - return a (potentially const) object capable of iterating a subset of a container
  * mutable_slice() - return a mutable object capable of iterating a subset of a container
@@ -106,21 +105,6 @@ template <typename C>
 size_t // size_t is generally convertable from all container `size_type`s
 size(C&& c) { 
     return detail::algorithm::size(c, std::integral_constant<bool, detail::algorithm::has_size<C>::has>()); 
-}
-
-
-//------------------------------------------------------------------------------
-// resize
-
-/**
- * @brief on each argument container call resize() if member exists, else resize by reassignment
- * @param c a container 
- * @param sz new target size 
- */
-template <typename C, typename... Cs>
-void 
-resize(C&& c, size_t sz) { 
-    detail::algorithm::resize(c, sz, std::integral_constant<bool, detail::algorithm::has_resize<C>::has>());
 }
 
 //------------------------------------------------------------------------------
@@ -501,7 +485,7 @@ filter(F&& f, C&& container) {
         }
     }
 
-    resize(ret, actual_size);
+    ret.resize(actual_size);
     return ret;
 }
 

@@ -5,6 +5,7 @@
 #include <type_traits>
 #include <functional>
 #include <tuple>
+#include <any>
 
 // local 
 #include "template.hpp"
@@ -17,6 +18,20 @@
 namespace sca { // simple cpp algorithm
 namespace detail { 
 namespace algorithm {
+// -----------------------------------------------------------------------------
+// atom forward declaration 
+
+template <typename T>
+class atom : std::shared_ptr<T>;
+
+template <typename T>
+atom<T> to_atom(atom<T>&& a);
+
+template <typename T>
+atom<T> to_atom(const atom<T>& a);
+
+template <typename T>
+atom<T> to_atom(T&& t);
 
 // -----------------------------------------------------------------------------
 // size  
@@ -283,7 +298,7 @@ template <typename F, typename RIT, typename IT, typename... ITs>
 void map(F&& f, size_t len, RIT&& rit, IT&& it, ITs&&... its) {
     while(len) {
         --len;
-        *rit = f(*it, *its...);
+        *rit = f(to_atom(*it), to_atom(*its)...);
         advance_group(rit, it, its...);
     }
 }
@@ -296,12 +311,10 @@ template <typename F,
           typename... ITs>
 R
 fold(size_t len, F& f, R&& init, ITs&&... its) {
-    // make an unqualified, mutable copy of the starter state 
-    using M = templates::unqualified<R>;
-    M mutable_state = std::forward<R>(init);
+    auto init_atom = to_atom(std::forward<R>(init));
 
     for(size_t i=0; i<len; ++i) {
-        mutable_state = f(std::move(mutable_state), *its...);
+        mutable_state = f(std::move(init_atom), to_atom(*its)...);
         advance_group(++its...);
     }
 
@@ -314,7 +327,7 @@ fold(size_t len, F& f, R&& init, ITs&&... its) {
 template <typename F, typename IT, typename... ITs>
 void each(F&& f, size_t len, IT&& it, ITs&&... its) {
     for(; len; --len) {
-        f(*it, *its...);
+        f(to_atom(*it), to_atom(*its)...);
         advance_group(it, its...);
     }
 }
@@ -328,7 +341,7 @@ all(size_t len, F&& f, CITs&&... cits) {
     bool ret = true;
 
     for(size_t i=0; i<len; ++i) {
-        if(!f(*cits...)) {
+        if(!f(to_atom(*cits)...)) {
             ret = false;
             break;
         }
@@ -348,7 +361,7 @@ some(size_t len, F&& f, CITs&&... cits) {
     bool ret = false;
 
     for(size_t i=0; i<len; ++i) {
-        if(f(*cits...)) {
+        if(f(to_atom(*cits)...)) {
             ret = true;
             break;
         }

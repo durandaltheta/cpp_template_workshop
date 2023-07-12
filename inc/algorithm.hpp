@@ -41,10 +41,39 @@
  * pre-advancing iterators to a desired index, or selecting a custom end 
  * iterator. To address such limitations, users can construct slices of 
  * containers with calls to `slice()` and `mutable_slie()`. The returned 
- * `slice_of` or `const_slice_of` objects return iterators over a subset range 
- * of the source container when their `begin()` and `end()` methods are called. 
- * `slice_of`/`const_slice_of` objects can be passed as arguments to any 
- * algorithm which accepts containers.
+ * `slice_of` objects return iterators over a subset range of the source 
+ * container when their `begin()` and `end()` methods are called. `slice_of` 
+ * objects can be passed as arguments to any algorithm which accepts containers.
+ * 
+ * A NOTE ON FUNCTIONAL SEMANTICS
+ * All elements operated on by algorithms in this library are converted to a 
+ * functional data type called `sca::atom<T>`. 
+ *
+ * This object's design intention is to facilitate better functional 
+ * programming, in conjunction with the algorithms in this library, where value 
+ * modification happens on the stack as much as possible or abstracted to
+ * atom construction, rather than with direct user modification. 
+ *
+ * Writes to an `atom<T>`, either via value construction or assignment, 
+ * allocate new values instead of mutating the old value. All copies of the 
+ * `atom<T>`s are shallow copies because it is a shared pointer. All algorithms 
+ * in this library ultimately convert to `atom<T>`, enabling cheap data reuse 
+ * and efficient algorithms after the initial conversion cost is paid.
+ *
+ * Values of type `T` can be directly assigned with `=` or used to construct to 
+ * an atom<T>. 
+ *
+ * Unlike `std::shared_ptr<T>`'s, `atom<T>`s always have an allocated value.
+ *
+ * The const value of an atom<T> can be retrieved with a `*` or `->`. A mutable 
+ * (non-functional) `T&` reference can be retrieved via `value()`.
+ *
+ * It is good practice to write functions to accept values as `atom<T>`s in 
+ * order to get the most efficient results. However, the value of the atom<T> 
+ * can also be type converted implicitly to a `T` or `const T&`. This means that 
+ * an `atom<T>` can be passed to a function expecting `T` or `const T&`. If a 
+ * user function needs to mutate an `atom<T>` it will need to explicitly accept 
+ * an `atom<T>` as it's argument and modify it by calls to `value()` or `get()`.
  *
  * PROVIDED ALGORITHMS 
  * The algorithms in this header library are intended for general usecases and 
@@ -52,11 +81,11 @@
  * in another). They are not exhaustive, but should cover the majority of
  * simple data processing usecases.
  *
- * Algorithms provided by this header:
+ * Algorithms and Objects provided by this header:
+ * atom() - a functional value wrapper
  * size() - return a container's size
  * to() - copy from an iterable object to a designated output container type
  * slice() - return a (potentially const) object capable of iterating a subset of a container
- * mutable_slice() - return a mutable object capable of iterating a subset of a container
  * group() - return a container composed of all elements of all argument containers
  * split() - return partitions of a container
  * reverse() - return a container whose elements are in reverse order of input container
@@ -66,18 +95,112 @@
  * each() - apply a function to every element of a container
  * all() - return true if all elements return true when applied to a function
  * some() - return true if at least one element returns true when applie to a function
- *
- * As stated in the note on design, this library specifically addresses the 
- * fact that the standard library algorithms don't deal directly with 
- * containers. 
- *
- * However, there are many algorithms in the standard library which don't 
- * *need* to deal directly with containers without impacting the user or
- * increasing risk of bugs. Those algorithms are good enough and are not 
- * addressed here.
  */
 
 namespace sca { // simple cpp algorithm
+
+//------------------------------------------------------------------------------
+
+/**
+ * @brief a generic shared pointer data wrapper which enables functional semantics
+ */
+template <typename T>
+class atom : std::shared_ptr<T> {
+    typedef T value_type;
+
+    atom() : std::shared_ptr<T>(std::make_shared<T>()) { } // atoms always have a default value  
+
+    // compiler generates default atom<T> constructors and assignment
+    atom(T& t) : std::shared_ptr<T>(std::make_shared<T>(t)) { }
+    atom(T&& t) : std::shared_ptr<T>(std::make_shared<T>(std::move(t))) { }
+    
+    inline atom<T>& operator=(const T& t) { 
+        *this = std::make_shared<T>(t);
+        return *this;
+    }
+
+    inline atom<T>& operator=(T&& t) { 
+        *this = std::make_shared<T>(std::move(t));
+        return *this;
+    }
+
+    /**
+     * @brief perform a non-functional access of the stored value
+     * @return a mutable reference to allocated T
+     */
+    inline T& value() {
+        return *this;
+    }
+    
+    /// override accessor operator to return const
+    inline const T& operator*() const { 
+        return std::shared_ptr<T>::operator*(); 
+    }
+
+    /// override accessor operator to return const 
+    inline const T* operator->() const { 
+        return std::shared_ptr<T>::operator->(); 
+    }
+
+    /// const lvalue reference T conversion
+    template <typename T>
+    operator const T&() const {
+        return *this;
+    }
+
+    /// lvalue T conversion
+    template <typename T>
+    operator T() const {
+        return *this;
+    }
+
+    /**
+     * @brief construct an atom by calling T's constructor in-place 
+     * @param as... optional T constructor arguments
+     * @return the constructed atom
+     */
+    template <typename... As>
+    static atom<T> make(As&&... as) {
+        // allow compiler to convert shared_ptr<T> to an atom<T>
+        return std::make_shared<T>(std::forward<As>(as)...);
+    }
+
+    /**
+     * @brief construct an atom by calling T's constructor in-place and then call a further initializer function on a pointer to constructed T
+     *
+     * This version allows for post-construction initialization of an object 
+     * should the object's constructor be insufficient.
+     *
+     * @param init_function a function which will be called with a pointer to the allocated T after construction
+     * @param as... optional T constructor arguments
+     * @return the constructed atom
+     */
+    template <typename IF, typename... As>
+    static atom<T> form(IF&& init_function, As&&... as) {
+        auto sp = std::make_shared<T>(std::forward<As>(as)...);
+        init_function(sp.get());
+        return sp; // allow compiler to convert sp to an atom<T>
+    }
+};
+
+template <typename T>
+atom<T>&& to_atom(atom<T>&& a) {
+    return std::move(a);
+}
+
+template <typename T>
+atom<T> to_atom(const atom<T>& a) {
+    return a;
+}
+
+/// convert an argument `T` to an `atom<T>`
+template <typename T>
+atom<T> to_atom(T&& t) {
+    return atom<T>(std::forward<T>(t));
+}
+
+//------------------------------------------------------------------------------
+// default container type 
 
 /**
  * @brief vectors are almost always the correct default choice
@@ -85,13 +208,17 @@ namespace sca { // simple cpp algorithm
  * In C++, algorithms are typically fastest with vectors, so algorithms 
  * implemented in this library typically convert to them internally and return 
  * the result vectors. 
+ *
+ * The vector value_type is `atom<T>`, to enforce a baseline of value reuse and 
+ * shallow copies. If a function expects a type `T` or `const T&`, then the 
+ * `atom<T>` will be silently converted to that type by the compiler.
  * 
  * If the user requires a container of elements be converted to another 
  * container type after the data has been processed they can use the `to<T>()` 
  * algorithm defined below.
  */
 template <typename T>
-using default_container = std::vector<T>;
+using vector = std::vector<atom<T>>;
 
 //------------------------------------------------------------------------------
 // size
@@ -112,6 +239,15 @@ size(C&& c) {
 
 /**
  * @brief copy or move elements from a container of one type to a container of another
+ *
+ * `Result` can have a value type convertable from `atom<T>` allowing conversion 
+ * from `sca` types. Ex:
+ * ```
+ * std::list<int> convert_vector_to_list(sca::vector<int>& v) {
+ *     return sca::to<std::list<int>>(v);
+ * }
+ * ```
+ *
  * @param c container of elements
  * @return a container of the target type Result
  */
@@ -130,34 +266,6 @@ to(C&& c) {
 //------------------------------------------------------------------------------
 // slice 
 
-namespace orientation {
-    /// type hint struct for indicating forward iteration
-    struct forward { };
-    
-    /// type hint struct for indicating reverse iteration
-    struct reverse { };
-    
-    template <typename T>
-    auto begin(orientation::forward, T& t, size_t idx) {
-        return std::next(t.begin(), idx);
-    }
-    
-    template <typename T>
-    auto begin(orientation::reverse, T& t, size_t idx) {
-        return std::next(t.rbegin(), idx);
-    }
-    
-    template <typename T>
-    auto cbegin(orientation::forward, T& t, size_t idx) {
-        return std::next(t.cbegin(), idx);
-    }
-    
-    template <typename T>
-    auto cbegin(orientation::reverse, T& t, size_t idx) {
-        return std::next(t.crbegin(), idx);
-    }
-}
-
 /**
  * @brief the underlying type returned by `slice()` representing a subset of a container
  *
@@ -167,7 +275,7 @@ namespace orientation {
  * There is no need to use this object directly. `slice()` methods will detect 
  * the necessary template information and return the proper `slice_of` object.
  */
-template<typename ORIENTATION, typename C>
+template<typename C>
 struct slice_of {
     typedef typename C::value_type value_type;
     typedef typename C::size_type size_type;
@@ -181,7 +289,8 @@ struct slice_of {
         m_idx(idx),
         m_len(len),
         m_mem(std::make_shared<C2>(std::move(c))), // keep container in memory
-        m_ref(*m_mem)
+        m_ref(*m_mem),
+        m_cref(*m_mem)
     { }
 
     // mutable lvalue constructor
@@ -189,7 +298,8 @@ struct slice_of {
     slice_of(size_t idx, size_t len, C2& c) :
         m_idx(idx),
         m_len(len),
-        m_ref(c)
+        m_ref(c),
+        m_cref(c)
     { }
 
     /// return the iterable length of the slice
@@ -199,50 +309,17 @@ struct slice_of {
 
     /// return an iterator to the beginning of the container subset
     inline auto begin() {
-        return orientation::begin(ORIENTATION(), m_ref, m_idx);
+        return std::next(t.begin(), idx);
+    }
+
+    /// return a const_iterator to the beginning of the container subset
+    inline auto begin() const {
+        return std::next(t.cbegin(), idx);
     }
 
     /// return an iterator to the end of the container subset
     inline auto end() {
         return std::next(begin(), m_len);
-    }
-
-private:
-    const size_t m_idx;
-    const size_t m_len;
-    // place to hold container memory if constructed with an rvalue 
-    std::shared_ptr<C> m_mem; 
-    C& m_ref; // reference to container 
-};
-
-/**
- * @brief the underlying (const variation) type returned by `slice()`
- *
- * This separate object is created to provide `const_iterator`s for non-rvalue
- * containers.
- */
-template <typename ORIENTATION, typename C>
-struct const_slice_of {
-    typedef typename C::value_type value_type;
-    typedef typename C::size_type size_type;
-
-    const_slice_of() = delete; // no default initialization
-   
-    // const lvalue constructor
-    const_slice_of(size_t idx, size_t len, const C& c) :
-        m_idx(idx),
-        m_len(len),
-        m_cref(c)
-    { }
-
-    /// return the iterable length of the slice
-    inline size_t size() const {
-        return m_len - m_idx;
-    }
-
-    /// return a const_iterator to the beginning of the container subset
-    inline auto begin() const {
-        return orientation::cbegin(ORIENTATION(), m_cref, m_idx);
     }
 
     /// return a const_iterator to the end of the container subset
@@ -253,6 +330,9 @@ struct const_slice_of {
 private:
     const size_t m_idx;
     const size_t m_len;
+    // place to hold container memory if constructed with an rvalue 
+    std::shared_ptr<C> m_mem; 
+    C& m_ref; // reference to container 
     const C&  m_cref; // reference to const container
 };
 
@@ -274,98 +354,33 @@ private:
  * auto my_result = sca::map(my_function, sca::slice(0, 13, std::move(my_container)));
  * ```
  *
- * The slice can instead provide reverse iterators by specifying the 
- * `orientation` in the template:
- * ```
- * auto my_reversed_results = sca::map(my_function, sca::slice<orientation::reverse>(0, 13, std::move(my_container)))
- * ```
- *
  * @param idx starting index of the range of values 
  * @param len ending index of the range of values
  * @param c container to take slice of
  * @return a tuple of slices from one or more input containers
  */
-template <typename ORIENTATION = orientation::forward, typename C, class = detail::templates::enable_if_rvalue<C>>
+template <typename C, class = detail::templates::enable_if_rvalue<C>>
 auto
 slice(size_t idx, size_t len, C&& c) {
-    return slice_of<C, ORIENTATION>(idx, len, std::forward<C>(c));
+    return slice_of<C>(idx, len, std::forward<C>(c));
 }
 
 /**
- * @brief create a `const_slice_of` object which allows iteration of a subset of another container
+ * @brief create a `const slice_of` object which allows iteration of a subset of another container
  *
- * This is the lvalue implementation of the algorithm, returning a 
- * `const_slice_of` instead of a `slice_of`. This prevents modification of the 
+ * This is the const lvalue reference implementation of the algorithm, returning 
+ * a `const slice_of` instead of a `slice_of`. This prevents modification of the 
  * original container, enforcing const references or deep copies.
  *
- * A typical usecase is to use `auto` as the returned variable's type:
- * ```
- * auto my_slice = sca::slice(0, 13, my_container);
- * auto my_result = sca::map(my_function, my_slice);
- * ```
- *
- * Or to use the slice inline:
- * ```
- * auto my_result = sca::map(my_function, sca::slice(0, 13, my_container));
- * ```
- *
- * Since values returned from iterators managed by `const_slice_of` are `const`,
- * functions which accept values from a `const_slice_of` need to accept either 
- * const references to the stored value (`const T&`, where `T` is the value type 
- * stored in the original container) or in the worst case a deep copy `T`.
- *
- * The slice can instead provide reverse iterators by specifying the 
- * `orientation` in the template:
- * ```
- * auto my_reversed_results = sca::map(my_function, sca::slice<orientation::reverse>(0, 13, my_container))
- * ```
- *
  * @param idx starting index of the range of values 
  * @param len ending index of the range of values
  * @param c container to take slice of
  * @return a tuple of slices from one or more input containers
  */
-template <typename ORIENTATION = orientation::forward, typename C>
+template <typename C>
 auto
 slice(size_t idx, size_t len, const C& c) {
-    return const_slice_of<C, ORIENTATION>(idx, len, c);
-}
-
-/**
- * @brief create a mutable `slice_of` object from a container which allows iteration over a subset of another container
- *
- * This implementation enforces the creation of a `slice_of` instead of a 
- * `const_slice_of`, which is more dangerous than normal calls to `slice()`.
- * This function should only be used (carefully) if normal calls to `slice()` 
- * won't work, such as cases where in-place container modification is necessary.
- *
- * Specifically, if the returned `slice_of` object is passed inline to an 
- * algorithm, the algorithm will see the `slice_of` object as an rvalue and 
- * attempt to `std::move()` values from it, which can unexpectedly modify the 
- * original source container.
- *
- * WARNING: BAD THINGS CAN HAPPEN TO ORIGINAL CONTAINER IF USED INLINE
- * ```
- * sca::each(my_function, sca::mutable_slice(0, 13, my_container));
- * ```
- *
- * Safe usecase is to use `auto` as the returned variable's type on a separate 
- * line from the call that uses the slice, which should avoid unexpected 
- * `std::swap()`s:
- * ```
- * auto my_slice = sca::mutable_slice(0, 13, my_container);
- * sca::each(my_function, my_slice);
- * ```
- *
- * @param idx starting index of the range of values 
- * @param len ending index of the range of values
- * @param c container to take slice of
- * @return a tuple of slices from one or more input containers
- */
-template <typename ORIENTATION = orientation::forward, typename C>
-auto
-mutable_slice(size_t idx, size_t len, C&& c) {
-    return slice_of<ORIENTATION, C>(idx, len, std::forward<C>(c));
+    return const slice_of<C>(idx, len, c);
 }
 
 
@@ -383,7 +398,7 @@ mutable_slice(size_t idx, size_t len, C&& c) {
 template <typename C, typename C2, typename... Cs>
 auto
 group(C&& c, C2&& c2, Cs&&... cs) {
-    default_container<typename C::value_type> ret(detail::algorithm::sum(size(c), size(c2), size(cs)...));
+    sca::vector<typename C::value_type> ret(detail::algorithm::sum(size(c), size(c2), size(cs)...));
     auto cur = ret.begin();
     auto end = ret.end();
 
@@ -412,7 +427,7 @@ group(C&& c, C2&& c2, Cs&&... cs) {
 template <typename C, typename... size_ts>
 auto
 split(C&& c, size_t part1len, size_ts... partlens) {
-    using R = std::optional<default_container<default_container<typename C::value_type>>>;
+    using R = std::optional<sca::vector<sca::vector<typename C::value_type>>>;
 
     // only partition if we can guarantee all partitions have space to exist
     if(size(c) > detail::algorithm::sum(part1len, partlens...)) {
@@ -436,17 +451,13 @@ split(C&& c, size_t part1len, size_ts... partlens) {
 
 /** 
  * @brief return a container where the order of elements is the reverse of the input container
- *
- * This implementation of the algorithm allows specification of the returned 
- * container type. 
- *
  * @param container an input container 
  * @return a new container with elements reversed from the input container
  */
 template <typename C>
 auto
 reverse(C&& container) {
-    default_container<typename C::value_type> res(size(container));
+    sca::vector<typename C::value_type> res(size(container));
     
     detail::algorithm::range_copy_or_move(std::is_lvalue_reference<C>(), res.begin(), container.begin(), container.end());
     std::reverse(res.begin(), res.end());
@@ -470,7 +481,7 @@ reverse(C&& container) {
 template <typename F, typename C>
 auto
 filter(F&& f, C&& container) {
-    default_container<typename C::value_type> ret(size(container));
+    sca::vector<typename C::value_type> ret(size(container));
 
     size_t actual_size = 0;
     auto first = container.begin();
@@ -478,7 +489,7 @@ filter(F&& f, C&& container) {
     auto ret_first = ret.begin();
 
     for(; first != last; ++first) {
-        if(f(*first)) {
+        if(f(to_atom(*first))) {
             copy_or_move(std::is_lvalue_reference<C>(), *ret_first, *first);
             ++ret_first;
             ++actual_size;
@@ -496,9 +507,13 @@ filter(F&& f, C&& container) {
 /**
  * @brief evaluate function with the elements of containers grouped by index and return a container filled with the results of each function call
  *
- * Evaluation begins at index 0, and ends when every element in container c has 
- * been iterated. It returns a container<T> (default `std::vector<T>`) where 
- * `T` is the deduced return value of user function `F`.
+ * Evaluation begins at index 0, and ends when every traversible element in 
+ * container c has been iterated. It returns an `sca::vector<T>` (where `T` is 
+ * the deduced return value of user function `f`) containing the result of 
+ * every invocation of user function `f`.
+ *
+ * Each container can contain a different value type as long as the value type 
+ * can be passed to the function.
  *
  * @param f a function to call 
  * @param c the first container 
@@ -508,7 +523,7 @@ filter(F&& f, C&& container) {
 template <typename F, typename C, typename... Cs>
 auto
 map(F&& f, C&& c, Cs&&... cs) {
-    using Result = default_container<detail::templates::function_return_type<F,typename C::value_type>>;
+    using Result = sca::vector<detail::templates::function_return_type<F,typename C::value_type, typename Cs...::value_type>>;
     size_t len = size(c);
     Result ret(len);
     detail::algorithm::map(len, ret.begin(), c.begin(), cs.begin()...);
@@ -523,6 +538,9 @@ map(F&& f, C&& c, Cs&&... cs) {
 /**
  * @brief perform a calculation on the values stored in a range of indices across one or more containers 
  *
+ * Evaluation begins at index 0, and ends when every element traversible element 
+ * in container c has been iterated. 
+ *
  * The argument function must accept the current value as its first argument, 
  * and one or more elements stored in the current index (the count of elements 
  * passed to the function is identical to the number of containers).
@@ -530,6 +548,9 @@ map(F&& f, C&& c, Cs&&... cs) {
  * The value returned by the function becomes the new current value. When all 
  * indices have been processed `fold()` will return the final return value of 
  * the function.
+ *
+ * Each container can contain a different value type as long as the value type 
+ * can be passed to the function.
  *
  * @param f the calculation function 
  * @param init the initial value of the calculation being performed 
@@ -551,11 +572,14 @@ fold(F&& f, Result&& init, C&& c, Cs&&... cs) {
 /**
  * @brief evaluate function with the elements of containers grouped by index 
  *
- * Evaluation begins at index 0, and ends when every element in container c has 
- * been iterated. 
+ * Evaluation begins at index 0, and ends when every element traversible element 
+ * in container c has been iterated. 
  *
  * No value is returned from this function, any changes are side effects of 
  * executing the function.
+ *
+ * Each container can contain a different value type as long as the value type 
+ * can be passed to the function.
  *
  * @param f a function to call 
  * @param c the first container 
@@ -565,7 +589,7 @@ template <typename F, typename C, typename... Cs>
 void
 each(F&& f, C&& c, Cs&&... cs) {
     size_t len = size(c);
-    default_container<typename C::value_type> ret(len);
+    sca::vector<typename C::value_type> ret(len);
 
     detail::algorithm::each(len, c.begin(), cs.begin()...);
 }
@@ -580,6 +604,9 @@ each(F&& f, C&& c, Cs&&... cs) {
  * The set of elements from all input containers at the current index are
  * simultaneously passed to the predicate function. Element argument ordering 
  * matches the order they appear in the function invocation.
+ *
+ * Each container can contain a different value type as long as the value type 
+ * can be passed to the function.
  *
  * @param f a predicate function applied to elements of input containers
  * @param c the first container whose elements will have f applied to 
@@ -603,6 +630,9 @@ all(F&& f, C&& c, Cs&&... cs) {
  * The set of elements from all input containers at the current index are
  * simultaneously passed to the predicate function. Element argument ordering 
  * matches the order they appear in the function invocation.
+ *
+ * Each container can contain a different value type as long as the value type 
+ * can be passed to the function.
  *
  * @param f a predicate function applied to elements of input containers
  * @param c the first container whose elements will have f applied to 

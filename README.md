@@ -160,18 +160,18 @@ void my_child_2_sighdl(int sig) {
     std::cout << "child 1 received signal[" << sig << "]" << std::endl;
 }
 
-void child_func_1(int arg0, const char* arg1) {
-    // do everything your thread 1 needs to do...
+void child_func_1(const char* arg1, const char* arg2) {
+    // use arg0 and arg1 to rule the world
 }
 
 void child_func_2(int arg0, const char* arg1) {
-    // do everything your thread 2 needs to do...
+    // rule the world without relying on the crutch of arguments
 }
 
 void launch_my_child_threads() {
     // use some lambdas to easily call set_handler() during thread initialization
-    g_my_child_1 = init_thread([]{ set_handler(my_child_1_sighdl); }, child_func_1, 42, "the meaning of life");
-    g_my_child_2 = init_thread([]{ set_handler(my_child_2_sighdl); }, child_func_2, 0, "hello world");
+    g_my_child_1 = init_thread([]{ set_handler(my_child_1_sighdl); }, child_func_1, "everybody wants to rule the", "world");
+    g_my_child_2 = init_thread([]{ set_handler(my_child_2_sighdl); }, child_func_2);
 }
 ```
 

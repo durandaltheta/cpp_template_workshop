@@ -87,7 +87,6 @@
  * to() - copy from an iterable object to a designated output container type
  * slice() - return a (potentially const) object capable of iterating a subset of a container
  * group() - return a container composed of all elements of all argument containers
- * split() - return partitions of a container
  * reverse() - return a container whose elements are in reverse order of input container
  * filter() - return a container filled with only elements which return true when applied to a function
  * map() - return the results of applying all elements of argument containers to a function
@@ -405,44 +404,6 @@ group(C&& c, C2&& c2, Cs&&... cs) {
     detail::algorithm::group(cur, end, std::forward<C>(c), std::forward<C2>(c2), std::forward<Cs>(cs)...);
 
     return ret;
-}
-
-
-//------------------------------------------------------------------------------
-// split 
-
-/**
- * @brief split a container into two or more partitions 
- *
- * The size of the final partition is determined by the aggregate sizes of the 
- * preceding partitions. 
- *
- * If the aggregate partition lengths are greater than or equal to the size of 
- * the source container the resulting `std::optional<...>` will be empty.
- *
- * @param len size of partition1
- * @param lens optional sizes of more partitions
- * @return an `std::optional<container<container<T>>>` of the resulting partitions 
- */
-template <typename C, typename... size_ts>
-auto
-split(C&& c, size_t part1len, size_ts... partlens) {
-    using R = std::optional<sca::vector<sca::vector<typename C::value_type>>>;
-
-    // only partition if we can guarantee all partitions have space to exist
-    if(size(c) > detail::algorithm::sum(part1len, partlens...)) {
-        R res(std::in_place, 1 + sizeof...(partlens));
-        detail::algorithm::split(
-                std::is_lvalue_reference<C>(),
-                res.begin(), 
-                c.begin(), 
-                c.end(), 
-                part1len, 
-                partlens...);
-        return res;
-    } else {
-        return R();
-    }
 }
 
 

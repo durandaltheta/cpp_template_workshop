@@ -260,21 +260,6 @@ void group(IT&& cur, C&& c, Cs&&... cs) {
 
 
 // ----------------------------------------------------------------------------- 
-// split operations 
-
-template <typename TRUE_FALSE_TYPE, typename PART_IT, typename SRC_IT>
-void split(TRUE_FALSE_TYPE tft, PART_IT&& cur_part, SRC_IT&& src_cur, SRC_IT&& src_end) {
-}
-
-template <typename TRUE_FALSE_TYPE, typename PART_IT, typename SRC_IT, typename... Lens>
-void split(TRUE_FALSE_TYPE tft, PART_IT&& cur_part, SRC_IT&& src_cur, SRC_IT&& src_end, size_t len, Lens... lens) {
-    cur_part->resize(len);
-    detail::algorithm::range_copy_or_move(tft, cur_part->begin(), src_cur, src_end);
-    split(tft, ++cur_part, src_cur, src_end, lens...);
-}
-
-
-// ----------------------------------------------------------------------------- 
 // advance group 
 
 /*

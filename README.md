@@ -164,7 +164,7 @@ void child_func_1(const char* arg0, const char* arg1) {
     // use arg0 and arg1 to rule the world
 }
 
-void child_func_2(int arg0, const char* arg1) {
+void child_func_2() {
     // rule the world without relying on the crutch of arguments
 }
 

@@ -35,30 +35,22 @@
  * However it is my opinion that this is a valuable exercise because if the 
  * library doesn't do these calculations automatically then it is up to the 
  * user to do them manually, opening the door for unwanted bugs.
- *
- * This decision to avoid iterators in algorithm API also removes some of the 
- * inherent control that direct usage of iterators enables, such as 
- * pre-advancing iterators to a desired index, or selecting a custom end 
- * iterator. To address such limitations, users can construct slices of 
- * containers with calls to `slice()` and `mutable_slie()`. The returned 
- * `slice_of` objects return iterators over a subset range of the source 
- * container when their `begin()` and `end()` methods are called. `slice_of` 
- * objects can be passed as arguments to any algorithm which accepts containers.
  * 
  * A NOTE ON FUNCTIONAL SEMANTICS
  * All elements operated on by algorithms in this library are converted to a 
- * functional data type called `sca::atom<T>`. 
+ * functional data type called `sca::atom<T>`, a type of shared pointer. 
  *
  * This object's design intention is to facilitate better functional 
- * programming, in conjunction with the algorithms in this library, where value 
- * modification happens on the stack as much as possible or abstracted to
- * atom construction, rather than with direct user modification. 
+ * programming (preventing further classes of bugs), in conjunction with the 
+ * algorithms in this library, where value modification happens on the stack as 
+ * much as possible or abstracted to `atom<T>` construction, rather than with 
+ * direct user modification. 
  *
  * Writes to an `atom<T>`, either via value construction or assignment, 
  * allocate new values instead of mutating the old value. All copies of the 
- * `atom<T>`s are shallow copies because it is a shared pointer. All algorithms 
- * in this library ultimately convert to `atom<T>`, enabling cheap data reuse 
- * and efficient algorithms after the initial conversion cost is paid.
+ * `atom<T>`s are shallow copies because it is a shared pointer. This enables 
+ * consistent, efficient, and safer algorithms after the initial conversion cost 
+ * is paid.
  *
  * Values of type `T` can be directly assigned with `=` or used to construct to 
  * an atom<T>. 
@@ -73,7 +65,7 @@
  * can also be type converted implicitly to a `T` or `const T&`. This means that 
  * an `atom<T>` can be passed to a function expecting `T` or `const T&`. If a 
  * user function needs to mutate an `atom<T>` it will need to explicitly accept 
- * an `atom<T>` as it's argument and modify it by calls to `value()` or `get()`.
+ * an `atom<T>` as it's argument and modify it by calls to `value()`.
  *
  * PROVIDED ALGORITHMS 
  * The algorithms in this header library are intended for general usecases and 
@@ -105,6 +97,12 @@ namespace sca { // simple cpp algorithm
  */
 template <typename T>
 class atom : std::shared_ptr<T> {
+    struct private_initialization { };
+
+    atom(private_initialization, std::shared_ptr<T>&& t) : 
+        std::shared_ptr<T>(std::move(t)) { }
+
+public:
     typedef T value_type;
 
     atom() : std::shared_ptr<T>(std::make_shared<T>()) { } // atoms always have a default value  
@@ -160,15 +158,14 @@ class atom : std::shared_ptr<T> {
      */
     template <typename... As>
     static atom<T> make(As&&... as) {
-        // allow compiler to convert shared_ptr<T> to an atom<T>
-        return std::make_shared<T>(std::forward<As>(as)...);
+        return atom<T>(private_initialization, std::make_shared<T>(std::forward<As>(as)...));
     }
 
     /**
      * @brief construct an atom by calling T's constructor in-place and then call a further initializer function on a pointer to constructed T
      *
      * This version allows for post-construction initialization of an object 
-     * should the object's constructor be insufficient.
+     * should the object's constructors be insufficient.
      *
      * @param init_function a function which will be called with a pointer to the allocated T after construction
      * @param as... optional T constructor arguments
@@ -178,7 +175,7 @@ class atom : std::shared_ptr<T> {
     static atom<T> form(IF&& init_function, As&&... as) {
         auto sp = std::make_shared<T>(std::forward<As>(as)...);
         init_function(sp.get());
-        return sp; // allow compiler to convert sp to an atom<T>
+        return atom<T>(private_initialization, std::move(sp)); 
     }
 };
 

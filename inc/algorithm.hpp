@@ -60,6 +60,12 @@
  * The const value of an atom<T> can be retrieved with a `*` or `->`. A mutable 
  * (non-functional) `T&` reference can be retrieved via `value()`.
  *
+ * A NOTE ON EFFICIENCY
+ * Because of the conversion to `atom<T>`, initial usage of algorithms in this 
+ * library may be slower. However, if the algorithms are used *together* they
+ * can ensure a much higher default efficiency because of implicit efficiency 
+ * savings that shared pointers provide.
+ *
  * It is good practice to write functions to accept values as `atom<T>`s in 
  * order to get the most efficient results. However, the value of the atom<T> 
  * can also be type converted implicitly to a `T` or `const T&`. This means that 

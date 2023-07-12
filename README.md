@@ -160,7 +160,7 @@ void my_child_2_sighdl(int sig) {
     std::cout << "child 1 received signal[" << sig << "]" << std::endl;
 }
 
-void child_func_1(const char* arg1, const char* arg2) {
+void child_func_1(const char* arg0, const char* arg1) {
     // use arg0 and arg1 to rule the world
 }
 

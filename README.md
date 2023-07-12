@@ -153,11 +153,11 @@ void set_handler(void(*sig_handler)(int)) {
 }
 
 void my_child_1_sighdl(int sig) {
-    std::cout << "child 0 received signal[" << sig << "]" << std::endl;
+    std::cout << "child 1 received signal[" << sig << "]" << std::endl;
 }
 
 void my_child_2_sighdl(int sig) {
-    std::cout << "child 1 received signal[" << sig << "]" << std::endl;
+    std::cout << "child 2 received signal[" << sig << "]" << std::endl;
 }
 
 void child_func_1(const char* arg0, const char* arg1) {

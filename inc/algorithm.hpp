@@ -464,7 +464,7 @@ auto
 reverse(C&& container) {
     default_container<typename C::value_type> res(size(container));
     
-    range_copy_or_move(std::is_lvalue_reference<C>(), res.begin(), container.begin(), container.end());
+    detail::algorithm::range_copy_or_move(std::is_lvalue_reference<C>(), res.begin(), container.begin(), container.end());
     std::reverse(res.begin(), res.end());
 
     return res; 

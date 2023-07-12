@@ -210,4 +210,61 @@ $ ./a.out
 6
 5
 $
+``` 
+
+## Compiler Behavior with Templates and Inlining
+[Inlining in c++](https://en.cppreference.com/w/cpp/language/inline) is the language feature for writing code which will can have it's body be "copy pasted" by the compiler wherever it is called in code instead of actually triggering a new function call to be put on the stack. It is very similar to a [macro in c](https://gcc.gnu.org/onlinedocs/cpp/Macros.html), with the distinction that inlining in `c++` is actually at the discretion of the compiler (the `inline` keyword is just a suggestion). There's also varous edgecases around efficiency and compilation which requires functions to be a true function on the stack rather than an effective text copy/paste, which the compiler will handle internally. 
+
+Inlining is a useful compiler technique because setting up new function calls on the stack during runtime has its own computation cost, in addition to the cost of actually *executing* the function. 
+
+Inline functions and templates are very similar concepts. Their main distinction to the developer is that templates have the ability to be generated for different types (`std::string`, `int`, `my_object`, etc.), while inline functions are just normal functions with the `inline` keyword prepended to their definition:
 ```
+// compiler can choose to copy paste the function body logic into other functions
+inline int add(int a, int b) {
+    return a + b;
+}
+```
+
+There is another important trait shared by inline functions and templates, that they don't generate final code until they are called somewhere. As a consequence valid `c++` libraries can be written which are *header only* (no compiled `.cpp` files!). Header only `c++` libraries are very convenient, because they can be "installed" into a system as source code without pre-compiling them, similar to higher level languages like `python`. 
+
+In header somewhere:
+```
+#ifndef MY_HEADER_ONLY_LIBRARY
+#define MY_HEADER_ONLY_LIBRARY
+
+#include <iostream>
+
+inline int real_main() {
+    std::cout << "hello from the real slim shady" << std::endl;
+    return 0;
+}
+
+#endif
+```
+
+In a `.cpp` somewhere:
+```
+#include "my_header_only_library.hpp"
+
+int main() {
+    return real_main(); // real_main() is compiled because it is called here
+}
+```
+
+Executing this program:
+```
+$ ./a.out
+hello from the real slim shady
+$
+``` 
+
+There are some limitations around writing code like this. For instance, header only libraries tend to produce larger binaries because the compiler copy pastes so much code (which also increases program start time as more data has to be loaded into memory to begin execution, even though execution may be faster once started). The fact that portions of a program are not pre-compiled also means that compilation speed can be slower as more code needs to be compiled every time. In the average case this is not going to be a problem when used in a project (remember, templates are used all the time by the standard library, see `std::string` which is a type alias to an underlying type `std::basic_string<CharT>` or `std::vector<T>`), but it is worth considering. 
+
+As a side note, [c++ lambdas](https://en.cppreference.com/w/cpp/language/lambda) will also be inlined by the compiler where possible, making them very efficient by default.
+
+### Takeway
+For almost all developers, the best way to determine your usage of inlining and templates is *not* to consider the performance beforehand. Except cases where efficiency is a real bottleneck (and even there care must be taken to determine what, when, where and why the bottleneck is occurring), the main advantage to these tools is how much they improve the writing and readability of your code!
+
+For instance, being able to write libraries which exist as source code and don't require pre-compilation is very useful for distributing code to projects because it is both quicker and easier to install. Another advantage is you can write normal code alongside your templates allowing your code to exist in the same file, rather than creating labyrinthine source and header dependencies and avoids populating your source with early function declarations just to get things to compile.
+
+As a one wise man once said, "keep it simple stupid!"

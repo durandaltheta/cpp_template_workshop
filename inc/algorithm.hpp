@@ -35,43 +35,6 @@
  * However it is my opinion that this is a valuable exercise because if the 
  * library doesn't do these calculations automatically then it is up to the 
  * user to do them manually, opening the door for unwanted bugs.
- * 
- * A NOTE ON FUNCTIONAL SEMANTICS
- * All elements operated on by algorithms in this library are converted to a 
- * functional data type called `sca::atom<T>`, a type of shared pointer. 
- *
- * This object's design intention is to facilitate better functional 
- * programming (preventing further classes of bugs), in conjunction with the 
- * algorithms in this library, where value modification happens on the stack as 
- * much as possible or abstracted to `atom<T>` construction, rather than with 
- * direct user modification. 
- *
- * Writes to an `atom<T>`, either via value construction or assignment, 
- * allocate new values instead of mutating the old value. All copies of the 
- * `atom<T>`s are shallow copies because it is a shared pointer. This enables 
- * consistent, efficient, and safer algorithms after the initial conversion cost 
- * is paid.
- *
- * Values of type `T` can be directly assigned with `=` or used to construct to 
- * an atom<T>. 
- *
- * Unlike `std::shared_ptr<T>`'s, `atom<T>`s always have an allocated value.
- *
- * The const value of an atom<T> can be retrieved with a `*` or `->`. A mutable 
- * (non-functional) `T&` reference can be retrieved via `value()`.
- *
- * A NOTE ON EFFICIENCY
- * Because of the conversion to `atom<T>`, initial usage of algorithms in this 
- * library may be slower. However, if the algorithms are used *together* they
- * can ensure a much higher default efficiency because of implicit efficiency 
- * savings that shared pointers provide.
- *
- * It is good practice to write functions to accept values as `atom<T>`s in 
- * order to get the most efficient results. However, the value of the atom<T> 
- * can also be type converted implicitly to a `T` or `const T&`. This means that 
- * an `atom<T>` can be passed to a function expecting `T` or `const T&`. If a 
- * user function needs to mutate an `atom<T>` it will need to explicitly accept 
- * an `atom<T>` as it's argument and modify it by calls to `value()`.
  *
  * PROVIDED ALGORITHMS 
  * The algorithms in this header library are intended for general usecases and 
@@ -80,10 +43,10 @@
  * simple data processing usecases.
  *
  * Algorithms and Objects provided by this header:
- * atom() - a functional value wrapper
  * size() - return a container's size
  * to() - copy from an iterable object to a designated output container type
  * slice() - return a (potentially const) object capable of iterating a subset of a container
+ * mslice() - return an object capable of iterating a mutable subset of a container
  * group() - return a container composed of all elements of all argument containers
  * reverse() - return a container whose elements are in reverse order of input container
  * filter() - return a container filled with only elements which return true when applied to a function
@@ -97,111 +60,6 @@
 namespace sca { // simple cpp algorithm
 
 //------------------------------------------------------------------------------
-
-/**
- * @brief a generic shared pointer data wrapper which enables functional semantics
- */
-template <typename T>
-class atom : std::shared_ptr<T> {
-    struct private_initialization { };
-
-    atom(private_initialization, std::shared_ptr<T>&& t) : 
-        std::shared_ptr<T>(std::move(t)) { }
-
-public:
-    typedef T value_type;
-
-    atom() : std::shared_ptr<T>(std::make_shared<T>()) { } // atoms always have a default value  
-
-    // compiler generates default atom<T> constructors and assignment
-    atom(T& t) : std::shared_ptr<T>(std::make_shared<T>(t)) { }
-    atom(T&& t) : std::shared_ptr<T>(std::make_shared<T>(std::move(t))) { }
-    
-    inline atom<T>& operator=(const T& t) { 
-        *this = std::make_shared<T>(t);
-        return *this;
-    }
-
-    inline atom<T>& operator=(T&& t) { 
-        *this = std::make_shared<T>(std::move(t));
-        return *this;
-    }
-
-    /**
-     * @brief perform a non-functional access of the stored value
-     * @return a mutable reference to allocated T
-     */
-    inline T& value() {
-        return *this;
-    }
-    
-    /// override accessor operator to return const
-    inline const T& operator*() const { 
-        return std::shared_ptr<T>::operator*(); 
-    }
-
-    /// override accessor operator to return const 
-    inline const T* operator->() const { 
-        return std::shared_ptr<T>::operator->(); 
-    }
-
-    /// const lvalue reference T conversion
-    template <typename T>
-    operator const T&() const {
-        return *this;
-    }
-
-    /// lvalue T conversion
-    template <typename T>
-    operator T() const {
-        return *this;
-    }
-
-    /**
-     * @brief construct an atom by calling T's constructor in-place 
-     * @param as... optional T constructor arguments
-     * @return the constructed atom
-     */
-    template <typename... As>
-    static atom<T> make(As&&... as) {
-        return atom<T>(private_initialization, std::make_shared<T>(std::forward<As>(as)...));
-    }
-
-    /**
-     * @brief construct an atom by calling T's constructor in-place and then call a further initializer function on a pointer to constructed T
-     *
-     * This version allows for post-construction initialization of an object 
-     * should the object's constructors be insufficient.
-     *
-     * @param init_function a function which will be called with a pointer to the allocated T after construction
-     * @param as... optional T constructor arguments
-     * @return the constructed atom
-     */
-    template <typename IF, typename... As>
-    static atom<T> form(IF&& init_function, As&&... as) {
-        auto sp = std::make_shared<T>(std::forward<As>(as)...);
-        init_function(sp.get());
-        return atom<T>(private_initialization, std::move(sp)); 
-    }
-};
-
-template <typename T>
-atom<T>&& to_atom(atom<T>&& a) {
-    return std::move(a);
-}
-
-template <typename T>
-atom<T> to_atom(const atom<T>& a) {
-    return a;
-}
-
-/// convert an argument `T` to an `atom<T>`
-template <typename T>
-atom<T> to_atom(T&& t) {
-    return atom<T>(std::forward<T>(t));
-}
-
-//------------------------------------------------------------------------------
 // default container type 
 
 /**
@@ -210,17 +68,13 @@ atom<T> to_atom(T&& t) {
  * In C++, algorithms are typically fastest with vectors, so algorithms 
  * implemented in this library typically convert to them internally and return 
  * the result vectors. 
- *
- * The vector value_type is `atom<T>`, to enforce a baseline of value reuse and 
- * shallow copies. If a function expects a type `T` or `const T&`, then the 
- * `atom<T>` will be silently converted to that type by the compiler.
  * 
  * If the user requires a container of elements be converted to another 
  * container type after the data has been processed they can use the `to<T>()` 
  * algorithm defined below.
  */
 template <typename T>
-using vector = std::vector<atom<T>>;
+using vector = std::vector<T>;
 
 //------------------------------------------------------------------------------
 // size
@@ -241,15 +95,6 @@ size(C&& c) {
 
 /**
  * @brief copy or move elements from a container of one type to a container of another
- *
- * `Result` can have a value type convertable from `atom<T>` allowing conversion 
- * from `sca` types. Ex:
- * ```
- * std::list<int> convert_vector_to_list(sca::vector<int>& v) {
- *     return sca::to<std::list<int>>(v);
- * }
- * ```
- *
  * @param c container of elements
  * @return a container of the target type Result
  */
@@ -385,6 +230,29 @@ slice(size_t idx, size_t len, const C& c) {
     return const slice_of<C>(idx, len, c);
 }
 
+/**
+ * @brief create a mutable `slice_of` object which allows iteration of a subset of another container
+ *
+ * This is the mutable lvalue reference implementation of the algorithm, 
+ * returning a `slice_of`. This can be dangerous when used inline carelessly, 
+ * as it will be treated as an rvalue. Best usage is to explicitly save as an 
+ * lvalue before usage:
+ * ```
+ * auto my_lvalue_slice = sca::mslice(0, 13, my_container);
+ * auto my_result = sca::map(my_function, my_lvalue_slice));
+ * ```
+ *
+ * @param idx starting index of the range of values 
+ * @param len ending index of the range of values
+ * @param c container to take slice of
+ * @return a tuple of slices from one or more input containers
+ */
+template <typename C>
+auto
+mslice(size_t idx, size_t len, C&& c) {
+    return slice_of<C>(idx, len, std::forward<C>(c));
+}
+
 
 //------------------------------------------------------------------------------
 // group
@@ -453,7 +321,7 @@ filter(F&& f, C&& container) {
     auto ret_first = ret.begin();
 
     for(; first != last; ++first) {
-        if(f(to_atom(*first))) {
+        if(f(*first)) {
             copy_or_move(std::is_lvalue_reference<C>(), *ret_first, *first);
             ++ret_first;
             ++actual_size;

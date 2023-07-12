@@ -18,20 +18,6 @@
 namespace sca { // simple cpp algorithm
 namespace detail { 
 namespace algorithm {
-// -----------------------------------------------------------------------------
-// atom forward declaration 
-
-template <typename T>
-class atom : std::shared_ptr<T>;
-
-template <typename T>
-atom<T> to_atom(atom<T>&& a);
-
-template <typename T>
-atom<T> to_atom(const atom<T>& a);
-
-template <typename T>
-atom<T> to_atom(T&& t);
 
 // -----------------------------------------------------------------------------
 // size  
@@ -283,7 +269,7 @@ template <typename F, typename RIT, typename IT, typename... ITs>
 void map(F&& f, size_t len, RIT&& rit, IT&& it, ITs&&... its) {
     while(len) {
         --len;
-        *rit = f(to_atom(*it), to_atom(*its)...);
+        *rit = f(*it, *its...);
         advance_group(rit, it, its...);
     }
 }
@@ -296,10 +282,11 @@ template <typename F,
           typename... ITs>
 R
 fold(size_t len, F& f, R&& init, ITs&&... its) {
-    auto init_atom = to_atom(std::forward<R>(init));
+    using M = std::decay_t<R>;
+    M mutable_init(std::forward<R>(init));
 
     for(size_t i=0; i<len; ++i) {
-        mutable_state = f(std::move(init_atom), to_atom(*its)...);
+        mutable_state = f(std::move(mutable_init), *its...);
         advance_group(++its...);
     }
 
@@ -312,7 +299,7 @@ fold(size_t len, F& f, R&& init, ITs&&... its) {
 template <typename F, typename IT, typename... ITs>
 void each(F&& f, size_t len, IT&& it, ITs&&... its) {
     for(; len; --len) {
-        f(to_atom(*it), to_atom(*its)...);
+        f(*it, *its...);
         advance_group(it, its...);
     }
 }
@@ -326,7 +313,7 @@ all(size_t len, F&& f, CITs&&... cits) {
     bool ret = true;
 
     for(size_t i=0; i<len; ++i) {
-        if(!f(to_atom(*cits)...)) {
+        if(!f(*cits...)) {
             ret = false;
             break;
         }
@@ -346,7 +333,7 @@ some(size_t len, F&& f, CITs&&... cits) {
     bool ret = false;
 
     for(size_t i=0; i<len; ++i) {
-        if(f(to_atom(*cits)...)) {
+        if(f(*cits...)) {
             ret = true;
             break;
         }

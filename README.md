@@ -160,11 +160,11 @@ void my_child_2_sighdl(int sig) {
     std::cout << "child 1 received signal[" << sig << "]" << std::endl;
 }
 
-void child_func_0(int arg0, const char* arg1) {
+void child_func_1(int arg0, const char* arg1) {
     // do everything your thread 1 needs to do...
 }
 
-void child_func_1(int arg0, const char* arg1) {
+void child_func_2(int arg0, const char* arg1) {
     // do everything your thread 2 needs to do...
 }
 

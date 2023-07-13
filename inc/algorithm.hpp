@@ -123,7 +123,13 @@ to(C&& c) {
  * the necessary template information and return the proper `slice_of` object.
  */
 template<typename C>
-struct slice_of {
+class slice_of {
+    std::shared_ptr<C> m_mem; // place to hold container memory if constructed with an rvalue 
+    const size_t m_size;
+    typename C::iterator m_begin;
+    typename C::iterator m_end;
+
+public:
     typedef typename C::value_type value_type;
     typedef typename C::size_type size_type;
 
@@ -133,54 +139,72 @@ struct slice_of {
     // rvalue constructor
     template <typename C2, class = detail::templates::enable_if_rvalue<C2>>
     slice_of(size_t idx, size_t len, C2&& c) :
-        m_idx(idx),
-        m_len(len),
         m_mem(std::make_shared<C2>(std::move(c))), // keep container in memory
-        m_ref(*m_mem),
-        m_cref(*m_mem)
+        m_size(len - idx),
+        m_begin(std::next(c.begin(), idx)),
+        m_end(std::next(m_begin, len))
     { }
 
     // mutable lvalue constructor
     template <typename C2>
     slice_of(size_t idx, size_t len, C2& c) :
-        m_idx(idx),
-        m_len(len),
-        m_ref(c),
-        m_cref(c)
+        m_size(len - idx),
+        m_begin(std::next(c.begin(), idx)),
+        m_end(std::next(m_begin, len))
     { }
 
     /// return the iterable length of the slice
     inline size_t size() const {
-        return m_len - m_idx;
+        return m_size;
     }
 
     /// return an iterator to the beginning of the container subset
     inline auto begin() {
-        return std::next(t.begin(), idx);
+        return m_begin;
+    }
+
+    /// return an iterator to the end of the container subset
+    inline auto end() { 
+        return m_end;
+    }
+};
+
+/// const variation of slice_of
+template <typename C>
+class const_slice_of {
+    const size_t m_size;
+    typename C::const_iterator m_cbegin;
+    typename C::const_iterator m_cend;
+
+public:
+    typedef typename C::value_type value_type;
+    typedef typename C::size_type size_type;
+
+    const_slice_of() = delete; // no default initialization
+    const_slice_of(size_t idx, size_t len, const C& c) = delete; // must use const_slice_of
+
+    // mutable lvalue constructor
+    template <typename C2>
+    const_slice_of(size_t idx, size_t len, C2& c) :
+        m_size(len - idx),
+        m_cbegin(std::next(c.cbegin(), idx)),
+        m_cend(std::next(m_cbegin, len))
+    { }
+
+    /// return the iterable length of the slice
+    inline size_t size() const {
+        return m_size;
     }
 
     /// return a const_iterator to the beginning of the container subset
     inline auto begin() const {
-        return std::next(t.cbegin(), idx);
-    }
-
-    /// return an iterator to the end of the container subset
-    inline auto end() {
-        return std::next(begin(), m_len);
+        return m_cbegin;
     }
 
     /// return a const_iterator to the end of the container subset
     inline auto end() const {
-        return std::next(begin(), m_len);
+        return m_cend;
     }
-
-private:
-    const size_t m_idx;
-    const size_t m_len;
-    // place to hold container memory if constructed with an rvalue 
-    std::shared_ptr<C> m_mem; 
-    C& m_ref; // reference to container 
-    const C&  m_cref; // reference to const container
 };
 
 /**
@@ -213,7 +237,7 @@ slice(size_t idx, size_t len, C&& c) {
 }
 
 /**
- * @brief create a `const slice_of` object which allows iteration of a subset of another container
+ * @brief create a `const_slice_of` object which allows iteration of a subset of another container
  *
  * This is the const lvalue reference implementation of the algorithm, returning 
  * a `const slice_of` instead of a `slice_of`. This prevents modification of the 
@@ -227,7 +251,7 @@ slice(size_t idx, size_t len, C&& c) {
 template <typename C>
 auto
 slice(size_t idx, size_t len, const C& c) {
-    return const slice_of<C>(idx, len, c);
+    return const_slice_of<C>(idx, len, c);
 }
 
 /**
@@ -355,7 +379,7 @@ filter(F&& f, C&& container) {
 template <typename F, typename C, typename... Cs>
 auto
 map(F&& f, C&& c, Cs&&... cs) {
-    using Result = sca::vector<detail::templates::function_return_type<F,typename C::value_type, typename Cs...::value_type>>;
+    using Result = sca::vector<detail::templates::function_return_type<F,typename C::value_type, typename Cs::value_type...>>;
     size_t len = size(c);
     Result ret(len);
     detail::algorithm::map(len, ret.begin(), c.begin(), cs.begin()...);

@@ -14,7 +14,16 @@ int i_am_an_lvalue = 3;
 int i_am_also_an_lvalue = i_am_an_lvalue; // both sides are still lvalues!
 ```
 
-The best way that I've found to generalize the two value categories for general use is:
+Here is a quote about the difference between lvalues and rvalues from computer scientist Scott Meyers (taken from https://isocpp.org/blog/2012/11/universal-references-in-c11-scott-meyers)
+"""
+A precise definition for these terms is difficult to develop (the C++11 standard generally specifies whether an expression is an lvalue or an rvalue on a case-by-case basis), but in practice, the following suffices:
+
+If you can take the address of an expression, the expression is an lvalue.
+If the type of an expression is an lvalue reference (e.g., T& or const T&, etc.), that expression is an lvalue. 
+Otherwise, the expression is an rvalue.  Conceptually (and typically also in fact), rvalues correspond to temporary objects, such as those returned from functions or created through implicit type conversions. Most literal values (e.g., 10 and 5.3) are also rvalues.
+"""
+
+To further simplify what Scott described you can generalize the two value categories as such:
 
 #### rvalue
 Any variable or object  which is going to go out of existence after the current statement. Examples:
@@ -26,6 +35,10 @@ struct my_struct { };
 int my_struct_instance = my_struct(); // the "my_struct()" on the right side of the assignment is an rvalue 
 
 int another_variable = std::move(a_variable); // std::move() forces a_variable to appear as an rvalue during the assignment
+
+int add_1(int&& i) { // double ampersand reference to i is an rvalue
+    return i + 1;
+}
 ```
 
 #### lvalue
@@ -37,7 +50,15 @@ struct my_struct {
     int my_member_variable; // lvalue
 };
 
-my_struct my_struct_instance; // lvalue
+my_struct my_struct_instance; // lvalue 
+
+int add_3(int& i) { // reference to i is an lvalue
+    return i + 3;
+}
+
+int sub_2(const int& i) { // const reference to i is an lvalue
+    return i - 2;
+}
 ```
 
 This doesn't capture the *exact* meaning, you may need to refer to the link I posted for greater detail, but in my experience this is a useful mental model, because the utility this concept brings to `c++` programming is tied to the idea of something "about to go out of existence", enabling "rvalue move semantics".
@@ -117,7 +138,9 @@ Forwarding is the method of taking either an `rvalue` or `lvalue` passed to a me
 
 A call to `std::move()` will transform it's argument into an `rvalue` reference. A call to `std::forward<T>()` will instead *persist* the current value category of its argument, rather than allowing it to be blindly converted to an `lvalue` reference (this means that `rvalue`s will stay `rvalue`s and `lvalue`s will stay `lvalue`s).
 
-As stated previously, the double ampersand `&&` has a special meaning in templates. `&&` usage in a template means the template should accept *either* `lvalue`s or `rvalue`s. When combined with `std::forward<T>()` you can allow the template to pass a reference without change to another function. Here's an example of forwarding an argument reference to an `std::string`'s assignment operator (which have different implementations for `rvalue`s and `lvalue`s!):
+As stated previously, the double ampersand `&&` has a special meaning in templates. `&&` usage in a template means the template should accept *either* `lvalue`s or `rvalue`s. This version of `&&` is colloqually known as a [universal reference](https://isocpp.org/blog/2012/11/universal-references-in-c11-scott-meyers). A universal reference is a way of telling the compiler that your template accepts *some* kind of reference as an argument, but it needs to type deduce what that type of reference actually is when the template is invoked.
+
+When universal references are combined with `std::forward<T>()` you can allow the template to pass a reference without change to another function. Here's an example of forwarding an argument reference to an `std::string`'s assignment operator (which have different implementations for `rvalue`s and `lvalue`s!):
 ```
 #include <string>
 
@@ -149,8 +172,8 @@ int main() {
     std::string s1 = "foo";
     std::string s2;
     assign(s2, s1); // works!
-    assign(s2, (const)s1); // will still function!
-    assign((const)s2, s1) // a compiler error, cannot assign to const
+    assign(s2, (const)s1); // also works!
+    assign((const)s2, s1); // a compiler error, cannot assign a value to a const variable
     return 0;
 }
 ```
@@ -261,6 +284,8 @@ $
 There are some limitations around writing code like this. For instance, header only libraries tend to produce larger binaries because the compiler copy pastes so much code (which also increases program start time as more data has to be loaded into memory to begin execution, even though execution may be faster once started). The fact that portions of a program are not pre-compiled also means that compilation speed can be slower as more code needs to be compiled every time. In the average case this is not going to be a problem when used in a project (remember, templates are used all the time by the standard library, see `std::string` which is a type alias to an underlying type `std::basic_string<CharT>` or `std::vector<T>`), but it is worth considering. 
 
 As a side note, [c++ lambdas](https://en.cppreference.com/w/cpp/language/lambda) will also be inlined by the compiler where possible, making them very efficient by default.
+
+It should be noted that if templates are required as part of a library's API, they are typically *required* to be implemented in a header, at least for any code where a type needs to be deduced by the user code's compiler.
 
 ### Takeway
 For almost all developers, the best way to determine your usage of inlining and templates is *not* to consider the performance beforehand. Except cases where efficiency is a real bottleneck (and even there care must be taken to determine what, when, where and why the bottleneck is occurring), the main advantage to these tools is how much they improve the writing and readability of your code!

@@ -85,7 +85,7 @@ using vector = std::vector<T>;
  * @return the size of the container
  */
 template <typename C>
-size_t // size_t is generally convertable from all container `size_type`s
+size_t // size_t is convertable from all std:: container `size_type`s
 size(C&& c) { 
     return detail::algorithm::size(c, std::integral_constant<bool, detail::algorithm::has_size<C>::has>()); 
 }
@@ -233,10 +233,10 @@ slice(size_t idx, size_t len, const C& c) {
 /**
  * @brief create a mutable `slice_of` object which allows iteration of a subset of another container
  *
- * This is the mutable lvalue reference implementation of the algorithm, 
- * returning a `slice_of`. This can be dangerous when used inline carelessly, 
- * as it will be treated as an rvalue. Best usage is to explicitly save as an 
- * lvalue before usage:
+ * This is the mutable reference implementation of the algorithm, returning a 
+ * `slice_of`. This can be dangerous when used inline carelessly, as it will be 
+ * treated as an rvalue by algorithms causing unexpected swaps. Best usage is to 
+ * explicitly save the result of this method as an lvalue before usage:
  * ```
  * auto my_lvalue_slice = sca::mslice(0, 13, my_container);
  * auto my_result = sca::map(my_function, my_lvalue_slice));

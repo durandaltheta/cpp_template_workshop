@@ -107,76 +107,41 @@ because we need to use SFINAE to determine if type `T` has a method named
     template<typename U, typename U::size_type (U::*)() const> struct SFINAE {};
 ```
 
-We are declaring a template struct *inside* of the template struct `has_size` 
-with potentially a different type `U`. 
+We are declaring a template struct *inside* of the template struct `has_size` with potentially a different type `U` because we don't want the compiler to try to produce the final code *yet*. Instead, we want to wait to make the final code once the compiler has figured out what type of container `U` we are dealing with.
 
-In normal uses this is necessary when your template object has need of internal 
-template methods or sub-objects.
+The code `U::size_type` is specifying that whatever `U` is *must* have some type defined called `size_type`. Every `std` container defines this type. `size_type` is always some number type, typically an unsigned integer.
 
-In our case, we are creating this templated sub-struct because we don't want the 
-compiler to try to produce the final code *yet*. Instead, we want to wait to 
-make the final code once the compiler has figured out what type of container `U` 
-we are dealing with.
+The code `U::size_type (U::*)() const` is a function pointer. The `U::*` is the template mechanism for specifying "function pointer in the `U` namespace". 
 
-The code `U::size_type` is specifying that whatever `U` is *must* have some type 
-defined called `size_type`. Every `std` container defines this type. `size_type`
-is always some number type, typically an unsigned integer.
+Function pointers typically look like: `return_type (*)(arg_1_type, arg_2_type, etc...)`. In this case, we are specifying that for our struct `SFINAE` to be valid, `U` must have some const method which has no arguments and returns `U::size_type`.
 
-The code `U::size_type (U::*)() const` is a function pointer. The `U::*` is the 
-template mechanism for specifying "function pointer in the `U` namespace". 
-
-Function pointers typically look like: `return_type (*)(arg_1_type, arg_2_type, 
-etc...)`. In this case, we are specifying that for our struct `SFINAE` to be 
-valid, `U` must have some const method which has no arguments and returns 
-`U::size_type`.
-
-That is, we're really looking for if `U` has a function 
-`size_type size() const`, and we are identifying if it has a member function 
-which matches that pattern.
+That is, we're really looking for if `U` has a function `size_type size() const`, and we are identifying if it has a member function which matches that pattern.
 
 ```
     template<typename U> static char test(SFINAE<U, &U::size>*);
 ```
 
-This is a forward declaration of a template method belonging to `has_size`. As 
-the name of this method implies, we are using it to test something, in this case 
-we are testing *at compilation time* (not runtime!) if we can create a valid 
-`SFINAE` object based on the characteristics of the object we are checking a 
-`size()` function for. 
+This is a forward declaration of a template method belonging to `has_size`. As the name of this method implies, we are using it to test something, in this case we are testing *at compilation time* (not runtime!) if we can create a valid `SFINAE` object based on the characteristics of the object we are checking a `size()` function for. 
 
-This `SFINAE` object must be able to declare a function pointer to a method 
-`U::size` as its second template argument. If this template succeeds, this test 
-will be selected and `has_size` will have a method named `test` which returns a 
-`char`. If this is the case, then we know type `U` has a method `size()`!
+This `SFINAE` object must be able to declare a function pointer to a method `U::size` as its second template argument. If this template succeeds, this test will be selected and `has_size` will have a method named `test` which returns a `char`. If this is the case, then we know type `U` has a method `size()`!
 
 ```
     template<typename U> static int test(...);
 ```
 
-This is a forward declaration of a template method as a fallback in case the 
-previous test template cannot produce valid code (in which case `T` does *NOT* 
-have a `size()` method!!). 
+This is a forward declaration of a template method as a fallback in case the previous test template cannot produce valid code (in which case `T` does *NOT* have a `size()` method!). 
 
 ```
     static const bool has = sizeof(test<T>(0)) == sizeof(char);
 ```
 
-`has` is created by comparing *theoretical* return value type sizes. Essentially 
-*IF* the method `test<T>` was called (remember, `T` is the type of `has_size`, 
-the object we checking for a `size()` method), then `sizeof()` can determine the 
-byte size of `test<T>`'s return value. 
+`has` is created by comparing *theoretical* return value type sizes. Essentially *IF* the method `test<T>` was called (remember, `T` is the type of `has_size`, the object we checking for a `size()` method), then `sizeof()` can determine the byte size of `test<T>`'s return value. 
 
-Our first `test()` template returns a `char`, while the second returns an `int`, 
-which are guaranteed by the c++ standard to be of *different byte sizes*. 
+Our first `test()` template returns a `char`, while the second returns an `int`, which are guaranteed by the c++ standard to be of *different byte sizes*. 
 
-If `test()` returns a `char`, then `T` has the function `size()`.
+If `test()` returns a `char`, then `T` has the function `size()`. Otherwise if `test()` returns an `int`, then `T` does *NOT* have the function `size()`.
 
-Otherwise if `test()` returns an `int`, then `T` does *NOT* have the function 
-`size()`.
-
-This means we are assigning a value of `true` to `has` if the first `test<T>` is 
-selected (meaning type `T` has a method `size()`!), otherwise we are assigning 
-`false`.
+This means we are assigning a value of `true` to `has` if the first `test<T>` is selected (meaning type `T` has a method `size()`!), otherwise we are assigning `false`.
 
 To use the `has_size` `struct`, we will need a couple more functions:
 ```

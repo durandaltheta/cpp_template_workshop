@@ -41,15 +41,7 @@ size(C& c, std::true_type) {
 template <typename C>
 inline size_t 
 size(C& c, std::false_type) {
-    size_t cnt = 0;
-    auto first = c.begin();
-    auto last = c.end();
-
-    for(; first != last; ++first) { 
-        ++cnt; 
-    }
-
-    return cnt;
+    return std::distance(c.begin(), c.end());
 }
 
 // ----------------------------------------------------------------------------- 

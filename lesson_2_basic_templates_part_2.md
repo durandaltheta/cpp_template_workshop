@@ -146,7 +146,8 @@ When universal references are combined with `std::forward<T>()` you can allow th
 
 template <typename STRING>
 void assign(std::string& lhs, STRING&& rhs) {
-    lhs = std::forward<STRING>(rhs); // us
+    // passes rhs to the assignment function as either an rvalue or lvalue depending on context
+    lhs = std::forward<STRING>(rhs); 
 }
 
 void foo() {

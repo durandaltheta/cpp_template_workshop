@@ -180,22 +180,9 @@ Here are the links to all the lesson notes. We will meet regularly (probably eve
 
 - [Lesson 1: Basic Templates Part 1](lesson_1_basic_templates_part_1.md) -- [exercises](tst/lesson_1_ut.cpp)
 - [Lesson 2: Basic Templates Part 2](lesson_2_basic_templates_part_2.md) -- [exercises](tst/lesson_2_ut.cpp)
-
-### Basic Templates - Part 2
-#### Basic Templates - rvalues and lvalues
-#### Basic Templates - forwarding
-#### Basic Templates - type decay
-#### Basic Templates - inlining and compiler behavior
-#### Exercises
-
-### SFINAE 
-#### SFINAE - Substitution Failure Is Not An Error
-#### SFINAE - specialization selection
-#### SFINAE - method detection
-#### Exercises 
-##### Exercise - size()
-##### Exercise - resize()
-##### Extra Credit - reverse(container)
+- [Lesson 3: Substitution Failure Is Not An
+  Error](lesson_3_substitution_failure_is_not_an_error.md) --
+  [exercises](tst/lesson_3_ut.cpp)
 
 ### Callables
 #### Callables - function pointers, functors, lambdas, std::function and you
@@ -205,7 +192,6 @@ Here are the links to all the lesson notes. We will meet regularly (probably eve
 ##### Exercise - psuedo-std::function functor
 ##### Exercise - lambda argument capturing 
 ##### Extra Credit - detail::filter(func, ItBegin, ItEnd)
-##### Extra Credit - filter_range_to(func, idx, len, container)
 ##### Extra Credit - filter(func, container)
 
 ### Variadics
@@ -215,17 +201,13 @@ Here are the links to all the lesson notes. We will meet regularly (probably eve
 ##### Exercise - detail::advance_group(It0, ..., ItN)
 ##### Exercise - detail::map(func, ItOut, It0Begin, It0End, It1, It2, ..., ItN)
 ##### Exercise - detail::fold(func, out, It0Begin, It0End, It1, It2, ..., ItN)
-##### Extra Credit - detail::map_and(func, ItOut, It0Begin, It0End, It1, It2, ..., ItN)
-##### Extra Credit - detail::map_or(func, ItOut, It0Begin, It0End, It1, It2, ..., ItN)
+##### Extra Credit - detail::all(func, ItOut, It0Begin, It0End, It1, It2, ..., ItN)
+##### Extra Credit - detail::some(func, ItOut, It0Begin, It0End, It1, It2, ..., ItN)
 
 ### Putting it all together 
 #### Building API - broad functionality versus selecting sane defaults
 #### Exercises
-##### Exercise - map_range_to<R>(func, idx, len, container0, ..., containerN)
 ##### Exercise - map(func, container0, ..., containerN)
-##### Exercise - fold_range(func, idx, len, icontainer0, ..., containerN)
 ##### Exercise - fold(func, container0, ..., containerN)
-##### Extra Credit - map_and_range_to<R>(func, idx, len, container0, ..., containerN)
-##### Extra Credit - map_and(func, container0, ..., containerN)
-##### Extra Credit - map_or_range_to<R>(func, idx, len, container0, ..., containerN)
-##### Extra Credit - map_or(func, container0, ..., containerN)
+##### Extra Credit - all(func, container0, ..., containerN)
+##### Extra Credit - some(func, container0, ..., containerN)

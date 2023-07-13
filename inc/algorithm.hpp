@@ -393,8 +393,7 @@ map(F&& f, C&& c, Cs&&... cs) {
 /**
  * @brief perform a calculation on the values stored in a range of indices across one or more containers 
  *
- * Evaluation ends when every element traversible element in container c has 
- * been iterated. 
+ * Evaluation ends when traversible element in container c has been iterated. 
  *
  * The argument function must accept the current value as its first argument, 
  * and one or more elements stored in the current index (the count of elements 
@@ -427,8 +426,7 @@ fold(F&& f, Result&& init, C&& c, Cs&&... cs) {
 /**
  * @brief evaluate function with the elements of containers grouped by index 
  *
- * Evaluation ends when every element traversible element in container c has 
- * been iterated. 
+ * Evaluation ends when traversible element in container c has been iterated. 
  *
  * No value is returned from this function, any changes are side effects of 
  * executing the function.

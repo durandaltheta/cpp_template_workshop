@@ -59,7 +59,7 @@ int sub_2(const int& i) { // const reference to i is an lvalue
 }
 ```
 
-This doesn't capture the *exact* meaning, you may need to refer to the link I posted for greater detail, but in my experience this is a useful mental model, because the utility this concept brings to `c++` programming is tied to the idea of something "about to go out of existence", enabling "rvalue move semantics".
+This doesn't capture the *exact* meaning, you may need to refer to the [value categories](https://en.cppreference.com/w/cpp/language/value_category) page for greater detail, but in my experience this is a useful mental model, because the utility this concept brings to `c++` programming is tied to the idea of something "about to go out of existence", enabling something called "rvalue move semantics".
 
 ### Why are lvalues and rvalues important?
 In `c` there are two ways to store data, by-value (variables) and by-reference (pointers). Variables exist at a memory address, while pointers hold the value of *another* value's memory address.

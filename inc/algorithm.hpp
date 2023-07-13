@@ -181,11 +181,10 @@ public:
     typedef typename C::size_type size_type;
 
     const_slice_of() = delete; // no default initialization
-    const_slice_of(size_t idx, size_t len, const C& c) = delete; // must use const_slice_of
 
     // mutable lvalue constructor
     template <typename C2>
-    const_slice_of(size_t idx, size_t len, C2& c) :
+    const_slice_of(size_t idx, size_t len, const C2& c) :
         m_size(len - idx),
         m_cbegin(std::next(c.cbegin(), idx)),
         m_cend(std::next(m_cbegin, len))

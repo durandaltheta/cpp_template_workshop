@@ -334,21 +334,16 @@ template <typename F, typename C>
 auto
 filter(F&& f, C&& container) {
     sca::vector<typename C::value_type> ret(size(container));
+    size_t cur = 0;
 
-    size_t actual_size = 0;
-    auto first = container.begin();
-    auto last = container.end();
-    auto ret_first = ret.begin();
-
-    for(; first != last; ++first) {
-        if(f(*first)) {
-            copy_or_move(std::is_lvalue_reference<C>(), *ret_first, *first);
-            ++ret_first;
-            ++actual_size;
+    for(auto& e : container) {
+        if(f(e)) {
+            copy_or_move(std::is_lvalue_reference<C>(), ret[cur], e);
+            ++cur;
         }
     }
 
-    ret.resize(actual_size);
+    ret.resize(cur);
     return ret;
 }
 

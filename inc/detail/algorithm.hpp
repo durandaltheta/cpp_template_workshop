@@ -175,18 +175,18 @@ void each(F&& f, IT&& it, IT&& it_end, ITs&&... its) {
 
 // ----------------------------------------------------------------------------
 // all
-template <typename F, typename... CITs>
+template <typename F, typename IT, typename... ITs>
 inline bool
-all(size_t len, F&& f, CITs&&... cits) {
+all(F&& f, IT&& it, IT&& it_end, ITs&&... its) {
     bool ret = true;
 
-    for(size_t i=0; i<len; ++i) {
-        if(!f(*cits...)) {
+    while(it != it_end) {
+        if(!f(*it, *its...)) {
             ret = false;
             break;
         }
 
-        advance_group(++cits...);
+        advance_group(it, its...);
     }
 
     return ret;
@@ -195,18 +195,18 @@ all(size_t len, F&& f, CITs&&... cits) {
 
 // ----------------------------------------------------------------------------
 // some
-template <typename F, typename... CITs>
-inline bool
-some(size_t len, F&& f, CITs&&... cits) {
+template <typename F, typename IT, typename... ITs>
+bool
+some(F&& f, IT&& it, IT&& it_end, ITs&&... its) {
     bool ret = false;
 
-    for(size_t i=0; i<len; ++i) {
-        if(f(*cits...)) {
+    while(it != it_end) {
+        if(f(*it, *its...)) {
             ret = true;
             break;
         }
 
-        advance_group(++cits...);
+        advance_group(it, its...);
     }
 
     return ret;

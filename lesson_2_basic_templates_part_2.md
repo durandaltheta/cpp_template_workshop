@@ -15,13 +15,11 @@ int i_am_also_an_lvalue = i_am_an_lvalue; // both sides are still lvalues!
 ```
 
 Here is a quote about the difference between lvalues and rvalues from computer scientist Scott Meyers (taken from https://isocpp.org/blog/2012/11/universal-references-in-c11-scott-meyers)
-"""
-A precise definition for these terms is difficult to develop (the C++11 standard generally specifies whether an expression is an lvalue or an rvalue on a case-by-case basis), but in practice, the following suffices:
-
-If you can take the address of an expression, the expression is an lvalue.
-If the type of an expression is an lvalue reference (e.g., T& or const T&, etc.), that expression is an lvalue. 
-Otherwise, the expression is an rvalue.  Conceptually (and typically also in fact), rvalues correspond to temporary objects, such as those returned from functions or created through implicit type conversions. Most literal values (e.g., 10 and 5.3) are also rvalues.
-"""
+> A precise definition for these terms is difficult to develop (the C++11 standard generally specifies whether an expression is an lvalue or an rvalue on a case-by-case basis), but in practice, the following suffices:
+> 
+> If you can take the address of an expression, the expression is an lvalue.
+> If the type of an expression is an lvalue reference (e.g., T& or const T&, etc.), that expression is an lvalue.
+> Otherwise, the expression is an rvalue.  Conceptually (and typically also in fact), rvalues correspond to temporary objects, such as those returned from functions or created through implicit type conversions. Most literal values (e.g., 10 and 5.3) are also rvalues.
 
 To further simplify what Scott described you can generalize the two value categories as such:
 

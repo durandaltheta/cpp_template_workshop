@@ -431,7 +431,7 @@ fold(F&& f, Result&& init, C&& c, Cs&&... cs) {
 template <typename F, typename C, typename... Cs>
 void
 each(F&& f, C&& c, Cs&&... cs) {
-    detail::algorithm::each(c.begin(), c.end(), cs.begin()...);
+    detail::algorithm::each(f, c.begin(), c.end(), cs.begin()...);
 }
 
 

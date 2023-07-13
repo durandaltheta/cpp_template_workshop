@@ -134,9 +134,8 @@ void advance_group(IT& it, IT2& it2, ITs&... its) {
 // ----------------------------------------------------------------------------- 
 // map
 template <typename F, typename RIT, typename IT, typename... ITs>
-void map(F&& f, size_t len, RIT&& rit, IT&& it, ITs&&... its) {
-    while(len) {
-        --len;
+void map(F&& f, RIT&& rit, IT&& it, IT&& it_end, ITs&&... its) {
+    while(it != it_end) {
         *rit = f(*it, *its...);
         advance_group(rit, it, its...);
     }
@@ -147,15 +146,16 @@ void map(F&& f, size_t len, RIT&& rit, IT&& it, ITs&&... its) {
 // fold
 template <typename F, 
           typename R,
+          typename IT,
           typename... ITs>
 R
-fold(size_t len, F& f, R&& init, ITs&&... its) {
+fold(F& f, R&& init, IT&& it, IT&& it_end, ITs&&... its) {
     using M = std::decay_t<R>;
     M mutable_state(std::forward<R>(init));
 
-    for(size_t i=0; i<len; ++i) {
-        mutable_state = f(std::move(mutable_state), *its...);
-        advance_group(++its...);
+    while(it != it_end) {
+        mutable_state = f(std::move(mutable_state), *it, *its...);
+        advance_group(it, its...);
     }
 
     return mutable_state;
@@ -165,8 +165,8 @@ fold(size_t len, F& f, R&& init, ITs&&... its) {
 // ----------------------------------------------------------------------------- 
 // each
 template <typename F, typename IT, typename... ITs>
-void each(F&& f, size_t len, IT&& it, ITs&&... its) {
-    for(; len; --len) {
+void each(F&& f, IT&& it, IT&& it_end, ITs&&... its) {
+    while(it != it_end) {
         f(*it, *its...);
         advance_group(it, its...);
     }

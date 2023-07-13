@@ -102,10 +102,7 @@ template <typename Result, typename C>
 auto
 to(C&& c) {
     Result ret(size(c));
-    auto it = ret.begin();
-
     detail::algorithm::range_copy_or_move(std::is_lvalue_reference<C>(), ret.begin(), c.begin(), c.end());
-
     return ret;
 }
 
@@ -292,10 +289,12 @@ template <typename C, typename C2, typename... Cs>
 auto
 group(C&& c, C2&& c2, Cs&&... cs) {
     sca::vector<typename C::value_type> ret(detail::algorithm::sum(size(c), size(c2), size(cs)...));
-    auto cur = ret.begin();
-    auto end = ret.end();
-
-    detail::algorithm::group(cur, end, std::forward<C>(c), std::forward<C2>(c2), std::forward<Cs>(cs)...);
+    detail::algorithm::group(
+            ret.begin(), 
+            ret.end(), 
+            std::forward<C>(c), 
+            std::forward<C2>(c2), 
+            std::forward<Cs>(cs)...);
 
     return ret;
 }
@@ -379,9 +378,8 @@ template <typename F, typename C, typename... Cs>
 auto
 map(F&& f, C&& c, Cs&&... cs) {
     using Result = sca::vector<detail::templates::function_return_type<F,typename C::value_type, typename Cs::value_type...>>;
-    size_t len = size(c);
-    Result ret(len);
-    detail::algorithm::map(len, ret.begin(), c.begin(), cs.begin()...);
+    Result ret(size(c));
+    detail::algorithm::map(ret.begin(), c.begin(), c.end(), cs.begin()...);
     return ret;
 
 }
@@ -415,8 +413,7 @@ map(F&& f, C&& c, Cs&&... cs) {
 template <typename F, typename Result, typename C, typename... Cs>
 auto
 fold(F&& f, Result&& init, C&& c, Cs&&... cs) {
-    size_t len = size(c);
-    return detail::algorithm::fold(f, init, c.begin(), cs.begin()...);
+    return detail::algorithm::fold(f, std::forward<Result>(init), c.begin(), c.end(), cs.begin()...);
 }
 
 
@@ -441,10 +438,7 @@ fold(F&& f, Result&& init, C&& c, Cs&&... cs) {
 template <typename F, typename C, typename... Cs>
 void
 each(F&& f, C&& c, Cs&&... cs) {
-    size_t len = size(c);
-    sca::vector<typename C::value_type> ret(len);
-
-    detail::algorithm::each(len, c.begin(), cs.begin()...);
+    detail::algorithm::each(c.begin(), c.end(), cs.begin()...);
 }
 
 
@@ -470,7 +464,7 @@ each(F&& f, C&& c, Cs&&... cs) {
 template <typename F, typename C, typename... Cs>
 bool 
 all(F&& f, C&& c, Cs&&... cs) {
-    return detail::algorithm::all(size(c), f, c.begin(), cs.begin()...);
+    return detail::algorithm::all(f, c.begin(), c.end(), cs.begin()...);
 }
 
 
@@ -496,7 +490,7 @@ all(F&& f, C&& c, Cs&&... cs) {
 template <typename F, typename C, typename... Cs>
 bool 
 some(F&& f, C&& c, Cs&&... cs) {
-    return detail::algorithm::some(size(c), f, c.begin(), cs.begin()...);
+    return detail::algorithm::some(f, c.begin(), c.end(), cs.begin()...);
 }
 
 }

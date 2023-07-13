@@ -142,7 +142,7 @@ Here is the final magic. All the above code has been careful to be valid at
 inside *other* templates to determine whether an object has a `size()` method or 
 not!
 
-See implementation of `cta::size()` one level up in `inc/algorithm.hpp` for the 
+See implementation of `sca::size()` one level up in `inc/algorithm.hpp` for the 
 code which calls `has_size` and selects which of the final 
 `std::true_type`/`std::false_type` `ct::detail::size()` implementations to call.
 */

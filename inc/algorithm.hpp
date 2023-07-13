@@ -124,7 +124,7 @@ to(C&& c) {
  */
 template<typename C>
 class slice_of {
-    std::shared_ptr<C> m_mem; // place to hold container memory if constructed with an rvalue 
+    std::unique_ptr<C> m_mem; // place to hold container memory if constructed with an rvalue 
     const size_t m_size;
     typename C::iterator m_begin;
     typename C::iterator m_end;
@@ -139,7 +139,7 @@ public:
     // rvalue constructor
     template <typename C2, class = detail::templates::enable_if_rvalue<C2>>
     slice_of(size_t idx, size_t len, C2&& c) :
-        m_mem(std::make_shared<C2>(std::move(c))), // keep container in memory
+        m_mem(new C2(std::move(c))), // keep container in memory
         m_size(len - idx),
         m_begin(std::next(c.begin(), idx)),
         m_end(std::next(m_begin, len))

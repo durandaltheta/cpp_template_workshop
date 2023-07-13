@@ -112,7 +112,7 @@ will be selected and `has_size` will have a method named `test` which returns a
     template<typename U> static int test(...);
 ```
 
-This is a forward declration of a template method as a fallback in case the 
+This is a forward declaration of a template method as a fallback in case the 
 previous test template cannot produce valid code (in which case `T` does *NOT* 
 have a `size()` method!!). 
 

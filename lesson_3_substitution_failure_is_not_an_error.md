@@ -169,6 +169,8 @@ size(C& c, std::false_type) {
     return cnt;
 }
 
+}
+
 /**
  * @brief call C::size() if member exists, else calculate the size using iterators
  * @param c a container 
@@ -178,8 +180,6 @@ template <typename C>
 size_t // size_t is convertable from all std:: container `size_type`s
 size(C&& c) { 
     return detail::algorithm::size(c, std::integral_constant<bool, detail::algorithm::has_size<C>::has>()); 
-}
-
 }
 ```
 

@@ -283,10 +283,10 @@ template <typename F,
 R
 fold(size_t len, F& f, R&& init, ITs&&... its) {
     using M = std::decay_t<R>;
-    M mutable_init(std::forward<R>(init));
+    M mutable_state(std::forward<R>(init));
 
     for(size_t i=0; i<len; ++i) {
-        mutable_state = f(std::move(mutable_init), *its...);
+        mutable_state = f(std::move(mutable_state), *its...);
         advance_group(++its...);
     }
 

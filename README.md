@@ -201,6 +201,7 @@ Here are the links to all the lesson notes. We will meet regularly (probably eve
 ##### Exercise - detail::advance_group(It0, ..., ItN)
 ##### Exercise - detail::map(func, ItOut, It0Begin, It0End, It1, It2, ..., ItN)
 ##### Exercise - detail::fold(func, out, It0Begin, It0End, It1, It2, ..., ItN)
+##### Exercise - each
 ##### Extra Credit - detail::all(func, ItOut, It0Begin, It0End, It1, It2, ..., ItN)
 ##### Extra Credit - detail::some(func, ItOut, It0Begin, It0End, It1, It2, ..., ItN)
 

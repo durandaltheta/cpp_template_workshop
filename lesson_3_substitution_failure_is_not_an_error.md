@@ -179,13 +179,16 @@ size(C& c, std::false_type) {
 template <typename C>
 size_t // size_t is convertable from all std:: container `size_type`s
 size(C&& c) { 
-    return detail::algorithm::size(c, std::integral_constant<bool, detail::algorithm::has_size<C>::has>()); 
+    return detail::size(c, std::integral_constant<bool, detail::algorithm::has_size<C>::has>()); 
 }
 ```
 
 When our `size()` function is called with an argument type `C`, it selects the proper `detail::size()` implementation based on the result of the compile time expression `std::integral_constant<bool, detail::algorithm::has_size<C>::has>()`.
 
 ## Exercises 
-### Exercise - size()
-### Exercise - rvalue slice()
-### Extra Credit - const slice()
+### size()
+### group()
+### rvalue slice()
+### const slice()
+## Extra Credit  
+### mutable slice()

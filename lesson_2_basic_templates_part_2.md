@@ -291,4 +291,9 @@ For almost all developers, the best way to determine your usage of inlining and 
 
 For instance, being able to write libraries which exist as source code and don't require pre-compilation is very useful for distributing code to projects because it is both quicker and easier to install. Another advantage is you can write normal code alongside your templates allowing your code to exist in the same file, rather than creating labyrinthine source and header dependencies and avoids populating your source with early function declarations just to get things to compile.
 
-As a one wise man once said, "keep it simple stupid!"
+As a one wise man once said, "keep it simple stupid!" 
+
+## Exercises 
+### to 
+### reverse
+### group 

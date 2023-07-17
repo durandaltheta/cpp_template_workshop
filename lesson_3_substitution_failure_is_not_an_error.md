@@ -43,7 +43,7 @@ following ways:
 - they have different `template` headers AND/OR
 - they have different function signatures (the order/types of their arguments are unique)
 
-Writing multiple versions of templates in this way is the simplest way to create specialization. In certain cases this allows other users to write their *own* template specializations building on the ones written before. An example of this can be seen in global operator overloads:
+Writing multiple versions of templates in this way is the simplest way to create special case handling. In certain cases this allows other users to write their *own* template specializations building on the ones written before. An example of this can be seen in global operator overloads:
 ```
 struct MyClass {
     MyClass(int i) : m_i(i) { }
@@ -58,7 +58,7 @@ private:
     const int m_i;
 };
 
-// overloading the '+' operator in the case where MyClass is on the right hand side of the operation
+// globally overloading the '+' operator in the case where MyClass is on the right hand side of the operation
 template <typename T>
 int operator+(T&& lhs, MyClass rhs) {
     // use MyClass's internal standard addition operator
@@ -66,9 +66,139 @@ int operator+(T&& lhs, MyClass rhs) {
 }
 ```
 
-## SFINAE specialization selection
+## SFINAE template selection 
+Compiler selection between competing templates in C++ is a bit stranger than you'd expect. When I first started studying this topic I assumed the "first valid definition" the compiler came across to be selected, to match behavior in other parts of the `C` programming language, like linking after compilation (if multiple identical function definitions are provided to the linker, the first valid one the linker comes across will be selected and the others discarded). 
+
+Instead, [as described in this answer](https://stackoverflow.com/questions/15497004/c-template-selection) when the compiler has several valid template candidates available it selects the one that is *most specific*. 
+
+A template which is *more* specific, can be used in *fewer* circumstances. 
+
+This means that templates with more deduced types (like `typename T, typename T2, ..., typename TN`) in it's `template < >` header the *less specialized* (and more generalized) the template is. 
+
+Given the previously defined `add()` template function signatures:
+```
+template <typename T, typename T2> // informally naming this "template 1", it is the *least* specialized
+T add(T t1, T2 t2);
+
+template <typename T>
+std::string add(std::string s, T t); // this is "template 2", a little more specialized because it has only one deduced type `T`
+
+template <typename T>
+std::string add(T t, std::string s); // "template 3" is similar to template 2 but different arguments are deduced
+```
+
+Template 1 is the least specialized, because the compiler has to deduce two types `T` and `T2` rather than a single type or less. Template 2 and 3 are equally specialized from that perspective and will be selected by the compiler whenever it can.
+
+```
+add(1,2); // template 1 selected 
+add(3,std::string(foo)); // template 3 selected
+add(std::string(faa),17); // template 2 selected
+```
+
+However, which one would the compiler think is the most specialized in a scenario where both arguents `a1` and `a2` are `std::string`s?:
+```
+std::cout << add(std::string("hello "), std::string("world!")) << std::endl;
+```
+
+I have not found any documentation on this case. However, in my case the compiler will error because the `error: call of overloaded ‘add(std::string, std::string)’ is ambiguous`.
+
+Instead we can remove ambiguity by creating a non-template, overloaded definition of our function, where *no* types are deduced by the compiler:
+```
+// no template header here, as this is a full function definition
+std::string add(std::string s, std::string s2) { // this function is most specialized and will be selected when `add()`ing two `std::string`s
+    std::cout << "ADD 4" << std::endl;
+    return s + s2;
+}
+```
+
+With this additional definition, the 4th version of `add()` would be selected when `add()`ing two `std::string` arguments:
+```
+#include <iostream>
+#include "my_add_template_header.hpp"
+
+int main() {
+    std::cout << add(std::string("hello "), std::string("world!")) << std::endl;
+    return 0;
+}
+```
+
+Executing this program:
+```
+$ ./a.out
+ADD 4
+$
+```
+
+### Full Template Specialization
+There is a concept in `c++` called [full template specialization](https://en.cppreference.com/w/cpp/language/template_specialization) that is very similar to writing a fully specified non-template version of a function. In practice, a full specialization *is* a fully specified non-template version of a function (just like `std::string add(std::string, std::string)` in the previous section), but it does it in a different way.
+
+Instead of simply writing a new template definition, template specializations write versions of `template` code with the template `<>` types hard coded:
+```
+#include <iostream>
+
+template <typename T, typename T2> // this is the primary template the specializations refer to
+auto // auto keyword can be used to allow the return type to be deduced
+add(T&& t, T2&& t2) {
+    std::cout << "add(T1,T2)" << std::endl;
+    return t + t2;
+}
+
+template <> // This is still a template! Brackets are empty because we are going to hardcode them!
+int add<int,int>(int i, int i2) {
+    std::cout << "add(int,int)" << std::endl;
+    return i + i2;
+}
+
+template <> 
+double add<double,double>(double i, double i2) {
+    std::cout << "add(double,double)" << std::endl;
+    return i + i2;
+}
+
+int main() {
+    std::cout << add(1,2) << std::endl;
+    std::cout << add(3.0,4.0) << std::endl;
+    std::cout << add(3.0,7) << std::endl;
+    return 0;
+}
+```
+
+Executing this program:
+```
+$ ./a.out 
+add(int,int)
+3
+add(double,double)
+7.0
+add(T1,T2)
+10 
+$
+```
+
+Explicit/full template specialization is a complicated topic which is not very useful most of the time, so I will leave further exploration of this topic to the reader.
+
+### Template and Overload Selection
+It should be noted that when all other template rules are accounted for, the compiler follows [overload resolution rules](https://en.cppreference.com/w/cpp/language/overload_resolution), such as when dealing with versions of functions accepting objects with different positions in an inheritence tree. For instance:
+```
+#include <string> 
+
+class MyString : std::string {
+    // just inherit and use everything from parent std::string as-is
+};
+
+MyString add(MyString s1, Mystring s2) { // this is just as specialized as 'std::string add(std::string,std::string)'
+    return s1 + s2;
+}
+```
+
+In the above scenario, because MyString can be cast to a it's parent type `std::string`, the above implementation of `Mystring add(MyString s1, Mystring s2)` is probably unnecessary. However, it will probably be selected by the compiler over `std::string add(std::string,std::string)` should said function be defined.
+
 ## SFINAE method detection
+And now, for something very different.
+
 A very advanced usage of SFINAE can occur when trying to write template specializations which are selected based on whether a templated type has a necessary method. The example I am about to show is [potentially no longer required as of c++20 using constraints](https://en.cppreference.com/w/cpp/language/constraints), however it is extremely useful as a measuring stick for a developer's ability to understand SFINAE in action. 
+
+I found that being forced to mold my brain to these kinds of type considerations helped me understand template code *in general*, so I'm forcing it on all of you as well :).
 
 YOU WILL PROBABLY HAVE TO READ THIS SEVERAL TIMES (AND PRACTICE IN BETWEEN) TO FULLY UNDERSTAND. YOU HAVE BEEN WARNED.
 
@@ -88,7 +218,7 @@ struct has_size {
 }
 ```
 
-Almost all `std` containers have the method `size()`, but not all. Example: `std::forward_list<T>`.
+Almost all `std` containers have the method `size()`, but not all. Example: `std::forward_list<T>`. Since, it might be nice (or necessary) to be able to write an edgecase which can handle containers without the `size()` method we can use the above struct to do detect when the edgecase needs to be selected.
 
 This code abuses compile time constants. Essentially, if a value is `const` then the compiler must be able to know its value *during* compilation. The c++ standards allow values known at compile time to be used inside of template declarations (IE, within the `< >` brackets). In practice, this means we can write limited `if/else` logic to determine *which* template gets used at certain times.
 
@@ -170,12 +300,12 @@ size(C& c, std::false_type) {
 }
 
 }
+```
 
-/**
- * @brief call C::size() if member exists, else calculate the size using iterators
- * @param c a container 
- * @return the size of the container
- */
+Above I have defined the two function overloads we can call to  return the size of a container. The first simply calls `C::size()`, while the second iterates through the container `C` and increments a count. They accept special empty objects `std::true_type` and `std::false_type`, two different types that can be returned by some `c++` standard library template utility functions. 
+
+Finally, to make the compiler choose one the two implementations, we wrap the call to `detail::size()` in another function:
+```
 template <typename C>
 size_t // size_t is convertable from all std:: container `size_type`s
 size(C&& c) { 
@@ -183,7 +313,11 @@ size(C&& c) {
 }
 ```
 
-When our `size()` function is called with an argument type `C`, it selects the proper `detail::size()` implementation based on the result of the compile time expression `std::integral_constant<bool, detail::algorithm::has_size<C>::has>()`.
+When our `size()` function is called with an argument type `C`, it selects the proper `detail::size()` implementation based on the result of the compile time expression `std::integral_constant<bool, detail::algorithm::has_size<C>::has>()`. 
+
+`std::integral_constant<T,T2>` is a `c++` helper struct which has a constexpr method `std::integral_constant<T,T2>::operator()()` which returns either a `std::true_type` if the types `T` and `T2` are identical or `std::false_type` otherwise.
+
+Since said method `std::integral_constant<T,T2>::operator()()` is a `constexpr`, the compiler *always* knows what this return type will be during compilation, allowing us select one of the two implementations of `detail::size()`.
 
 ## Exercises 
 ### size()

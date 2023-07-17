@@ -10,6 +10,7 @@ add_subdirectory(googletest)
 
 add_executable(cpp_template_workshop_ut
     lesson_1_ut.cpp 
+    lesson_3_ut.cpp 
 )
 
 target_compile_features(cpp_template_workshop_ut PRIVATE cxx_std_17)

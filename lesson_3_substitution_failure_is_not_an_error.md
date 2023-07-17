@@ -193,12 +193,12 @@ MyString add(MyString s1, Mystring s2) { // this is just as specialized as 'std:
 
 In the above scenario, because MyString can be cast to a it's parent type `std::string`, the above implementation of `Mystring add(MyString s1, Mystring s2)` is probably unnecessary. However, it will probably be selected by the compiler over `std::string add(std::string,std::string)` should said function be defined.
 
-## SFINAE method detection
-And now, for something very different.
+## SFINAE CHALLENGE SECTION - method detection
+A very advanced usage of SFINAE can occur when trying to write template specializations which are selected based on whether a templated type has a necessary method. 
 
-A very advanced usage of SFINAE can occur when trying to write template specializations which are selected based on whether a templated type has a necessary method. The example I am about to show is [potentially no longer required as of c++20 using constraints](https://en.cppreference.com/w/cpp/language/constraints), however it is extremely useful as a measuring stick for a developer's ability to understand SFINAE in action. 
+The following information is not required to complete the course, however it is extremely useful as a measuring stick for a developer's ability to understand SFINAE in action. 
 
-I found that being forced to mold my brain to these kinds of type considerations helped me understand template code *in general*, so I'm forcing it on all of you as well :).
+The example I am about to show is [potentially no longer required as of c++20 using constraints](https://en.cppreference.com/w/cpp/language/constraints), but again, is useful for understanding SFINAE.
 
 YOU WILL PROBABLY HAVE TO READ THIS SEVERAL TIMES (AND PRACTICE IN BETWEEN) TO FULLY UNDERSTAND. YOU HAVE BEEN WARNED.
 

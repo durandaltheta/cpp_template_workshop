@@ -102,7 +102,7 @@ template <typename Result, typename C>
 auto
 to(C&& c) {
     Result ret(size(c));
-    detail::algorithm::range_copy_or_move(std::is_lvalue_reference<C>(), ret.begin(), c.begin(), c.end());
+    detail::algorithm::range_copy_or_move(std::is_lvalue_reference<C>::type(), ret.begin(), c.begin(), c.end());
     return ret;
 }
 
@@ -312,7 +312,7 @@ template <typename C>
 auto
 reverse(C&& container) {
     sca::vector<typename C::value_type> res(size(container));
-    detail::algorithm::range_copy_or_move(std::is_lvalue_reference<C>(), res.begin(), container.begin(), container.end());
+    detail::algorithm::range_copy_or_move(std::is_lvalue_reference<C>::type(), res.begin(), container.begin(), container.end());
     std::reverse(res.begin(), res.end());
     return res; 
 }
@@ -338,7 +338,7 @@ filter(F&& f, C&& container) {
 
     for(auto& e : container) {
         if(f(e)) {
-            copy_or_move(std::is_lvalue_reference<C>(), ret[cur], e);
+            copy_or_move(std::is_lvalue_reference<C>::type(), ret[cur], e);
             ++cur;
         }
     }

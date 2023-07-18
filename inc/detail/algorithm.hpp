@@ -108,7 +108,7 @@ void group(IT&& cur) {
 
 template <typename IT, typename C, typename... Cs>
 void group(IT&& cur, C&& c, Cs&&... cs) {
-    detail::algorithm::range_copy_or_move(std::is_lvalue_reference<C>(), cur, c.begin(), c.end());
+    detail::algorithm::range_copy_or_move(std::is_lvalue_reference<C>::type(), cur, c.begin(), c.end());
     group(++cur, std::forward<Cs>(cs)...);
 }
 

@@ -10,6 +10,7 @@ add_subdirectory(googletest)
 
 add_executable(cpp_template_workshop_ut
     lesson_1_ut.cpp 
+    lesson_2_ut.cpp 
     lesson_3_ut.cpp 
 )
 

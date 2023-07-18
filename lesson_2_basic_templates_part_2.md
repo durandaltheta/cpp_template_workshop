@@ -30,7 +30,8 @@ int a_variable = 3; // 3 is an rvalue
 
 struct my_struct { };
 
-int my_struct_instance = my_struct(); // the "my_struct()" on the right side of the assignment is an rvalue 
+// the "my_struct()" on the right side of the assignment is an rvalue 
+auto my_struct_instance = my_struct(); 
 
 int another_variable = std::move(a_variable); // std::move() forces a_variable to appear as an rvalue during the assignment
 
@@ -287,9 +288,9 @@ As a side note, [c++ lambdas](https://en.cppreference.com/w/cpp/language/lambda)
 It should be noted that if templates are required as part of a library's API, they are typically *required* to be implemented in a header, at least for any code where a type needs to be deduced by the user code's compiler.
 
 ### Takeway
-For almost all developers, the best way to determine your usage of inlining and templates is *not* to consider the performance beforehand. Except cases where efficiency is a real bottleneck (and even there care must be taken to determine what, when, where and why the bottleneck is occurring), the main advantage to these tools is how much they improve the writing and readability of your code!
+For almost all developers, the best way to determine your usage of inlining and templates is *not* to consider the performance beforehand. Except cases where efficiency is a real bottleneck (and even there care must be taken to determine what, when, where and why the bottleneck is occurring), the main advantage to these tools is how much they improve the writability and readability of your code!
 
-For instance, being able to write libraries which exist as source code and don't require pre-compilation is very useful for distributing code to projects because it is both quicker and easier to install. Another advantage is you can write normal code alongside your templates allowing your code to exist in the same file, rather than creating labyrinthine source and header dependencies and avoids populating your source with early function declarations just to get things to compile.
+For instance, being able to write libraries which exist as source code and don't require pre-compilation is very useful for distributing code to projects because it is both quicker and easier to install. Another advantage is you can write normal code alongside your templates allowing your code to exist in the same file, rather than creating labyrinthine source and header dependencies and avoids populating your source with early function declarations just to get things to compile. The fact these libraries may add some startup overhead (reading slightly larger executable binary files from the disk) is unlikely to be the bottleneck to meet performance standards.
 
 As a one wise man once said, "keep it simple stupid!" 
 

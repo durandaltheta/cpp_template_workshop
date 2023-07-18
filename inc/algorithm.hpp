@@ -102,7 +102,7 @@ template <typename Result, typename C>
 auto
 to(C&& c) {
     Result ret(size(c));
-    detail::algorithm::range_copy_or_move(std::is_lvalue_reference<C>::type(), ret.begin(), c.begin(), c.end());
+    detail::algorithm::range_copy_or_move(typename std::is_lvalue_reference<C>::type(), ret.begin(), c.begin(), c.end());
     return ret;
 }
 
@@ -288,10 +288,10 @@ mslice(size_t idx, size_t len, C&& c) {
 template <typename C, typename C2, typename... Cs>
 auto
 group(C&& c, C2&& c2, Cs&&... cs) {
-    sca::vector<typename C::value_type> ret(detail::algorithm::sum(size(c), size(c2), size(cs)...));
+    using UC = detail::templates::unqualified<C>;
+    sca::vector<typename UC::value_type> ret(detail::algorithm::sum(size(c), size(c2), size(cs)...));
     detail::algorithm::group(
             ret.begin(), 
-            ret.end(), 
             std::forward<C>(c), 
             std::forward<C2>(c2), 
             std::forward<Cs>(cs)...);
@@ -311,8 +311,9 @@ group(C&& c, C2&& c2, Cs&&... cs) {
 template <typename C>
 auto
 reverse(C&& container) {
-    sca::vector<typename C::value_type> res(size(container));
-    detail::algorithm::range_copy_or_move(std::is_lvalue_reference<C>::type(), res.begin(), container.begin(), container.end());
+    using UC = detail::templates::unqualified<C>;
+    sca::vector<typename UC::value_type> res(size(container));
+    detail::algorithm::range_copy_or_move(typename std::is_lvalue_reference<C>::type(), res.begin(), container.begin(), container.end());
     std::reverse(res.begin(), res.end());
     return res; 
 }
@@ -338,7 +339,7 @@ filter(F&& f, C&& container) {
 
     for(auto& e : container) {
         if(f(e)) {
-            copy_or_move(std::is_lvalue_reference<C>::type(), ret[cur], e);
+            copy_or_move(typename std::is_lvalue_reference<C>::type(), ret[cur], e);
             ++cur;
         }
     }

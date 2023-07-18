@@ -1,6 +1,9 @@
 #include <type_traits>
 #include <string>
 #include <iostream>
+#include <vector>
+#include <list>
+#include <forward_list>
 #include "algorithm.hpp"
 #include <gtest/gtest.h> 
 
@@ -81,5 +84,79 @@ TEST(lesson_2, type_decay) {
     {
         bool val = std::is_same<int,std::decay<typeof(ref_i)>::type>::value;
         EXPECT_TRUE(val);
+    }
+}
+
+TEST(lesson_2, to) {
+    std::list<int> l{1,2,3};
+    std::vector<double> v{1.0,2.0,3.0};
+    std::forward_list<std::string> fl{"hello"," world"};
+
+    {
+        auto out = sca::to<std::vector<int>>(l);
+        auto val = std::is_same<std::vector<int>,typeof(out)>::value;
+        EXPECT_TRUE(val);
+    }
+
+    {
+        auto out = sca::to<std::list<double>>(v);
+        auto val = std::is_same<std::list<double>,typeof(out)>::value;
+        EXPECT_TRUE(val);
+    }
+
+    {
+        auto out = sca::to<std::list<std::string>>(fl);
+        auto val = std::is_same<std::list<std::string>,typeof(out)>::value;
+        EXPECT_TRUE(val);
+    }
+}
+
+TEST(lesson_2, reverse) {
+    std::forward_list<int> fl{1,2,3};
+    std::list<std::string> l{"hello", " my", " ragtime", " gal"};
+
+    {
+        auto out = sca::reverse(fl);
+        auto val = std::is_same<std::vector<int>,typeof(out)>::value;
+        EXPECT_TRUE(val);
+        EXPECT_EQ(3, out[0]);
+        EXPECT_EQ(2, out[1]);
+        EXPECT_EQ(1, out[2]);
+    }
+
+    {
+        auto out = sca::reverse(l);
+        auto val = std::is_same<std::vector<std::string>,typeof(out)>::value;
+        EXPECT_TRUE(val);
+        EXPECT_EQ(std::string(" gal"), out[0]);
+        EXPECT_EQ(std::string(" ragtime"), out[1]);
+        EXPECT_EQ(std::string(" my"), out[2]);
+        EXPECT_EQ(std::string("hello"), out[3]);
+    }
+}
+
+TEST(lesson_2, group) {
+    {
+        std::vector<int> v{1,2,};
+        std::list<int> l{3,4};
+        std::forward_list<int> fl{5,6};
+
+        auto out = sca::group(l, fl, v);
+        auto val = std::is_same<std::vector<int>,typeof(out)>::value;
+        EXPECT_TRUE(val);
+        auto cmp = std::vector<int>{3,4,5,6,1,2};
+        EXPECT_EQ(cmp, out);
+    }
+
+    {
+        std::list<std::string> l{"hello"," my"};
+        std::forward_list<std::string> fl{" name", " is"};
+        std::vector<std::string> v{" foo","faa"};
+
+        auto out = sca::group(l, fl, v);
+        auto val = std::is_same<std::vector<std::string>,typeof(out)>::value;
+        EXPECT_TRUE(val);
+        auto cmp = std::vector<std::string>{"hello", " my", " name", " is", " foo", "faa"};
+        EXPECT_EQ(cmp, out);
     }
 }

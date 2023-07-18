@@ -71,14 +71,14 @@ void copy_or_move(std::false_type, DEST& dst, SRC& src) {
 //
 // Think of this as a container and value category aware memcpy() :).
 template <typename DIT, typename IT>
-void range_copy_or_move(std::true_type, DIT& dst_cur, IT& src_cur, IT& src_end) {
+void range_copy_or_move(std::true_type, DIT&& dst_cur, IT&& src_cur, IT&& src_end) {
     for(; src_cur != src_end; ++src_cur, ++dst_cur) {
         *dst_cur = *src_cur;
     }
 }
 
 template <typename DIT, typename IT>
-void range_copy_or_move(std::false_type, DIT& dst_cur, IT& src_cur, IT& src_end) {
+void range_copy_or_move(std::false_type, DIT&& dst_cur, IT&& src_cur, IT&& src_end) {
     for(; src_cur != src_end; ++src_cur, ++dst_cur) {
         *dst_cur = std::move(*src_cur);
     }
@@ -89,13 +89,13 @@ void range_copy_or_move(std::false_type, DIT& dst_cur, IT& src_cur, IT& src_end)
 // sum 
 
 template <typename V>
-size_t sum(V sum, V v) {
-    return sum + v;
+size_t sum(V cur_sum, V v) {
+    return cur_sum + v;
 }
 
 template <typename V, typename... Values>
-size_t sum(V sum, V v, V v2, Values... vs) {
-    return sum(sum + v, v2, vs...);
+size_t sum(V cur_sum, V v, V v2, Values... vs) {
+    return sum(cur_sum + v, v2, vs...);
 }
 
 
@@ -108,8 +108,8 @@ void group(IT&& cur) {
 
 template <typename IT, typename C, typename... Cs>
 void group(IT&& cur, C&& c, Cs&&... cs) {
-    detail::algorithm::range_copy_or_move(std::is_lvalue_reference<C>::type(), cur, c.begin(), c.end());
-    group(++cur, std::forward<Cs>(cs)...);
+    detail::algorithm::range_copy_or_move(typename std::is_lvalue_reference<C>::type(), cur, c.begin(), c.end());
+    group(cur, std::forward<Cs>(cs)...);
 }
 
 

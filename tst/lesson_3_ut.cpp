@@ -160,21 +160,24 @@ TEST(lesson_3, rvalue_slice) {
         auto v = v_base;
         auto begin = v.begin();
         auto end = std::next(begin, 2);
-        EXPECT_TRUE(std::equal(begin, end, sca::slice(std::move(v), 0, 2).begin()));
+        auto sl = sca::slice(std::move(v), 0, 2);
+        EXPECT_TRUE(std::equal(begin, end, sl.begin()));
     }
 
     {
         auto v = v_base;
         auto begin = std::next(v.begin(), 2);
         auto end = std::next(begin, 3);
-        EXPECT_TRUE(std::equal(begin, end, sca::slice(std::move(v), 2, 3).begin()));
+        auto sl = sca::slice(std::move(v), 2, 3);
+        EXPECT_TRUE(std::equal(begin, end, sl.begin()));
     }
 
     {
         auto v = v_base;
         auto begin = std::next(v.begin(), 2);
         auto end = std::next(begin, 3);
-        EXPECT_FALSE(std::equal(begin, end, sca::slice(std::move(v), 3, 3).begin()));
+        auto sl = sca::slice(std::move(v), 3, 3);
+        EXPECT_FALSE(std::equal(begin, end, sl.begin()));
     }
     
     {

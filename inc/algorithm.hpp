@@ -137,7 +137,7 @@ public:
 
     // mutable lvalue constructor
     slice_of(C& c, size_t idx, size_t len) :
-        m_size(len - idx),
+        m_size(len),
         m_begin(std::next(c.begin(), idx)),
         m_end(std::next(m_begin, len))
     { }
@@ -145,8 +145,8 @@ public:
     // rvalue constructor
     slice_of(C&& c, size_t idx, size_t len) :
         m_mem(std::make_shared<UC>(std::move(c))), // keep container in memory
-        m_size(len - idx),
-        m_begin(std::next(c.begin(), idx)),
+        m_size(len),
+        m_begin(std::next(m_mem->begin(), idx)),
         m_end(std::next(m_begin, len))
     { }
 
@@ -183,7 +183,7 @@ public:
 
     // const lvalue constructor
     const_slice_of(const C& c, size_t idx, size_t len) :
-        m_size(len - idx),
+        m_size(len),
         m_cbegin(std::next(c.cbegin(), idx)),
         m_cend(std::next(m_cbegin, len))
     { }
@@ -205,31 +205,7 @@ public:
 };
 
 /**
- * @brief create a `const_slice_of` object which allows iteration of a subset of another container
- *
- * This is the const lvalue reference implementation of the algorithm, returning 
- * a `const slice_of` instead of a `slice_of`. This prevents modification of the 
- * original container, enforcing const references or deep copies.
- *
- * @param idx starting index of the range of values 
- * @param len ending index of the range of values
- * @param c container to take slice of
- * @return a tuple of slices from one or more input containers
- */
-template <typename C>
-auto
-slice(const C& c, size_t idx, size_t len) {
-    return const_slice_of<C>(c, idx, len);
-}
-
-template <typename C>
-auto
-slice(C& c, size_t idx, size_t len) {
-    return const_slice_of<C>(c, idx, len);
-}
-
-/**
- * @brief create a `slice_of` object from an rvalue container which allows iteration over a subset of another container
+ * @brief create a `slice_of` object from a container which allows iteration over a subset of another container
  *
  * This implementation only gets selected when the input container is an rvalue.
  * The `slice_of` object will keep the original container in memory as long as 
@@ -237,13 +213,13 @@ slice(C& c, size_t idx, size_t len) {
  *
  * Typical usecase is to use `auto` as the returned variable's type:
  * ```
- * auto my_slice = sca::slice(0, 13, std::move(my_container));
+ * auto my_slice = sca::slice(my_container, 0, 13);
  * auto my_result = sca::map(my_function, my_slice);
  * ```
  *
  * Or to use the slice inline:
  * ```
- * auto my_result = sca::map(my_function, sca::slice(0, 13, std::move(my_container)));
+ * auto my_result = sca::map(my_function, sca::slice(my_container, 0, 13));
  * ```
  *
  * @param idx starting index of the range of values 
@@ -257,6 +233,19 @@ slice(C&& c, size_t idx, size_t len) {
     return slice_of<C>(std::forward<C>(c), idx, len);
 }
 
+template <typename C>
+auto
+slice(const C& c, size_t idx, size_t len) {
+    return const_slice_of<C>(c, idx, len);
+}
+
+// explicitly catch mutable lvalue reference so compiler doesn't convert to `const C&`
+template <typename C>
+auto
+slice(C& c, size_t idx, size_t len) {
+    return const_slice_of<C>(c, idx, len);
+}
+
 /**
  * @brief create a mutable `slice_of` object which allows iteration of a subset of another container
  *
@@ -265,7 +254,7 @@ slice(C&& c, size_t idx, size_t len) {
  * treated as an rvalue by algorithms causing unexpected swaps. Best usage is to 
  * explicitly save the result of this method as an lvalue before usage:
  * ```
- * auto my_lvalue_slice = sca::mslice(0, 13, my_container);
+ * auto my_lvalue_slice = sca::mslice(my_container, 0, 13);
  * auto my_result = sca::map(my_function, my_lvalue_slice));
  * ```
  *
@@ -278,6 +267,13 @@ template <typename C>
 auto
 mslice(C&& c, size_t idx, size_t len) {
     return slice_of<C>(std::forward<C>(c), idx, len);
+}
+
+// explicitly catch mutable lvalue reference so compiler doesn't convert to `const C&`
+template <typename C>
+auto
+mslice(C& c, size_t idx, size_t len) {
+    return slice_of<C>(c, idx, len);
 }
 
 

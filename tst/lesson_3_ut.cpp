@@ -160,7 +160,10 @@ TEST(lesson_3, rvalue_slice) {
         auto v = v_base;
         auto begin = v.begin();
         auto end = std::next(begin, 2);
-        auto sl = sca::slice(std::move(v), 0, 2);
+
+        // must ensure a copy of the slice exists because slice holds rvalue
+        // moved memory of its source container
+        auto sl = sca::slice(std::move(v), 0, 2); 
         EXPECT_TRUE(std::equal(begin, end, sl.begin()));
     }
 

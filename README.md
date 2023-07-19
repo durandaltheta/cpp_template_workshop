@@ -190,6 +190,8 @@ Here are the links to all the lesson notes. We will meet regularly (probably eve
 - [Lesson 2: Basic Templates Part 2](lesson_2_basic_templates_part_2.md) -- [unit tests](tst/lesson_2_ut.cpp)
 - [Lesson 3: Substitution Failure Is Not An Error](lesson_3_substitution_failure_is_not_an_error.md) --
   [unit tests](tst/lesson_3_ut.cpp)
+- [Lesson 4: Callables](lesson_4_callables.md) -- [unit tests](tst/lesson_4_ut.cpp)
+- [Lesson 5: Variadic Templates](lesson_5_variadic_templates.md) -- [unit tests](tst/lesson_5_ut.cpp)
 
 ### Callables
 #### Callables - function pointers, functors, lambdas, std::function and you

@@ -1,5 +1,5 @@
-# Variadics 
-## What are Variadics?
+# Variadic Templates
+## What does variadic mean?
 In classic `c` a [variadic function](https://en.cppreference.com/w/cpp/utility/variadic) is a function which takes a variable number of arguments. 
 
 Classic `c` variadic functions have several limitations. The first is that they aren't templated, but hard-coded, limiting their flexibility when dealing with arbitrary types. The second is that they are evaluated at runtime rather than compile time, preventing the compiler from inlining operations.
@@ -147,6 +147,10 @@ int main() {
 ## Callables and parameter packs
 Callables can be easily combined with parameter packs:
 ```
+#include <string>
+#include <iostream>
+#include <functional>
+
 template <typename F, typename... As> // declare a template parameter pack 
 auto // allow the compiler to deduce the return type 
 execute_callable_with_args(F&& f, As&&... as) {
@@ -155,6 +159,10 @@ execute_callable_with_args(F&& f, As&&... as) {
 
 int foo() {
     return 3;
+}
+
+struct s {
+    std::string
 }
 
 int main() {

@@ -121,30 +121,30 @@ to(C&& c) {
  */
 template<typename C>
 class slice_of {
-    std::unique_ptr<C> m_mem; // place to hold container memory if constructed with an rvalue 
+    typedef detail::templates::unqualified<C> UC;
+    typedef typename UC::iterator iterator;
+    std::shared_ptr<UC> m_mem; // place to hold container memory if constructed with an rvalue 
     const size_t m_size;
-    typename C::iterator m_begin;
-    typename C::iterator m_end;
+    iterator m_begin;
+    iterator m_end;
 
 public:
-    typedef typename C::value_type value_type;
-    typedef typename C::size_type size_type;
+    typedef typename UC::value_type value_type;
+    typedef typename UC::size_type size_type;
 
     slice_of() = delete; // no default initialization
-    slice_of(size_t idx, size_t len, const C& c) = delete; // must use const_slice_of
+    slice_of(const C& c, size_t idx, size_t len) = delete; // must use const_slice_of
 
-    // rvalue constructor
-    template <typename C2, class = detail::templates::enable_if_rvalue<C2>>
-    slice_of(size_t idx, size_t len, C2&& c) :
-        m_mem(new C2(std::move(c))), // keep container in memory
+    // mutable lvalue constructor
+    slice_of(C& c, size_t idx, size_t len) :
         m_size(len - idx),
         m_begin(std::next(c.begin(), idx)),
         m_end(std::next(m_begin, len))
     { }
 
-    // mutable lvalue constructor
-    template <typename C2>
-    slice_of(size_t idx, size_t len, C2& c) :
+    // rvalue constructor
+    slice_of(C&& c, size_t idx, size_t len) :
+        m_mem(std::make_shared<UC>(std::move(c))), // keep container in memory
         m_size(len - idx),
         m_begin(std::next(c.begin(), idx)),
         m_end(std::next(m_begin, len))
@@ -169,19 +169,20 @@ public:
 /// const variation of slice_of
 template <typename C>
 class const_slice_of {
+    typedef detail::templates::unqualified<C> UC;
+    typedef typename UC::const_iterator const_iterator;
     const size_t m_size;
-    typename C::const_iterator m_cbegin;
-    typename C::const_iterator m_cend;
+    const_iterator m_cbegin;
+    const_iterator m_cend;
 
 public:
-    typedef typename C::value_type value_type;
-    typedef typename C::size_type size_type;
+    typedef typename UC::value_type value_type;
+    typedef typename UC::size_type size_type;
 
     const_slice_of() = delete; // no default initialization
 
-    // mutable lvalue constructor
-    template <typename C2>
-    const_slice_of(size_t idx, size_t len, const C2& c) :
+    // const lvalue constructor
+    const_slice_of(const C& c, size_t idx, size_t len) :
         m_size(len - idx),
         m_cbegin(std::next(c.cbegin(), idx)),
         m_cend(std::next(m_cbegin, len))
@@ -202,6 +203,30 @@ public:
         return m_cend;
     }
 };
+
+/**
+ * @brief create a `const_slice_of` object which allows iteration of a subset of another container
+ *
+ * This is the const lvalue reference implementation of the algorithm, returning 
+ * a `const slice_of` instead of a `slice_of`. This prevents modification of the 
+ * original container, enforcing const references or deep copies.
+ *
+ * @param idx starting index of the range of values 
+ * @param len ending index of the range of values
+ * @param c container to take slice of
+ * @return a tuple of slices from one or more input containers
+ */
+template <typename C>
+auto
+slice(const C& c, size_t idx, size_t len) {
+    return const_slice_of<C>(c, idx, len);
+}
+
+template <typename C>
+auto
+slice(C& c, size_t idx, size_t len) {
+    return const_slice_of<C>(c, idx, len);
+}
 
 /**
  * @brief create a `slice_of` object from an rvalue container which allows iteration over a subset of another container
@@ -226,28 +251,10 @@ public:
  * @param c container to take slice of
  * @return a tuple of slices from one or more input containers
  */
-template <typename C, class = detail::templates::enable_if_rvalue<C>>
-auto
-slice(size_t idx, size_t len, C&& c) {
-    return slice_of<C>(idx, len, std::forward<C>(c));
-}
-
-/**
- * @brief create a `const_slice_of` object which allows iteration of a subset of another container
- *
- * This is the const lvalue reference implementation of the algorithm, returning 
- * a `const slice_of` instead of a `slice_of`. This prevents modification of the 
- * original container, enforcing const references or deep copies.
- *
- * @param idx starting index of the range of values 
- * @param len ending index of the range of values
- * @param c container to take slice of
- * @return a tuple of slices from one or more input containers
- */
 template <typename C>
 auto
-slice(size_t idx, size_t len, const C& c) {
-    return const_slice_of<C>(idx, len, c);
+slice(C&& c, size_t idx, size_t len) {
+    return slice_of<C>(std::forward<C>(c), idx, len);
 }
 
 /**
@@ -269,8 +276,8 @@ slice(size_t idx, size_t len, const C& c) {
  */
 template <typename C>
 auto
-mslice(size_t idx, size_t len, C&& c) {
-    return slice_of<C>(idx, len, std::forward<C>(c));
+mslice(C&& c, size_t idx, size_t len) {
+    return slice_of<C>(std::forward<C>(c), idx, len);
 }
 
 

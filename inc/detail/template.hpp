@@ -16,12 +16,6 @@ namespace templates {
 template <typename T>
 using unqualified = typename std::decay<T>::type;
 
-template <typename T>
-using enable_if_rvalue = typename std::enable_if
-                         <
-                             !std::is_lvalue_reference<T>::value
-                         >::type;
-
 template<typename T>
 struct function_traits;
 

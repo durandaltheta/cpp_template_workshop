@@ -3,6 +3,7 @@
 #include <vector>
 #include <list>
 #include <forward_list>
+#include <algorithm>
 #include "algorithm.hpp"
 #include <gtest/gtest.h> 
 
@@ -97,11 +98,154 @@ TEST(lesson_3, size) {
     EXPECT_EQ(5, sca::size(fl));
 }
 
-TEST(lesson_3, rvalue_slice) {
+TEST(lesson_3, const_lvalue_slice) {
+    const std::vector<int> v_base{1,13,5,78132,7,8};
+
+    {
+        auto v = v_base;
+        auto out = sca::slice(v, 0, 2);
+        auto val = std::is_same<sca::const_slice_of<std::vector<int>>,typeof(out)>::value;
+        EXPECT_TRUE(val);
+    }
+
+    {
+        auto v = v_base;
+        auto begin = v.begin();
+        auto end = std::next(begin, 2);
+        EXPECT_TRUE(std::equal(begin, end, sca::slice(v, 0, 2).begin()));
+    }
+
+    {
+        auto v = v_base;
+        auto begin = std::next(v.begin(), 2);
+        auto end = std::next(begin, 3);
+        EXPECT_TRUE(std::equal(begin, end, sca::slice(v, 2, 3).begin()));
+    }
+
+    {
+        auto v = v_base;
+        auto begin = std::next(v.begin(), 2);
+        auto end = std::next(begin, 3);
+        EXPECT_FALSE(std::equal(begin, end, sca::slice(v, 3, 3).begin()));
+    }
+    
+    {
+        auto v = v_base;
+        auto csl = sca::slice(v, 2, 3);
+
+        EXPECT_EQ(3, csl.size());
+
+        auto it = csl.begin();
+        EXPECT_EQ(5, *it);
+        ++it;
+        EXPECT_EQ(78132, *it);
+        ++it;
+        EXPECT_EQ(7,*it);
+        ++it;
+        EXPECT_EQ(csl.end(), it);
+    }
 }
 
-TEST(lesson_3, lvalue_const_slice) {
+TEST(lesson_3, rvalue_slice) {
+    const std::vector<int> v_base{1,13,5,78132,7,8};
+
+    {
+        auto v = v_base;
+        auto out = sca::slice(std::move(v), 0, 2);
+        auto val = std::is_same<sca::slice_of<std::vector<int>>,typeof(out)>::value;
+        EXPECT_TRUE(val);
+    }
+
+    {
+        auto v = v_base;
+        auto begin = v.begin();
+        auto end = std::next(begin, 2);
+        EXPECT_TRUE(std::equal(begin, end, sca::slice(std::move(v), 0, 2).begin()));
+    }
+
+    {
+        auto v = v_base;
+        auto begin = std::next(v.begin(), 2);
+        auto end = std::next(begin, 3);
+        EXPECT_TRUE(std::equal(begin, end, sca::slice(std::move(v), 2, 3).begin()));
+    }
+
+    {
+        auto v = v_base;
+        auto begin = std::next(v.begin(), 2);
+        auto end = std::next(begin, 3);
+        EXPECT_FALSE(std::equal(begin, end, sca::slice(std::move(v), 3, 3).begin()));
+    }
+    
+    {
+        auto v = v_base;
+        auto sl = sca::slice(std::move(v), 2, 3);
+
+        for(auto& e : sl) {
+            e = e + 1;
+        }
+
+        EXPECT_EQ(3, sl.size());
+
+        auto it = sl.begin();
+        EXPECT_EQ(6, *it);
+        ++it;
+        EXPECT_EQ(78133, *it);
+        ++it;
+        EXPECT_EQ(8,*it);
+        ++it;
+        EXPECT_EQ(sl.end(), it);
+    }
 }
 
 TEST(lesson_3, mutable_slice) {
+    const std::vector<int> v_base{1,13,5,78132,7,8};
+
+    {
+        auto v = v_base;
+        auto out = sca::mslice(v, 0, 2);
+        auto val = std::is_same<sca::slice_of<std::vector<int>>,typeof(out)>::value;
+        EXPECT_TRUE(val);
+    }
+
+    {
+        auto v = v_base;
+        auto begin = v.begin();
+        auto end = std::next(begin, 2);
+        EXPECT_TRUE(std::equal(begin, end, sca::mslice(v, 0, 2).begin()));
+    }
+
+    {
+        auto v = v_base;
+        auto begin = std::next(v.begin(), 2);
+        auto end = std::next(begin, 3);
+        EXPECT_TRUE(std::equal(begin, end, sca::mslice(v, 2, 3).begin()));
+    }
+
+    {
+        auto v = v_base;
+        auto begin = std::next(v.begin(), 2);
+        auto end = std::next(begin, 3);
+        EXPECT_FALSE(std::equal(begin, end, sca::mslice(v, 3, 3).begin()));
+    }
+
+    {
+        auto v = v_base;
+        auto sl = sca::mslice(v, 2, 3);
+
+        for(auto& e : sl) {
+            e = e + 1;
+        }
+
+        EXPECT_EQ(3, sl.size());
+
+        auto it = sl.begin();
+        EXPECT_EQ(6, *it);
+        ++it;
+        EXPECT_EQ(78133, *it);
+        ++it;
+        EXPECT_EQ(8,*it);
+        ++it;
+        EXPECT_EQ(sl.end(), it);
+    }
 }

@@ -18,11 +18,11 @@ It's true the intended audience of this workshop is not c++ beginners. However, 
 > but it’s actually not. It’s only the “hard” way because it’s the way people used to teach things. With the help of this
 > book, you will do the incredibly simple things that all programmers need to do to learn a language:
 > 
-> 1. Go through each exercise.
+> 1. Go through each unit test (written using [googletest](https://google.github.io/googletest/primer.html))
 > 2. Type in each sample exactly.
 > 3. Make it run.
 > 
-> That’s it. This will be very difficult at first, but stick with it. If you go through this book, and do each exercise for
+> That’s it. This will be very difficult at first, but stick with it. If you go through this book, and do each unit test for
 > one or two hours a night, you will have a good foundation for moving onto another book. You might not really learn
 > “programming” from this book, but you will learn the foundation skills you need to start learning the language.
 > This book’s job is to teach you the three most essential skills that a beginning programmer needs to know: Reading
@@ -36,11 +36,11 @@ NOTE: as implied by the `git` argument `--recurse-submodules`, this repo uses su
 
 This repository has github actions setup to automatically build and run unit tests on each branch. Therefore, no local editor and tooling is technically necessary, you can simply edit your branch in the browser and commit most of the time and see the results. It will probably be faster to develop, build and test locally though.
 
-I have provided the solutions for most exercises in the branch `solutions`. It is *intended* that you use this branch as reference. I do not want you to write your own solutions (though I have no problem if you do that on your own time). I literally expect participants to do the following:
+I have provided the solutions for most unit tests in the branch `solutions`. It is *intended* that you use this branch as reference. I do not want you to write your own solutions (though I have no problem if you do that on your own time). I literally expect participants to do the following:
 - open `solutions` branch in their browser on right side of your screen (or other monitor)
 - open your branch in your code editor on the left side of your screen (or other monitor)
-- type *BY HAND* each exercise solution into your branch
-    - *NO COPY PASTE*. The point of this exercise is to force all parts of your brain to engage with the learning process
+- type *BY HAND* each unit test solution into your branch
+    - *NO COPY PASTE*. The point of this unit test is to force all parts of your brain to engage with the learning process
     - much of the code you need to enter will need to be in the `inc/` and `inc/detail` directories, as that is where our template definitions will live 
 - optionally, compile and run the unit tests locally with `cmake . && make cpp_template_2023_ut && tst/cpp_template_workshop_ut`
     - a single unit test can be run with `tst/cpp_template_workshop_ut unit_test_name`
@@ -176,39 +176,38 @@ void launch_my_child_threads() {
 ```
 
 ## Lesson Notes
-Here are the links to all the lesson notes. We will meet regularly (probably every 2 weeks or so) where I will go through the lesson notes and have extended question/answer session (if necessary). We can live debug together if necessary, though I can't promise I can immediately solve every problem on th spot :D. The goal is you should do your exercises sometime in the intervening days, though I won't track your progress (and I don't care! I only care about helping you learn this skill).
+Here are the links to all the lesson notes. We will meet regularly (probably every 2 weeks or so) where I will go through the lesson notes and have extended question/answer session (if necessary). We can live debug together if necessary, though I can't promise I can immediately solve every problem on the spot :D. The goal is you should do your unit tests sometime in the intervening days, though I won't track your progress (and I don't care! I only care about helping you learn this skill).
 
-- [Lesson 1: Basic Templates Part 1](lesson_1_basic_templates_part_1.md) -- [exercises](tst/lesson_1_ut.cpp)
-- [Lesson 2: Basic Templates Part 2](lesson_2_basic_templates_part_2.md) -- [exercises](tst/lesson_2_ut.cpp)
-- [Lesson 3: Substitution Failure Is Not An
-  Error](lesson_3_substitution_failure_is_not_an_error.md) --
-  [exercises](tst/lesson_3_ut.cpp)
+- [Lesson 1: Basic Templates Part 1](lesson_1_basic_templates_part_1.md) -- [unit tests](tst/lesson_1_ut.cpp)
+- [Lesson 2: Basic Templates Part 2](lesson_2_basic_templates_part_2.md) -- [unit tests](tst/lesson_2_ut.cpp)
+- [Lesson 3: Substitution Failure Is Not An Error](lesson_3_substitution_failure_is_not_an_error.md) --
+  [unit tests](tst/lesson_3_ut.cpp)
 
 ### Callables
 #### Callables - function pointers, functors, lambdas, std::function and you
 #### Callables - Techniques - SFINAE Callable argument type detection 
 #### Callables - Techniques - SFINAE Callable return value type detection 
-#### Exercises 
-##### Exercise - psuedo-std::function functor
-##### Exercise - lambda argument capturing 
+#### unit tests 
+##### unit test - psuedo-std::function functor
+##### unit test - lambda argument capturing 
 ##### Extra Credit - detail::filter(func, ItBegin, ItEnd)
 ##### Extra Credit - filter(func, container)
 
 ### Variadics
 #### Variadics - Handling any number of arguments
 #### Variadics - Techniques - variadic rvalue iterator trampolines
-#### Exercises
-##### Exercise - detail::advance_group(It0, ..., ItN)
-##### Exercise - detail::map(func, ItOut, It0Begin, It0End, It1, It2, ..., ItN)
-##### Exercise - detail::fold(func, out, It0Begin, It0End, It1, It2, ..., ItN)
-##### Exercise - each
+#### unit tests
+##### unit test - detail::advance_group(It0, ..., ItN)
+##### unit test - detail::map(func, ItOut, It0Begin, It0End, It1, It2, ..., ItN)
+##### unit test - detail::fold(func, out, It0Begin, It0End, It1, It2, ..., ItN)
+##### unit test - each
 ##### Extra Credit - detail::all(func, ItOut, It0Begin, It0End, It1, It2, ..., ItN)
 ##### Extra Credit - detail::some(func, ItOut, It0Begin, It0End, It1, It2, ..., ItN)
 
 ### Putting it all together 
 #### Building API - broad functionality versus selecting sane defaults
-#### Exercises
-##### Exercise - map(func, container0, ..., containerN)
-##### Exercise - fold(func, container0, ..., containerN)
+#### unit tests
+##### unit test - map(func, container0, ..., containerN)
+##### unit test - fold(func, container0, ..., containerN)
 ##### Extra Credit - all(func, container0, ..., containerN)
 ##### Extra Credit - some(func, container0, ..., containerN)

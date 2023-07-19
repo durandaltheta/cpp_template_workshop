@@ -32,15 +32,13 @@ struct has_size {
 
 // Get the size of an object with its `size()` method
 template <typename C>
-inline size_t 
-size(C& c, std::true_type) { 
+size_t size(C& c, std::true_type) { 
     return c.size(); 
 }
 
 // Get the size of an object the *slow* way by iterating through it
 template <typename C>
-inline size_t 
-size(C& c, std::false_type) {
+size_t size(C& c, std::false_type) {
     return std::distance(c.begin(), c.end());
 }
 
@@ -176,7 +174,7 @@ void each(F&& f, IT&& it, IT&& it_end, ITs&&... its) {
 // ----------------------------------------------------------------------------
 // all
 template <typename F, typename IT, typename... ITs>
-inline bool
+bool
 all(F&& f, IT&& it, IT&& it_end, ITs&&... its) {
     bool ret = true;
 

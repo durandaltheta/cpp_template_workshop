@@ -211,3 +211,6 @@ void transform(InputIt cur, InputIt end, OutputIt out, UnaryOperation f) {
 ```
 
 The above `UnaryOperation` is any Callable which accepts the type stored in the input iterators and whose output can be stored in the output iterator.
+
+## Examining lambdas 
+Lambdas are a type of callable introduced in `c++11` that I've found both extremely useful and often ill-understood by developers generally. To address this deficit of knowledge I have written this optional [lambda primer](lambda_primer.md) as an educational aid for anyone who wants to know more about them.

@@ -216,6 +216,7 @@ Here are the links to all the lesson notes. We will meet regularly (probably eve
 
 ### Putting it all together 
 #### Building API - broad functionality versus selecting sane defaults
+#### Building API - composability
 #### unit tests
 ##### unit test - map(func, container0, ..., containerN)
 ##### unit test - fold(func, container0, ..., containerN)

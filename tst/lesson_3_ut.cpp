@@ -133,7 +133,7 @@ TEST(lesson_3, const_lvalue_slice) {
         auto v = v_base;
         auto csl = sca::slice(v, 2, 3);
 
-        EXPECT_EQ(3, size(csl));
+        EXPECT_EQ(3, sca::size(csl));
 
         auto it = csl.begin();
         EXPECT_EQ(5, *it);
@@ -191,7 +191,7 @@ TEST(lesson_3, rvalue_slice) {
             e = e + 1;
         }
 
-        EXPECT_EQ(3, size(sl));
+        EXPECT_EQ(3, sca::size(sl));
 
         auto it = sl.begin();
         EXPECT_EQ(6, *it);
@@ -243,7 +243,7 @@ TEST(lesson_3, mutable_slice) {
             e = e + 1;
         }
 
-        EXPECT_EQ(3, size(sl));
+        EXPECT_EQ(3, sca::size(sl));
 
         auto it = sl.begin();
         EXPECT_EQ(6, *it);

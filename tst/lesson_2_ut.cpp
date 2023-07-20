@@ -77,12 +77,12 @@ TEST(lesson_2, type_decay) {
     int i = 3;
     const int& ref_i = i;
     {
-        bool val = std::is_same<int,typeof(ref_i)>::value;
+        bool val = std::is_same<int,decltype(ref_i)>::value;
         EXPECT_FALSE(val);
     }
 
     {
-        bool val = std::is_same<int,std::decay<typeof(ref_i)>::type>::value;
+        bool val = std::is_same<int,std::decay<decltype(ref_i)>::type>::value;
         EXPECT_TRUE(val);
     }
 }
@@ -94,19 +94,19 @@ TEST(lesson_2, to) {
 
     {
         auto out = sca::to<std::vector<int>>(l);
-        auto val = std::is_same<std::vector<int>,typeof(out)>::value;
+        auto val = std::is_same<std::vector<int>,decltype(out)>::value;
         EXPECT_TRUE(val);
     }
 
     {
         auto out = sca::to<std::list<double>>(v);
-        auto val = std::is_same<std::list<double>,typeof(out)>::value;
+        auto val = std::is_same<std::list<double>,decltype(out)>::value;
         EXPECT_TRUE(val);
     }
 
     {
         auto out = sca::to<std::list<std::string>>(fl);
-        auto val = std::is_same<std::list<std::string>,typeof(out)>::value;
+        auto val = std::is_same<std::list<std::string>,decltype(out)>::value;
         EXPECT_TRUE(val);
     }
 }
@@ -117,7 +117,7 @@ TEST(lesson_2, reverse) {
 
     {
         auto out = sca::reverse(fl);
-        auto val = std::is_same<std::vector<int>,typeof(out)>::value;
+        auto val = std::is_same<std::vector<int>,decltype(out)>::value;
         EXPECT_TRUE(val);
         EXPECT_EQ(3, out[0]);
         EXPECT_EQ(2, out[1]);
@@ -126,7 +126,7 @@ TEST(lesson_2, reverse) {
 
     {
         auto out = sca::reverse(l);
-        auto val = std::is_same<std::vector<std::string>,typeof(out)>::value;
+        auto val = std::is_same<std::vector<std::string>,decltype(out)>::value;
         EXPECT_TRUE(val);
         EXPECT_EQ(std::string(" gal"), out[0]);
         EXPECT_EQ(std::string(" ragtime"), out[1]);
@@ -142,7 +142,7 @@ TEST(lesson_2, group) {
         std::forward_list<int> fl{5,6};
 
         auto out = sca::group(l, fl, v);
-        auto val = std::is_same<std::vector<int>,typeof(out)>::value;
+        auto val = std::is_same<std::vector<int>,decltype(out)>::value;
         EXPECT_TRUE(val);
         auto cmp = std::vector<int>{3,4,5,6,1,2};
         EXPECT_EQ(cmp, out);
@@ -154,7 +154,7 @@ TEST(lesson_2, group) {
         std::vector<std::string> v{" foo","faa"};
 
         auto out = sca::group(l, fl, v);
-        auto val = std::is_same<std::vector<std::string>,typeof(out)>::value;
+        auto val = std::is_same<std::vector<std::string>,decltype(out)>::value;
         EXPECT_TRUE(val);
         auto cmp = std::vector<std::string>{"hello", " my", " name", " is", " foo", "faa"};
         EXPECT_EQ(cmp, out);

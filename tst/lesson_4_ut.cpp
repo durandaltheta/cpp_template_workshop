@@ -162,4 +162,11 @@ TEST(lesson_4, filter) {
         std::vector<int> expect{3,6,9};
         EXPECT_EQ(expect, sca::filter(skip_every_2, v));
     }
+
+    {
+        auto sl = sca::slice(v,4,4);
+        auto out = sca::filter([](int i) { return i % 2 == 0; }, sl);
+        std::vector<int> expect{6,8};
+        EXPECT_EQ(expect, out);
+    }
 }

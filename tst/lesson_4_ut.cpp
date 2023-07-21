@@ -1,8 +1,6 @@
 #include <string>
 #include <iostream>
 #include <vector>
-#include <list>
-#include <forward_list>
 #include <algorithm>
 #include <functional>
 #include "scalgorithm.hpp"

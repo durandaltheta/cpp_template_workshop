@@ -4,7 +4,7 @@
 #include <vector>
 #include <list>
 #include <forward_list>
-#include "algorithm.hpp"
+#include "scalgorithm.hpp"
 #include <gtest/gtest.h> 
 
 namespace lesson_2_ns {

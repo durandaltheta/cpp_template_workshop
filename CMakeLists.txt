@@ -10,10 +10,11 @@ set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall")
 
 set(SIMPLE_CPLUSPLUS_ALGORITHM_DETAIL_HEADER_FILES 
     ${CMAKE_CURRENT_LIST_DIR}/inc/detail/template.hpp
+    ${CMAKE_CURRENT_LIST_DIR}/inc/detail/algorithm.hpp
 )
 
 set(SIMPLE_CPLUSPLUS_ALGORITHM_HEADER_FILES 
-    ${CMAKE_CURRENT_LIST_DIR}/inc/template.hpp
+    ${CMAKE_CURRENT_LIST_DIR}/inc/scalgorithm.hpp
 )
 
 add_library(sca INTERFACE)

@@ -4,7 +4,7 @@
 #include <list>
 #include <forward_list>
 #include <algorithm>
-#include "algorithm.hpp"
+#include "scalgorithm.hpp"
 #include <gtest/gtest.h> 
 
 struct lesson_3_f : public ::testing::Test {
@@ -250,7 +250,7 @@ TEST(lesson_3, mutable_slice) {
         ++it;
         EXPECT_EQ(78133, *it);
         ++it;
-        EXPECT_EQ(8,*it);
+        EXPECT_EQ(8, *it);
         ++it;
         EXPECT_EQ(sl.end(), it);
     }

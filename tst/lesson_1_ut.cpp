@@ -1,7 +1,7 @@
 #include <string>
 #include <vector>
 #include <list>
-#include "algorithm.hpp"
+#include "scalgorithm.hpp"
 #include <gtest/gtest.h> 
 
 TEST(lesson_1, manual_type_specification) {

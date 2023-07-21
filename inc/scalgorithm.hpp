@@ -337,12 +337,13 @@ reverse(C&& container) {
 template <typename F, typename C>
 auto
 filter(F&& f, C&& container) {
-    sca::vector<typename C::value_type> ret(size(container));
+    typedef detail::templates::unqualified<C> UC;
+    sca::vector<typename UC::value_type> ret(size(container));
     size_t cur = 0;
 
     for(auto& e : container) {
         if(f(e)) {
-            copy_or_move(typename std::is_lvalue_reference<C>::type(), ret[cur], e);
+            detail::algorithm::copy_or_move(typename std::is_lvalue_reference<C>::type(), ret[cur], e);
             ++cur;
         }
     }

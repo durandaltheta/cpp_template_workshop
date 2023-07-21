@@ -87,3 +87,81 @@ TEST(lesson_4, callable_with_argument) {
     EXPECT_EQ(5, execute_unary_callable(lambda_2,2));
     EXPECT_EQ(5, execute_unary_callable(wrapper_2,2));
 }
+
+namespace lesson_4_ns {
+
+std::string function_3(int i) {
+    return std::to_string(i);
+}
+
+template <typename InputIt, typename OutputIt, typename UnaryOperation>
+void transform(InputIt cur, InputIt end, OutputIt out, UnaryOperation f) {
+    while(cur != end) {
+        *out = f(*cur);
+        ++cur;
+        ++out;
+    }
+}
+
+}
+
+TEST(lesson_4, algorithms_and_callables) {
+    const std::vector<int> v{1,2,3,4,5,6,7,8,9,10};
+
+    {
+        std::vector<int> out(sca::size(v));
+        lesson_4_ns::transform(v.begin(), v.end(), out.begin(), [](int i){ return i + 2; });
+        std::vector<int> expect{3,4,5,6,7,8,9,10,11,12};
+        EXPECT_EQ(expect, out);
+    }
+
+    {
+        std::vector<std::string> out(sca::size(v));
+        lesson_4_ns::transform(v.begin(), v.end(), out.begin(), lesson_4_ns::function_3);
+        std::vector<std::string> expect{
+                std::to_string(1),
+                std::to_string(2),
+                std::to_string(3),
+                std::to_string(4),
+                std::to_string(5),
+                std::to_string(6),
+                std::to_string(7),
+                std::to_string(8),
+                std::to_string(9),
+                std::to_string(10)};
+        EXPECT_EQ(expect, out);
+    }
+}
+
+TEST(lesson_4, filter) {
+    const std::vector<int> v{1,2,3,4,5,6,7,8,9,10};
+
+    {
+        auto out = sca::filter([](int i) { return i % 2 == 0; }, v);
+        auto val = std::is_same<std::vector<int>,decltype(out)>::value;
+        std::vector<int> expect{2,4,6,8,10};
+        EXPECT_TRUE(val);
+        EXPECT_EQ(expect, out);
+    }
+    
+    {
+        std::vector<int> expect{1,3,5,7,9};
+        EXPECT_EQ(expect, sca::filter([](int i) { return i % 2 != 0; }, v));
+    }
+
+    {
+        int cnt = 0;
+        auto skip_every_2 = [&cnt](int i) {
+            if(cnt < 2) {
+                ++cnt;
+                return false;
+            } else {
+                cnt = 0;
+                return true;
+            }
+        };
+
+        std::vector<int> expect{3,6,9};
+        EXPECT_EQ(expect, sca::filter(skip_every_2, v));
+    }
+}

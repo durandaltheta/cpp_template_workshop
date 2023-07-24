@@ -194,14 +194,8 @@ Here are the links to all the lesson notes. We will meet regularly (probably eve
 - [Lesson 5: Variadic Templates](lesson_5_variadic_templates.md) -- [unit tests](tst/lesson_5_ut.cpp)
 
 ### Callables
-#### Callables - function pointers, functors, lambdas, std::function and you
 #### Callables - Techniques - SFINAE Callable argument type detection 
 #### Callables - Techniques - SFINAE Callable return value type detection 
-#### unit tests 
-##### unit test - psuedo-std::function functor
-##### unit test - lambda argument capturing 
-##### Extra Credit - detail::filter(func, ItBegin, ItEnd)
-##### Extra Credit - filter(func, container)
 
 ### Variadics
 #### Variadics - Handling any number of arguments

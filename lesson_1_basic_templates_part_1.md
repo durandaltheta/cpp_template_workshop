@@ -47,9 +47,9 @@ $ ./a.out
 $
 ```
 
-Consider the fact that different objects have different implementations of the same function. Both `int` and `std::string` can be "added" together using the `+` operator. Under the hood, the `+` operator is just a function (and `c++` allows you to write these operators for your objects if you desire). 
+Consider the fact `c++` allows different implementations of the same function as long as they follow [overload resolution rules](https://en.cppreference.com/w/cpp/language/overload_resolution). For example, both `int` and `std::string` can be "added" together using the `+` operator. 
 
-Textually, the `+` is just a symbol that happens to have multiple meanings. Templates allow you to use this ambiguity to write 'code' which the compiler can use in multiple circumstances. Take this `template` example using `+`:
+Textually, the `+` is just a symbol that happens to have multiple meanings. Under the hood, the `+` operator is just a function and `c++` allows you overload these operators as you desire. Templates allow you to use this ambiguity to write 'code recipes' which the compiler can use in multiple circumstances. Take this `template` example using `+`:
 ```
 #include <string>
 #include <iostream>
@@ -169,10 +169,10 @@ number: 3.0
 $
 ```
 
-The order that template specializations are written can be quite in important for selecting the proper case. This is a whole topic in and of itself, but it should be noted that the compiler likes to take the *first* valid template it can use when it needs one, so you need to keep in mind your ordering so that you can ensure the proper template is selected.
+The order that template specializations are written can be quite in important for selecting the proper case. This is a whole topic in and of itself, but it should be noted that the compiler likes to take the *most specialized* valid template it can use when it needs one (the template which can be used in the smallest subset of usecases).
 
 ## Default Type Assignment 
-One final point is that templates types can have default values. This is often then case when a library template code supports a primary way of doing something in a template, but leaves the door open for custom overrides. When using a default type assignment the user does not have to specify the type in `<`/`>` brackets. Such is the case with `std::vector`, whose template class declaration is as follows:
+One final point is that templates types can have default values. This is often then case when a library template code supports a primary way of doing something in a template, but leaves the door open for custom overrides. When using a default type assignment the user does not have to specify the type in `<`/`>` brackets if a type is assigned via `=`. Such is the case with `std::vector`, whose template class declaration is as follows:
 ```
 template<
  class T,

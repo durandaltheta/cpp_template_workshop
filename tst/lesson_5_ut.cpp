@@ -124,5 +124,127 @@ TEST(lesson_5, concatenate) {
         auto s = concatenate(3, std::string(" is a number"));
         EXPECT_EQ(std::string("3 is a number"), s);
     }
+}
 
+TEST(lesson_5, detail_advance_group) {
+    std::vector<int> v1{1,2,3};
+    std::vector<int> v2{4,5,6};
+    std::vector<int> v3{7,8,9};
+
+    auto cur_v1 = v1.begin();
+    auto cur_v2 = v2.begin();
+    auto cur_v3 = v3.begin();
+
+    EXPECT_EQ(1, *cur_v1);
+    EXPECT_EQ(4, *cur_v2);
+    EXPECT_EQ(7, *cur_v3);
+
+    sca::detail::algorithm::advance_group(cur_v1, cur_v2, cur_v3);
+
+    EXPECT_EQ(2, *cur_v1);
+    EXPECT_EQ(5, *cur_v2);
+    EXPECT_EQ(8, *cur_v3);
+
+    sca::detail::algorithm::advance_group(cur_v1, cur_v2, cur_v3);
+
+    EXPECT_EQ(3, *cur_v1);
+    EXPECT_EQ(6, *cur_v2);
+    EXPECT_EQ(9, *cur_v3);
+
+    sca::detail::algorithm::advance_group(cur_v1, cur_v2, cur_v3);
+
+    EXPECT_EQ(v1.end(), cur_v1);
+    EXPECT_EQ(v2.end(), cur_v2);
+    EXPECT_EQ(v3.end(), cur_v3);
+}
+
+TEST(lesson_5, each) {
+    std::vector<int> v1{1,2,3};
+    std::vector<int> v2{4,5,6};
+    
+    const std::vector<int> expect{5,7,9};
+    std::vector<int> out(sca::size(v1));
+    auto out_it = out.begin();
+
+    auto add = [&out_it](int a, int b) { 
+        *out_it = a + b; 
+        ++out_it;
+    };
+
+    sca::detail::algorithm::each(add, v1.begin(), v1.end(), v2.begin());
+    EXPECT_EQ(expect, out);
+
+    out = std::vector<int>(sca::size(v1)); // reset our out vector
+    out_it = out.begin(); // reset our iterator
+    
+    // completed algorithm `sca::each()` abstracts the argument iterators
+    sca::each(add, v1, v2);
+    EXPECT_EQ(expect, out);
+    
+    out = std::vector<int>(); // reset and resize our out vector
+   
+    // don't use iterator in this case
+    auto add_v2 = [&out](int a, int b) { 
+        out.push_back(a + b); 
+    };
+    
+    sca::each(add_v2, v1, v2);
+    EXPECT_EQ(expect, out);
+}
+
+TEST(lesson_5, detail_map) {
+    std::vector<int> v1{1,2,3};
+    std::vector<int> v2{4,5,6};
+
+    {
+        std::vector<int> out(sca::size(v1));
+        auto add = [](int a, int b) { return a + b; };
+
+        // internal algorithm `sca::detail::algorithm::map` is similar to 
+        // `std::transform()` except that it can accept iterators to more than 1 
+        // container
+        sca::detail::algorithm::map(add, out.begin(), v1.begin(), v1.end(), v2.begin());
+
+        std::vector<int> expect{5,7,9};
+        EXPECT_EQ(expect, out);
+    }
+
+    {
+        std::vector<std::string> out(sca::size(v1));
+        auto add_and_stringify = [](int a, int b) { return std::to_string(a + b); };
+
+        // internal algorithm `sca::detail::algorithm::map` is similar to 
+        // `std::transform()` except that it can accept iterators to more than 1 
+        // container
+        sca::detail::algorithm::map(add_and_stringify, out.begin(), v1.begin(), v1.end(), v2.begin());
+
+        std::vector<std::string> expect{"5","7","9"};
+        EXPECT_EQ(expect, out);
+    }
+}
+
+TEST(lesson_5, detail_fold) {
+    std::vector<int> v1{1,2,3};
+    std::vector<int> v2{4,5,6};
+
+    {
+        // sum 1 vector at a time
+        auto sum = [](int cur_sum, int new_value) { 
+            return cur_sum + new_value; 
+        };
+        
+        auto out = sca::detail::algorithm::fold(sum, 0, v1.begin(), v1.end());
+        out = sca::detail::algorithm::fold(sum, out, v2.begin(), v2.end());
+        EXPECT_EQ(21, out);
+    }
+
+    {
+        // sum 2 vectors simultaneously
+        auto sum = [](int cur_sum, int new_value_1, int new_value_2) { 
+            return cur_sum + new_value_1 + new_value_2; 
+        };
+
+        auto out = sca::detail::algorithm::fold(sum, 0, v1.begin(), v1.end(), v2.begin());
+        EXPECT_EQ(21, out);
+    }
 }

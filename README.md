@@ -198,15 +198,7 @@ Here are the links to all the lesson notes. We will meet regularly (probably eve
 #### Callables - Techniques - SFINAE Callable return value type detection 
 
 ### Variadics
-#### Variadics - Handling any number of arguments
 #### Variadics - Techniques - variadic rvalue iterator trampolines
-#### unit tests
-##### unit test - detail::advance_group(It0, ..., ItN)
-##### unit test - detail::map(func, ItOut, It0Begin, It0End, It1, It2, ..., ItN)
-##### unit test - detail::fold(func, out, It0Begin, It0End, It1, It2, ..., ItN)
-##### unit test - each
-##### Extra Credit - detail::all(func, ItOut, It0Begin, It0End, It1, It2, ..., ItN)
-##### Extra Credit - detail::some(func, ItOut, It0Begin, It0End, It1, It2, ..., ItN)
 
 ### Putting it all together 
 #### Building API - broad functionality versus selecting sane defaults
@@ -214,5 +206,7 @@ Here are the links to all the lesson notes. We will meet regularly (probably eve
 #### unit tests
 ##### unit test - map(func, container0, ..., containerN)
 ##### unit test - fold(func, container0, ..., containerN)
-##### Extra Credit - all(func, container0, ..., containerN)
-##### Extra Credit - some(func, container0, ..., containerN)
+##### unit test - detail::all(func, ItOut, It0Begin, It0End, It1, It2, ..., ItN)
+##### unit test - detail::some(func, ItOut, It0Begin, It0End, It1, It2, ..., ItN)
+##### unit test - all(func, container0, ..., containerN)
+##### unit test - some(func, container0, ..., containerN)

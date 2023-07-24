@@ -146,7 +146,7 @@ template <typename F,
           typename R,
           typename IT,
           typename... ITs>
-R
+std::decay_t<R>
 fold(F& f, R&& init, IT&& it, IT&& it_end, ITs&&... its) {
     using M = std::decay_t<R>;
     M mutable_state(std::forward<R>(init));

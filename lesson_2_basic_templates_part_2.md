@@ -77,7 +77,7 @@ printf("%s", str_ptr); // prints "hello world"
 
 The introduction of `rvalue`s to `c++` enables a higher order "in-between copy" called "swapping" using "rvalue move semantics". 
 
-An `std::string` contains an allocated buffer of characters. When the `std::string` is destroyed or reassigned it deallocates it's internal buffer of characters (and when reassigning allocates a *new* buffer to hold the new values). This means that a standard copy between named string variables is slower (often *much* slower) than copying using `char *` pointers. 
+An `std::string` contains an allocated buffer of characters. When the `std::string` is destroyed or reassigned it deallocates it's internal buffer of characters (and when reassigning allocates a *new* buffer to hold the new values). This means that a standard copy between named `std::string` variables is slower (often *much* slower) than copying using `char *` pointers. 
 ```
 std::string s1 = "hello world"; // this is a deep copy, each char must be copied into s1's character buffer
 std::string s2 = s1; // this is also a deep copy

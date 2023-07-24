@@ -139,9 +139,9 @@ Forwarding is the method of taking either an `rvalue` or `lvalue` passed to a me
 
 A call to `std::move()` will transform it's argument into an `rvalue` reference. A call to `std::forward<T>()` will instead *persist* the current value category of its argument, rather than allowing it to be blindly converted to an `lvalue` reference (this means that `rvalue`s will stay `rvalue`s and `lvalue`s will stay `lvalue`s).
 
-As stated previously, the double ampersand `&&` has a special meaning in templates. `&&` usage in a template means the template should accept *either* `lvalue`s or `rvalue`s. This version of `&&` is colloqually known as a [universal reference](https://isocpp.org/blog/2012/11/universal-references-in-c11-scott-meyers). A universal reference is a way of telling the compiler that your template accepts *some* kind of reference as an argument, but it needs to type deduce what that type of reference actually is when the template is invoked.
+As stated previously, the double ampersand `&&` has a special meaning in templates. `&&` usage in a template means the template should accept *either* `lvalue`s or `rvalue`s. This version of `&&` is colloqually known as a [universal reference](https://isocpp.org/blog/2012/11/universal-references-in-c11-scott-meyers). A universal reference is a way of telling the compiler that your template accepts *some* kind of reference as an argument, but it needs to deduce what the reference type actually is when the template is invoked.
 
-When universal references are combined with `std::forward<T>()` you can allow the template to pass a reference without change to another function. Here's an example of forwarding an argument reference to an `std::string`'s assignment operator (which have different implementations for `rvalue`s and `lvalue`s!):
+When universal references are combined with `std::forward<T>()` you can write a template which can pass a reference without change to another function. Here's an example of forwarding an argument reference to an `std::string`'s assignment operator (which have different implementations for `rvalue`s and `lvalue`s!):
 ```
 #include <string>
 
@@ -180,7 +180,7 @@ int main() {
 }
 ```
 
-The takeaway here is that to write efficient template code for all usecases the author may need to incorporate universal references and forwarding. However, it is often *much* easier to write and maintain template code with universal references and forwarding which does this than be forced to write `lvalue` AND `rvalue` implementations of methods (where they are required).
+The takeaway here is that to write efficient template code for all usecases the author may need to incorporate universal references and forwarding. However, it is often *much* easier to write and maintain template code utilizing universal references and forwarding rather than be forced to write `lvalue` AND `rvalue` implementations of methods (where they are required).
 
 ### Universal References in Template Objects
 An important note here is that the universal reference treatment of the double ampersand `&&` *ONLY* takes place in top level templates. If you are writing a template `struct` or `class`, and you want to write a template method that uses universal references, you must add an additional `template` header to your method:
@@ -223,8 +223,8 @@ std::decay_t<T> add_three(T&& t) {
 int main() {
     int a = 3;
     const int b = 2;
-    std::cout << add_three(a) << std::endl;
-    std::cout << add_three(b) << std::endl; // still works because the final return type is just 'int'
+    std::cout << add_three(a) << std::endl; // returns `int`
+    std::cout << add_three(b) << std::endl; // still returns `int`, not `const int`
     return 0; 
 }
 ```
@@ -238,9 +238,9 @@ $
 ``` 
 
 ## Compiler Behavior with Templates and Inlining
-[Inlining in c++](https://en.cppreference.com/w/cpp/language/inline) is the language feature for writing code which will can have it's body be "copy pasted" by the compiler wherever it is called in code instead of actually triggering a new function call to be put on the stack. It is very similar to a [macro in c](https://gcc.gnu.org/onlinedocs/cpp/Macros.html), with the distinction that inlining in `c++` is actually at the discretion of the compiler (the `inline` keyword is just a suggestion). There's also varous edgecases around efficiency and compilation which requires functions to be a true function on the stack rather than an effective text copy/paste, which the compiler will handle internally. 
+[Inlining in c++](https://en.cppreference.com/w/cpp/language/inline) is the language feature for writing code which can be "copy pasted" by the compiler wherever it is called in code instead of actually triggering a new function call on the stack. Inlining is a useful compiler technique because setting up new function calls on the stack during runtime has its own computation cost, in addition to the cost of actually *executing* the function. 
 
-Inlining is a useful compiler technique because setting up new function calls on the stack during runtime has its own computation cost, in addition to the cost of actually *executing* the function. 
+Inlining is very similar to [macros in c](https://gcc.gnu.org/onlinedocs/cpp/Macros.html), with the distinction that inlining in `c++` is actually at the discretion of the compiler (the `inline` keyword is just a suggestion). Additionally, `inline` code is namespace aware, unlike macros which blindly paste text. There's also varous edgecases around efficiency and compilation which requires `inline` functions to be a true function on the stack rather than an effective text copy/paste, which the compiler will handle internally. 
 
 Inline functions and templates are very similar concepts. Their main distinction to the developer is that templates have the ability to be generated for different types (`std::string`, `int`, `my_object`, etc.), while inline functions are just normal functions with the `inline` keyword prepended to their definition:
 ```
@@ -292,6 +292,6 @@ It should be noted that if templates are required as part of a library's API, th
 ### Takeway
 For almost all developers, the best way to determine your usage of inlining and templates is *not* to consider the performance beforehand. Except cases where efficiency is a real bottleneck (and even there care must be taken to determine what, when, where and why the bottleneck is occurring), the main advantage to these tools is how much they improve the writability and readability of your code!
 
-For instance, being able to write libraries which exist as source code and don't require pre-compilation is very useful for distributing code to projects because it is both quicker and easier to install. Another advantage is you can write normal code alongside your templates allowing your code to exist in the same file, rather than creating labyrinthine source and header dependencies and avoid populating your source with early function declarations just to get things to compile. The fact these libraries may add some startup overhead (reading slightly larger executable binary files from the disk) is unlikely to be the bottleneck to meet performance standards.
+Being able to write libraries which don't require pre-compilation is very useful for distributing code to projects because it is both quicker and easier to install. Another advantage is you can write normal code alongside your templates allowing *all relevant* code to exist in the same file, rather than creating labyrinthine source and header dependencies and avoid populating your source with early function declarations just to get things to compile. The fact these libraries may add some startup overhead (reading slightly larger executable binary files from the disk) is unlikely to be the bottleneck to meet performance standards *in most cases*.
 
 As a one wise man once said, "keep it simple stupid!" 

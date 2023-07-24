@@ -106,6 +106,7 @@ void transform(InputIt cur, InputIt end, OutputIt out, UnaryOperation f) {
 TEST(lesson_4, algorithms_and_callables) {
     const std::vector<int> v{1,2,3,4,5,6,7,8,9,10};
 
+    // transform int via increment
     {
         std::vector<int> out(sca::size(v));
         lesson_4_ns::transform(v.begin(), v.end(), out.begin(), [](int i){ return i + 2; });
@@ -113,6 +114,7 @@ TEST(lesson_4, algorithms_and_callables) {
         EXPECT_EQ(expect, out);
     }
 
+    // transform int to strings
     {
         std::vector<std::string> out(sca::size(v));
         lesson_4_ns::transform(v.begin(), v.end(), out.begin(), lesson_4_ns::function_3);
@@ -134,6 +136,7 @@ TEST(lesson_4, algorithms_and_callables) {
 TEST(lesson_4, filter) {
     const std::vector<int> v{1,2,3,4,5,6,7,8,9,10};
 
+    // simple filter
     {
         auto out = sca::filter([](int i) { return i % 2 == 0; }, v);
         auto val = std::is_same<std::vector<int>,decltype(out)>::value;
@@ -141,12 +144,14 @@ TEST(lesson_4, filter) {
         EXPECT_TRUE(val);
         EXPECT_EQ(expect, out);
     }
-    
+   
+    // inline lambda filter
     {
         std::vector<int> expect{1,3,5,7,9};
         EXPECT_EQ(expect, sca::filter([](int i) { return i % 2 != 0; }, v));
     }
 
+    // multiline filter function
     {
         int cnt = 0;
         auto skip_every_2 = [&cnt](int i) {
@@ -163,8 +168,17 @@ TEST(lesson_4, filter) {
         EXPECT_EQ(expect, sca::filter(skip_every_2, v));
     }
 
+    // filter slice
     {
-        std::vector<std::string> s{"hello", "1", " my", "2", " name", "3", " is", "4", " regret"};
+        auto sl = sca::slice(v,4,4);
+        auto out = sca::filter([](int i) { return i % 2 == 0; }, sl);
+        std::vector<int> expect{6,8};
+        EXPECT_EQ(expect, out);
+    }
+
+    // complex string filter
+    {
+        std::vector<std::string> s{"hello", "1", " my", "2", " name", "3", " is", "4", " regret", ""};
 
         auto ascii_filter_non_alphabet_or_space = [](std::string& s) {
             auto is_space = [](const char c){ return c == 32; };
@@ -174,14 +188,9 @@ TEST(lesson_4, filter) {
         };
 
         auto out = sca::filter(ascii_filter_non_alphabet_or_space, s);
+        auto val = std::is_same<std::vector<std::string>,decltype(out)>::value;
         std::vector<std::string> expect{"hello", " my", " name", " is", " regret"};
-        EXPECT_EQ(expect, out);
-    }
-
-    {
-        auto sl = sca::slice(v,4,4);
-        auto out = sca::filter([](int i) { return i % 2 == 0; }, sl);
-        std::vector<int> expect{6,8};
+        EXPECT_TRUE(val);
         EXPECT_EQ(expect, out);
     }
 }

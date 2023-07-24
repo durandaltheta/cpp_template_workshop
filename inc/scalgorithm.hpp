@@ -43,12 +43,12 @@
  * mslice() - return an object capable of iterating a mutable subset of a container
  * group() - return a container composed of all elements of all argument containers
  * reverse() - return a container whose elements are in reverse order of input container
- * filter() - return a container filled with only elements which return true when applied to a function
- * map() - return the results of applying all elements of argument containers to a function
+ * filter() - return a container filled with only elements which return true when applied to a Callable
+ * map() - return the results of applying all elements of argument containers to a Callable
  * fold() - calculate a result after iterating through all elements of argument containers
- * each() - apply a function to every element of a container
- * all() - return true if all elements return true when applied to a function
- * some() - return true if at least one element returns true when applie to a function
+ * each() - apply a Callable to every element of a container
+ * all() - return true if all elements return true when applied to a Callable
+ * some() - return true if at least one element returns true when applied to a Callable
  */
 
 namespace sca { // simple cpp algorithm

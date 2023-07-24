@@ -117,7 +117,7 @@ std::function<int()> high_level_func() {
 
 The main purpose of passing lambdas around is as a method of passing state. Instead of passing around 10 variables from 5 functions, some of the calculation can be done in one place and passed to another function that knows what is needed to complete the calculation.
 
-This is effectively a form of data hiding that is even more private than structs and objects. That is, when passing data around via structures all parties that read the data must include relevant headers for that structure that describes its members, typically public and private. This is not the case with lambdas and `std::function`, whose internals are completely unknown to code which uses them, minimizing the amount of boilerplate and knowledge required to use them.
+This is effectively a form of data hiding that is even more private than structs and objects. That is, when passing data around via `class` or `struct` objects all parties that read the data must include relevant headers for that structure that describes its members, typically public and private. This is not the case with lambdas and `std::function`, whose internals are completely unknown to code which uses them, minimizing the amount of boilerplate and knowledge required to use them.
 
 In the case of lambda captures, what is being passed is much more specialized, and the recipient doesn't need to know *anything* about the internals of the function other than its return type and argument types, making message passing and interfaces much easier and even more of black box. Thus:
 

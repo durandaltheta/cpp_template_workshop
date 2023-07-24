@@ -105,7 +105,8 @@ I have not found any documentation on this case. However, in my case the compile
 Instead we can remove ambiguity by creating a non-template, overloaded definition of our function, where *no* types are deduced by the compiler:
 ```
 // no template header here, as this is a full function definition
-std::string add(std::string s, std::string s2) { // this function is most specialized and will be selected when `add()`ing two `std::string`s
+// this function is most specialized and will be selected when `add()`ing two `std::string`s
+std::string add(std::string s, std::string s2) {
     std::cout << "ADD 4" << std::endl;
     return s + s2;
 }

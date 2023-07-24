@@ -210,4 +210,72 @@ hello world
 $
 ```
 
-The above pattern allows for very flexible algorithm construction.
+The above pattern allows for very flexible algorithm construction. 
+
+## Iterator group advancement
+One pattern that is useful in advanced algorithms is the ability to iterate over multiple containers simultaneously. This can be done simply via parameter packs and recursive template calls (which will be trivially inlined):
+```
+// explicitly accept iterators as references
+template <typename IT>
+void advance_group(IT& it) { // process the final iterator
+    ++it; // advance the iterator by reference
+}
+
+template <typename IT, typename IT2, typename... ITs>
+void advance_group(IT& it, IT2& it2, ITs&... its) {
+    ++it; // advance the iterator by reference
+    advance_group(it2, its...); // advance the remaining iterators
+}
+```
+
+This allows for the creation of algorithms which execute a Callable on any number of container elements:
+```
+namespace detail {
+
+template <typename F, typename IT, typename... ITs>
+void each(F&& f, IT&& it, IT&& it_end, ITs&&... its) {
+    while(it != it_end) { // while we haven't reached the end of the current container
+        f(*it, *its...); // f is executed with the current element in each container
+        advance_group(it, its...); // advance the iterators
+    }
+}
+
+}
+```
+
+We can use another template to abstract the usage of iterators:
+```
+#include <vector>
+#include <iostream>
+// include our detail::each 
+
+template <typename F, typename C, typename... Cs>
+void
+each(F&& f, C&& c, Cs&&... cs) {
+    detail::algorithm::each(f, c.begin(), c.end(), cs.begin()...);
+}
+
+int main() {
+    std::vector<int> v1{1,2,3};
+    std::vector<int> v2{4,5,6};
+    std::vector<int> out;
+
+    auto add = [&out](int a, int b){ out.push_back(a + b); };
+    each(add, v1, v2);
+
+    for(auto& e : out) {
+        std::cout << e << std::endl;
+    }
+
+    return 0;
+}
+```
+
+Executing this program:
+```
+$ ./a.out 
+5
+7
+9
+$
+```

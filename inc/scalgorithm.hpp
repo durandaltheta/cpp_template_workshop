@@ -7,8 +7,6 @@
 #include <functional>
 #include <iterator>
 #include <memory>
-#include <tuple>
-#include <optional>
 
 /**
  * A NOTE ON API DESIGN
@@ -431,7 +429,7 @@ private:
  * @param idx starting index of the range of values 
  * @param len ending index of the range of values
  * @param c container to take slice of
- * @return a tuple of slices from one or more input containers
+ * @return a slice object capable of iterating a given container
  */
 template <typename C>
 auto
@@ -467,7 +465,7 @@ slice(C& c, size_t idx, size_t len) {
  * @param idx starting index of the range of values 
  * @param len ending index of the range of values
  * @param c container to take slice of
- * @return a tuple of slices from one or more input containers
+ * @return a slice object capable of iterating a given container
  */
 template <typename C>
 auto

@@ -102,11 +102,11 @@ Finally, to make the compiler choose one the two implementations, we wrap the ca
 template <typename C>
 size_t // size_t is convertable from all std:: container `size_type`s
 size(C&& c) { 
-    return detail::size(c, std::integral_constant<bool, detail::algorithm::has_size<C>::has>()); 
+    return detail::size(c, std::integral_constant<bool, detail::has_size<C>::has>()); 
 }
 ```
 
-When our `size()` function is called with an argument type `C`, it selects the proper `detail::size()` implementation based on the result of the compile time expression `std::integral_constant<bool, detail::algorithm::has_size<C>::has>()`. 
+When our `size()` function is called with an argument type `C`, it selects the proper `detail::size()` implementation based on the result of the compile time expression `std::integral_constant<bool, detail::has_size<C>::has>()`. 
 
 `std::integral_constant<T,T2>` is a `c++` helper struct which has a `constexpr` method `std::integral_constant<T,T2>::operator()()` which returns either a `std::true_type` if the types `T` and `T2` are identical or `std::false_type` otherwise.
 

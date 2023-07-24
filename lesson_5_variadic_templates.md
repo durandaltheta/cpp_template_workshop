@@ -65,6 +65,9 @@ void faa(A&& a, As&&... as) {
 }
 ```
 
+To be specific, putting the `typename...` last is a requirement for class templates, but for function templates, parameter packs can appear anywhere.
+
+
 ## Processing parameter pack elements with recursive templates
 In the ideal case the developer will not have to process the individual elements of a parameter pack, because the `as...` variable will resolve to the actual arguments that the compiler can understand.
 

@@ -180,7 +180,7 @@ int main() {
 }
 ```
 
-The takeaway here is that to write efficient template code for all usecases the author may need to incorporate universal references and forwarding. However, it is often *much* easier to write and maintain template code with universal references and forwarding which does this than be forced to write `lvalue` AND `rvalue` implementations of methods (where they are required).
+The takeaway here is that to write efficient template code for all usecases the author may need to incorporate universal references and forwarding. However, it is often *much* easier to write and maintain template code utilizing universal references and forwarding rather than be forced to write `lvalue` AND `rvalue` implementations of methods (where they are required).
 
 ### Universal References in Template Objects
 An important note here is that the universal reference treatment of the double ampersand `&&` *ONLY* takes place in top level templates. If you are writing a template `struct` or `class`, and you want to write a template method that uses universal references, you must add an additional `template` header to your method:

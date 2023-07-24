@@ -141,7 +141,7 @@ A call to `std::move()` will transform it's argument into an `rvalue` reference.
 
 As stated previously, the double ampersand `&&` has a special meaning in templates. `&&` usage in a template means the template should accept *either* `lvalue`s or `rvalue`s. This version of `&&` is colloqually known as a [universal reference](https://isocpp.org/blog/2012/11/universal-references-in-c11-scott-meyers). A universal reference is a way of telling the compiler that your template accepts *some* kind of reference as an argument, but it needs to deduce what the reference type actually is when the template is invoked.
 
-When universal references are combined with `std::forward<T>()` you can allow the template to pass a reference without change to another function. Here's an example of forwarding an argument reference to an `std::string`'s assignment operator (which have different implementations for `rvalue`s and `lvalue`s!):
+When universal references are combined with `std::forward<T>()` you can write a template which can pass a reference without change to another function. Here's an example of forwarding an argument reference to an `std::string`'s assignment operator (which have different implementations for `rvalue`s and `lvalue`s!):
 ```
 #include <string>
 

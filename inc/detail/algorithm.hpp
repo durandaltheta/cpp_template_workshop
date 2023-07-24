@@ -7,9 +7,6 @@
 #include <tuple>
 #include <any>
 
-// local 
-#include "template.hpp"
-
 /**
  * This where code goes which should *not* be directly included by a user, but
  * is needed by other code included by a user.
@@ -20,42 +17,16 @@ namespace detail {
 namespace algorithm {
 
 // ----------------------------------------------------------------------------- 
-// type traits
-
-template<typename T>
-struct function_traits;
-
-// get access to more type information about a function, IE:
-//
-// typedef std::function<R(A,B)> fun;
-// 
-// function_traits<fun>::arg<1>::type
-template<typename R, typename... Args>
-struct function_traits<std::function<R(Args...)>>
-{
-    static const size_t nargs = sizeof...(Args);
-
-    typedef std::function<R(Args...)> function_type;
-    typedef R result_type;
-
-    template <std::size_t i>
-    struct arg
-    {
-        typedef typename std::tuple_element<i, std::tuple<Args...>>::type type;
-    };
-}; 
+// callable_return_type 
 
 // handle pre and post c++17 
 #if __cplusplus >= 201703L
 template <typename F, typename... Ts>
-using function_return_type = typename std::invoke_result<std::decay_t<F>,Ts...>::type;
+using callable_return_type = typename std::invoke_result<std::decay_t<F>,Ts...>::type;
 #else 
 template <typename F, typename... Ts>
-using function_return_type = typename std::result_of<std::decay_t<F>(Ts...)>::type;
+using callable_return_type = typename std::result_of<std::decay_t<F>(Ts...)>::type;
 #endif
-
-template <typename F, std::size_t i>
-using function_arg_type = typename function_traits<F>::template arg<i>::type; 
 
 // -----------------------------------------------------------------------------
 // size  

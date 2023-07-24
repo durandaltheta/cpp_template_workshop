@@ -374,7 +374,14 @@ filter(F&& f, C&& container) {
 template <typename F, typename C, typename... Cs>
 auto
 map(F&& f, C&& c, Cs&&... cs) {
-    using Result = sca::vector<detail::algorithm::function_return_type<F,typename C::value_type, typename Cs::value_type...>>;
+    // get the return type of `f`
+    using FReturnType = detail::algorithm::callable_return_type<
+        F,
+        typename C::value_type, 
+        typename Cs::value_type...>;
+
+    // determine the return type of this function
+    using Result = sca::vector<FReturnType>;
     Result ret(size(c));
     detail::algorithm::map(ret.begin(), c.begin(), c.end(), cs.begin()...);
     return ret;

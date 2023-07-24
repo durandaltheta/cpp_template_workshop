@@ -74,7 +74,7 @@ $ ./a.out
 $
 ```
 
-A function which accepts another function is known as a [higher order function](https://en.wikipedia.org/wiki/Higher-order_function). Higher order functions are very powerful tools (especially when written as templates!) for encapsulating executable behavior. For instance, a library can be written when accepts a user Callable that it promises to call when certain conditions are met (a callback). With templated Callables said API can be very flexible instead of rigorously strict.
+A function which accepts another function is known as a [higher order function](https://en.wikipedia.org/wiki/Higher-order_function). Higher order functions are very powerful tools (especially when written as templates!) for encapsulating executable behavior. For instance, a library function can be written that accepts a user Callable as an argument that the library function promises to call when certain conditions are met (a callback). With templated Callables said API can be very flexible instead of rigorously strict.
 
 ## Callable arguments
 SFINAE also allows the ability to pass arguments to an argument function:

@@ -7,7 +7,7 @@ Practically speaking, this just means that lambdas are functions that are also v
 [capture0, ..., captureN](arg0, ..., argN){ statement0; ...; statmentN; };
 ```
 
-Lambdas can be stored as a variable using their real type (specified by the compiler) using auto:
+Lambdas can be stored as a variable using their real type (specified by the compiler) using keyword `auto`:
 ```
 auto my_lambda = [capture0, ..., captureN](arg0, ..., argN){ statement0; ...; statmentN; };
 ```

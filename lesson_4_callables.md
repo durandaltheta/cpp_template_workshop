@@ -210,7 +210,75 @@ void transform(InputIt cur, InputIt end, OutputIt out, UnaryOperation f) {
 }
 ```
 
-The above `UnaryOperation` is any Callable which accepts the type stored in the input iterators and whose output can be stored in the output iterator.
+The above `UnaryOperation` is any Callable which accepts the type stored in the input iterators and whose output can be stored in the output iterator:
+```
+#include <algorithm>
+#include <iostream>
+#include <string>
+
+int add_2(int i) {
+    return i + 2;
+}
+
+struct add_1 {
+    unsigned int operator()(int i) {
+        return i + 1;
+    }
+};
+
+int main() {
+    const std::vector<int> inp{1,2,3};
+
+    {
+        std::vector<int> out(inp.size());
+        std::transform(inp.begin(), inp.end(), out.begin(), add_2);
+
+        for(auto& e : out) {
+            std::cout << "int: " << e << std::endl;
+        }
+    }
+
+    {
+        std::vector<size_t> out(inp.size());
+        std::transform(inp.begin(), inp.end(), out.begin(), add_1());
+
+        for(auto& e : out) {
+            std::cout << "unsigned int: " << e << std::endl;
+        }
+    }
+
+    {
+        std::vector<std::string> out(inp.size());
+
+        auto add_1_and_to_string = [](int i) {
+            return std::to_string(i + 1);
+        };
+
+        std::transform(inp.begin(), inp.end(), out.begin(), add_1_and_to_string);
+
+        for(auto& e : out) {
+            std::cout << "string: " << e << std::endl;
+        }
+    }
+
+    return 0;
+}
+```
+
+Executing this program:
+```
+$ ./a.out 
+int: 3
+int: 4
+int: 5
+unsigned int: 2
+unsigned int: 3
+unsigned int: 4
+string: 2
+string: 3
+string: 4
+$
+``` 
 
 ## Examining lambdas 
 Lambdas are a type of callable introduced in `c++11` that I've found both extremely useful and often ill-understood by developers generally. To address this deficit of knowledge I have written this optional [lambda primer](lambda_primer.md) as an educational aid for anyone who wants to know more about them.

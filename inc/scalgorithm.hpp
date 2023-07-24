@@ -321,7 +321,8 @@ to(C&& c) {
  * if user code doesn't properly use references.
  *
  * This algorithm also useful when sorting data without modifying the source 
- * data's container positions.
+ * data's container positions (while still being able to reference the original 
+ * data within the sorted set!).
  *
  * It may be beneficial to apply `pointers()` to the result of `slice()`, to 
  * only operate on the necessary subset of elements.

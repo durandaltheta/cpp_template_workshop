@@ -238,9 +238,9 @@ $
 ``` 
 
 ## Compiler Behavior with Templates and Inlining
-[Inlining in c++](https://en.cppreference.com/w/cpp/language/inline) is the language feature for writing code which can be "copy pasted" by the compiler wherever it is called in code instead of actually triggering a new function call on the stack. It is very similar to a [macro in c](https://gcc.gnu.org/onlinedocs/cpp/Macros.html), with the distinction that inlining in `c++` is actually at the discretion of the compiler (the `inline` keyword is just a suggestion). Additionally, `inline` code is namespace aware, unlike macros which blindly paste text. There's also varous edgecases around efficiency and compilation which requires functions to be a true function on the stack rather than an effective text copy/paste, which the compiler will handle internally. 
+[Inlining in c++](https://en.cppreference.com/w/cpp/language/inline) is the language feature for writing code which can be "copy pasted" by the compiler wherever it is called in code instead of actually triggering a new function call on the stack. Inlining is a useful compiler technique because setting up new function calls on the stack during runtime has its own computation cost, in addition to the cost of actually *executing* the function. 
 
-Inlining is a useful compiler technique because setting up new function calls on the stack during runtime has its own computation cost, in addition to the cost of actually *executing* the function. 
+Inlining is very similar to [macros in c](https://gcc.gnu.org/onlinedocs/cpp/Macros.html), with the distinction that inlining in `c++` is actually at the discretion of the compiler (the `inline` keyword is just a suggestion). Additionally, `inline` code is namespace aware, unlike macros which blindly paste text. There's also varous edgecases around efficiency and compilation which requires `inline` functions to be a true function on the stack rather than an effective text copy/paste, which the compiler will handle internally. 
 
 Inline functions and templates are very similar concepts. Their main distinction to the developer is that templates have the ability to be generated for different types (`std::string`, `int`, `my_object`, etc.), while inline functions are just normal functions with the `inline` keyword prepended to their definition:
 ```

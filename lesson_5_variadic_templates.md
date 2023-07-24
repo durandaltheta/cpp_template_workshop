@@ -252,7 +252,7 @@ We can use another template to abstract the usage of iterators:
 template <typename F, typename C, typename... Cs>
 void
 each(F&& f, C&& c, Cs&&... cs) {
-    detail::algorithm::each(f, c.begin(), c.end(), cs.begin()...);
+    detail::each(f, c.begin(), c.end(), cs.begin()...);
 }
 
 int main() {

@@ -311,7 +311,7 @@ to(C&& c) {
 // pointers
 
 /**
- * @brief copy the addresses of elements in a container  
+ * @brief copy the addresses of elements in a container to a new container
  *
  * This a helper mechanism for ensuring all calculations on data are by 
  * reference to a specific set of values. 

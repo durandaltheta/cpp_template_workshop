@@ -101,11 +101,11 @@ void swap(void* a, void* b) {
 ```
 
 ### Lvalue and Rvalue References
-Objects can often be assigned or constructed using rvalues (which is behavior that the compiler may write for you if you don't explicitly write one for your custom objects). 
+Most objects can be assigned or constructed using rvalues (operations which compiler may write for you if you don't explicitly write them for your objects). But how can we write code which recognizes an argument as an `rvalue`?
 
-`rvalue`s are always a special kind of c++ reference when writing code that uses them. In *non-templates* an `rvalue` reference is denoted by a double ampersand `&&`, instead of a single ampersand `&` used in normal (lvalue!) references. In *templates* the double ampersand `&&` has special meaning, which we will address later.
+In *non-templates* the solution is to denote an `rvalue` reference by a double ampersand `&&`, instead of a single ampersand `&` used in normal (lvalue!) references. In *templates* the double ampersand `&&` has special meaning, which we will address later.
 
-A simple struct with a lvalue and rvalue constructors/assignment:
+A simple struct with a lvalue and rvalue constructors/assignment explicitly written:
 ```
 struct my_struct() {
     // rhs is common shortand for "right hand side"

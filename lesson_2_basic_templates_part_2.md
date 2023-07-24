@@ -1,7 +1,7 @@
 # Basic Templates Part 2
 ## Lvalues and Rvalues
 ### What are they?
-`lvalue`s and `rvalue`s are a concept in c++ called [value categories](https://en.cppreference.com/w/cpp/language/value_category). However, that hyperlinked list is *extremely* confusing and contains many sub-categories which are commonly also called `lvalue`s or `rvalue`s but are in fact some other value type (`prvalue`, `xvalue`, etc.).
+`lvalue`s and `rvalue`s are a concept in `c++` called [value categories](https://en.cppreference.com/w/cpp/language/value_category). However, that hyperlinked list is *extremely* confusing and contains many sub-categories which are commonly also called `lvalue`s or `rvalue`s but are in fact some other value type (`prvalue`, `xvalue`, etc.).
 
 Historically, an `lvalue` might be described as the value on the left side of a statement, whereas an rvalue is on the right side. The classic example is an assignment:
 ```

@@ -1,7 +1,7 @@
 # Callables 
 ## What is a Callable?
 According to [cppreference](https://en.cppreference.com/w/cpp/named_req/Callable) a Callable is:
-> A Callable type is a type for which the INVOKE and INVOKE<R> operations (used by, e.g., std::function, std::bind, and std::thread::thread) are applicable.
+> A Callable type is a type for which the INVOKE and INVOKE<R> operations (used by, e.g., `std::function`, `std::bind`, and `std::thread::thread`) are applicable.
 
 What this basically means is if you can "execute" anything with `()` in a similar fashion to calling a normal function, then that object, function, or lambda is a `Callable`.
 

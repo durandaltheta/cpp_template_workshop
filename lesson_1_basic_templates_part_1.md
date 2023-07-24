@@ -194,7 +194,7 @@ Container construct_container_with_one_element(T t) {
 }
 
 int main() {
-    std::vector v = construct_container_with_one_element(1);
+    std::vector<int> v = construct_container_with_one_element(1);
     std::list<int> l = construct_container_with_one_element<int, std::list<int>>(2);
 
     std::cout << v.front() << std::endl;

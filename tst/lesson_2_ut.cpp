@@ -183,24 +183,9 @@ compare_container_to_pointer_container(Container&& c, PointerContainer&& pc) {
 TEST(lesson_2, pointers) {
     using namespace lesson_2_ns;
 
-    std::vector<int> v{1,2,3};
-    std::list<int> l{4,5,6};
-    std::forward_list<int> fl{7,8,9};
-
-    {
-        auto outv = sca::pointers(v);
-        auto outl = sca::pointers(l);
-        auto outfl = sca::pointers(fl);
-        auto valv = std::is_same<std::vector<int*>,decltype(outv)>::value;
-        auto vall = std::is_same<std::vector<int*>,decltype(outl)>::value;
-        auto valfl = std::is_same<std::vector<int*>,decltype(outfl)>::value;
-        EXPECT_TRUE(valv);
-        EXPECT_TRUE(vall);
-        EXPECT_TRUE(valfl);
-        compare_container_to_pointer_container(v, outv);
-        compare_container_to_pointer_container(l, outl);
-        compare_container_to_pointer_container(fl, outfl);
-    }
+    const std::vector<int> v{1,2,3};
+    const std::list<int> l{4,5,6};
+    const std::forward_list<int> fl{7,8,9};
 
     {
         const auto& cvr = v;
@@ -221,18 +206,39 @@ TEST(lesson_2, pointers) {
     }
 
     {
-        auto v2 = v; // deep copy v
-        auto out = sca::pointers(v2);
+        // copy elements into mutable containers
+        auto cpv = v;
+        auto cpl = l;
+        auto cpfl = fl;
+
+        auto outv = sca::pointers(cpv);
+        auto outl = sca::pointers(cpl);
+        auto outfl = sca::pointers(cpfl);
+        auto valv = std::is_same<std::vector<int*>,decltype(outv)>::value;
+        auto vall = std::is_same<std::vector<int*>,decltype(outl)>::value;
+        auto valfl = std::is_same<std::vector<int*>,decltype(outfl)>::value;
+        EXPECT_TRUE(valv);
+        EXPECT_TRUE(vall);
+        EXPECT_TRUE(valfl);
+        compare_container_to_pointer_container(cpv, outv);
+        compare_container_to_pointer_container(cpl, outl);
+        compare_container_to_pointer_container(cpfl, outfl);
+    }
+
+    {
+        auto cpv = v; // deep copy v
+        auto out = sca::pointers(cpv);
         
         for(auto e : out) {
             *e = *e + 2; // increment v2 elements by 2
         }
 
         std::vector<int> expect{3,4,5};
-        EXPECT_EQ(expect, v2);
+        EXPECT_EQ(expect, cpv);
     }
 
     {
+        // get a container of pointers to const values
         auto pv = sca::pointers(v);
         auto rpv = sca::reverse(pv);
 
@@ -242,15 +248,20 @@ TEST(lesson_2, pointers) {
     }
 
     {
+        // copy elements from source containers
+        auto cpv = v;
+        auto cpl = l;
+        auto cpfl = fl;
+
         // convert to containers of pointers
-        auto outv = sca::pointers(v);
-        auto outl = sca::pointers(l);
-        auto outfl = sca::pointers(fl);
+        auto outv = sca::pointers(cpv);
+        auto outl = sca::pointers(cpl);
+        auto outfl = sca::pointers(cpfl);
 
         // group containers of pointers together in an arbitrary order
         auto outgrp = sca::group(outfl, outv, outl);
 
-        // verify values are as expected
+        // verify pointed values are as expected
         EXPECT_EQ(7, *(outgrp[0]));
         EXPECT_EQ(8, *(outgrp[1]));
         EXPECT_EQ(9, *(outgrp[2]));
@@ -274,14 +285,8 @@ TEST(lesson_2, pointers) {
         EXPECT_EQ(9, *(outgrp[8]));
 
         // verify original mutable containers are unmodified 
-        EXPECT_EQ(1, v[0]);
-        EXPECT_EQ(2, v[1]);
-        EXPECT_EQ(3, v[2]);
-        EXPECT_EQ(4, *std::next(l.begin(), 0));
-        EXPECT_EQ(5, *std::next(l.begin(), 1));
-        EXPECT_EQ(6, *std::next(l.begin(), 2));
-        EXPECT_EQ(7, *std::next(fl.begin(), 0));
-        EXPECT_EQ(8, *std::next(fl.begin(), 1));
-        EXPECT_EQ(9, *std::next(fl.begin(), 2));
+        EXPECT_EQ(v, cpv);
+        EXPECT_EQ(l, cpl);
+        EXPECT_EQ(fl, cpfl);
     }
 }

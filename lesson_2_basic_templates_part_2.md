@@ -69,7 +69,8 @@ In `c` there are two ways to store data, by-value (variables) and by-reference (
 Assigning values to variables is called a "deep copy", while assigning a variable to a pointer is a "shallow copy". All this means is that, if the variable is large (some kind of struct or array), deep copying to it is a more expensive operation than shallow copying, which only needs to assign a single value (the memory address).
 ```
 char str[10]; // a character buffer to hold our string
-strncpy(&str,"hello world",sizeof(str)); // this is a deep copy
+memset(str, 0, sizeof(str));
+strncpy(str,"hello world",sizeof(str)); // this is a deep copy
 char* str_ptr = &str; // this is a shallow copy
 printf("%s", str_ptr); // prints "hello world"
 ```

@@ -37,7 +37,7 @@
  * simple data processing usecases.
  *
  * Algorithms and Objects provided by this header:
- * size() - return a container's size
+ * size() - return a container's size, regardless if it implements a `::size()` method
  * to() - copy from an iterable object to a designated output container type
  * slice() - return a (potentially const) object capable of iterating a subset of a container
  * mslice() - return an object capable of iterating a mutable subset of a container

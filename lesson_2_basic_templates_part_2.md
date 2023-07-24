@@ -238,7 +238,7 @@ $
 ``` 
 
 ## Compiler Behavior with Templates and Inlining
-[Inlining in c++](https://en.cppreference.com/w/cpp/language/inline) is the language feature for writing code which will can have it's body be "copy pasted" by the compiler wherever it is called in code instead of actually triggering a new function call to be put on the stack. It is very similar to a [macro in c](https://gcc.gnu.org/onlinedocs/cpp/Macros.html), with the distinction that inlining in `c++` is actually at the discretion of the compiler (the `inline` keyword is just a suggestion). There's also varous edgecases around efficiency and compilation which requires functions to be a true function on the stack rather than an effective text copy/paste, which the compiler will handle internally. 
+[Inlining in c++](https://en.cppreference.com/w/cpp/language/inline) is the language feature for writing code which can be "copy pasted" by the compiler wherever it is called in code instead of actually triggering a new function call on the stack. It is very similar to a [macro in c](https://gcc.gnu.org/onlinedocs/cpp/Macros.html), with the distinction that inlining in `c++` is actually at the discretion of the compiler (the `inline` keyword is just a suggestion). There's also varous edgecases around efficiency and compilation which requires functions to be a true function on the stack rather than an effective text copy/paste, which the compiler will handle internally. 
 
 Inlining is a useful compiler technique because setting up new function calls on the stack during runtime has its own computation cost, in addition to the cost of actually *executing* the function. 
 

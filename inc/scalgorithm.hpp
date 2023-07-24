@@ -11,7 +11,6 @@
 #include <optional>
 
 // local
-#include "detail/template.hpp"
 #include "detail/algorithm.hpp"
 
 /**
@@ -121,16 +120,16 @@ to(C&& c) {
  */
 template<typename C>
 class slice_of {
-    typedef detail::templates::unqualified<C> UC;
-    typedef typename UC::iterator iterator;
-    std::shared_ptr<UC> m_mem; // place to hold container memory if constructed with an rvalue 
+    typedef std::decay_t<C> DC;
+    typedef typename DC::iterator iterator;
+    std::shared_ptr<DC> m_mem; // place to hold container memory if constructed with an rvalue 
     const size_t m_size;
     iterator m_begin;
     iterator m_end;
 
 public:
-    typedef typename UC::value_type value_type;
-    typedef typename UC::size_type size_type;
+    typedef typename DC::value_type value_type;
+    typedef typename DC::size_type size_type;
 
     slice_of() = delete; // no default initialization
     slice_of(const C& c, size_t idx, size_t len) = delete; // must use const_slice_of
@@ -144,7 +143,7 @@ public:
 
     // rvalue constructor
     slice_of(C&& c, size_t idx, size_t len) :
-        m_mem(std::make_shared<UC>(std::move(c))), // keep container in memory
+        m_mem(std::make_shared<DC>(std::move(c))), // keep container in memory
         m_size(len),
         m_begin(std::next(m_mem->begin(), idx)),
         m_end(std::next(m_begin, len))
@@ -169,15 +168,15 @@ public:
 /// const variation of slice_of
 template <typename C>
 class const_slice_of {
-    typedef detail::templates::unqualified<C> UC;
-    typedef typename UC::const_iterator const_iterator;
+    typedef std::decay_t<C> DC;
+    typedef typename DC::const_iterator const_iterator;
     const size_t m_size;
     const_iterator m_cbegin;
     const_iterator m_cend;
 
 public:
-    typedef typename UC::value_type value_type;
-    typedef typename UC::size_type size_type;
+    typedef typename DC::value_type value_type;
+    typedef typename DC::size_type size_type;
 
     const_slice_of() = delete; // no default initialization
 
@@ -291,8 +290,8 @@ mslice(C& c, size_t idx, size_t len) {
 template <typename C, typename C2, typename... Cs>
 auto
 group(C&& c, C2&& c2, Cs&&... cs) {
-    using UC = detail::templates::unqualified<C>;
-    sca::vector<typename UC::value_type> ret(detail::algorithm::sum(size(c), size(c2), size(cs)...));
+    using DC = std::decay_t<C>;
+    sca::vector<typename DC::value_type> ret(detail::algorithm::sum(size(c), size(c2), size(cs)...));
     detail::algorithm::group(
             ret.begin(), 
             std::forward<C>(c), 
@@ -314,8 +313,8 @@ group(C&& c, C2&& c2, Cs&&... cs) {
 template <typename C>
 auto
 reverse(C&& container) {
-    using UC = detail::templates::unqualified<C>;
-    sca::vector<typename UC::value_type> res(size(container));
+    using DC = std::decay_t<C>;
+    sca::vector<typename DC::value_type> res(size(container));
     detail::algorithm::range_copy_or_move(typename std::is_lvalue_reference<C>::type(), res.begin(), container.begin(), container.end());
     std::reverse(res.begin(), res.end());
     return res; 
@@ -337,8 +336,8 @@ reverse(C&& container) {
 template <typename F, typename C>
 auto
 filter(F&& f, C&& container) {
-    typedef detail::templates::unqualified<C> UC;
-    sca::vector<typename UC::value_type> ret(size(container));
+    typedef std::decay_t<C> DC;
+    sca::vector<typename DC::value_type> ret(size(container));
     size_t cur = 0;
 
     for(auto& e : container) {
@@ -375,7 +374,7 @@ filter(F&& f, C&& container) {
 template <typename F, typename C, typename... Cs>
 auto
 map(F&& f, C&& c, Cs&&... cs) {
-    using Result = sca::vector<detail::templates::function_return_type<F,typename C::value_type, typename Cs::value_type...>>;
+    using Result = sca::vector<detail::algorithm::function_return_type<F,typename C::value_type, typename Cs::value_type...>>;
     Result ret(size(c));
     detail::algorithm::map(ret.begin(), c.begin(), c.end(), cs.begin()...);
     return ret;

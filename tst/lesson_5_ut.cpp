@@ -139,19 +139,19 @@ TEST(lesson_5, detail_advance_group) {
     EXPECT_EQ(4, *cur_v2);
     EXPECT_EQ(7, *cur_v3);
 
-    sca::detail::algorithm::advance_group(cur_v1, cur_v2, cur_v3);
+    sca::detail::advance_group(cur_v1, cur_v2, cur_v3);
 
     EXPECT_EQ(2, *cur_v1);
     EXPECT_EQ(5, *cur_v2);
     EXPECT_EQ(8, *cur_v3);
 
-    sca::detail::algorithm::advance_group(cur_v1, cur_v2, cur_v3);
+    sca::detail::advance_group(cur_v1, cur_v2, cur_v3);
 
     EXPECT_EQ(3, *cur_v1);
     EXPECT_EQ(6, *cur_v2);
     EXPECT_EQ(9, *cur_v3);
 
-    sca::detail::algorithm::advance_group(cur_v1, cur_v2, cur_v3);
+    sca::detail::advance_group(cur_v1, cur_v2, cur_v3);
 
     EXPECT_EQ(v1.end(), cur_v1);
     EXPECT_EQ(v2.end(), cur_v2);
@@ -171,7 +171,7 @@ TEST(lesson_5, each) {
         ++out_it;
     };
 
-    sca::detail::algorithm::each(add, v1.begin(), v1.end(), v2.begin());
+    sca::detail::each(add, v1.begin(), v1.end(), v2.begin());
     EXPECT_EQ(expect, out);
 
     out = std::vector<int>(sca::size(v1)); // reset our out vector
@@ -200,10 +200,10 @@ TEST(lesson_5, detail_map) {
         std::vector<int> out(sca::size(v1));
         auto add = [](int a, int b) { return a + b; };
 
-        // internal algorithm `sca::detail::algorithm::map` is similar to 
+        // internal algorithm `sca::detail::map` is similar to 
         // `std::transform()` except that it can accept iterators to more than 1 
         // container
-        sca::detail::algorithm::map(add, out.begin(), v1.begin(), v1.end(), v2.begin());
+        sca::detail::map(add, out.begin(), v1.begin(), v1.end(), v2.begin());
 
         std::vector<int> expect{5,7,9};
         EXPECT_EQ(expect, out);
@@ -213,10 +213,10 @@ TEST(lesson_5, detail_map) {
         std::vector<std::string> out(sca::size(v1));
         auto add_and_stringify = [](int a, int b) { return std::to_string(a + b); };
 
-        // internal algorithm `sca::detail::algorithm::map` is similar to 
+        // internal algorithm `sca::detail::map` is similar to 
         // `std::transform()` except that it can accept iterators to more than 1 
         // container
-        sca::detail::algorithm::map(add_and_stringify, out.begin(), v1.begin(), v1.end(), v2.begin());
+        sca::detail::map(add_and_stringify, out.begin(), v1.begin(), v1.end(), v2.begin());
 
         std::vector<std::string> expect{"5","7","9"};
         EXPECT_EQ(expect, out);
@@ -233,8 +233,8 @@ TEST(lesson_5, detail_fold) {
             return cur_sum + new_value; 
         };
         
-        auto out = sca::detail::algorithm::fold(sum, 0, v1.begin(), v1.end());
-        out = sca::detail::algorithm::fold(sum, out, v2.begin(), v2.end());
+        auto out = sca::detail::fold(sum, 0, v1.begin(), v1.end());
+        out = sca::detail::fold(sum, out, v2.begin(), v2.end());
         EXPECT_EQ(21, out);
     }
 
@@ -244,7 +244,7 @@ TEST(lesson_5, detail_fold) {
             return cur_sum + new_value_1 + new_value_2; 
         };
 
-        auto out = sca::detail::algorithm::fold(sum, 0, v1.begin(), v1.end(), v2.begin());
+        auto out = sca::detail::fold(sum, 0, v1.begin(), v1.end(), v2.begin());
         EXPECT_EQ(21, out);
     }
 }

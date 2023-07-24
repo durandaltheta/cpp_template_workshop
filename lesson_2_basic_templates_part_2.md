@@ -223,8 +223,8 @@ std::decay_t<T> add_three(T&& t) {
 int main() {
     int a = 3;
     const int b = 2;
-    std::cout << add_three(a) << std::endl;
-    std::cout << add_three(b) << std::endl; // still works because the final return type is just 'int'
+    std::cout << add_three(a) << std::endl; // returns `int`
+    std::cout << add_three(b) << std::endl; // still returns `int`, not `const int`
     return 0; 
 }
 ```

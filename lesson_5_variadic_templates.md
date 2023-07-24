@@ -96,7 +96,7 @@ $ ./a.out
 $
 ```
 
-Variadic template arguments are often processed in a similar fashion, handling one concrete argument at a time. They break out of recursion by calling an explicitly defined template or function with the same function name that does not recursively call itself:
+Variadic template arguments are often processed in a similar fashion, handling one concrete argument at a time. They break out of recursion by writing an overloaded template or function with the same function name that does not recursively call itself:
 ```
 #include <iostream>
 

@@ -194,7 +194,7 @@ $
 A wrapper like `std::function` is often necessary when writing parts of code which *need* to be precompiled (IE, code which is not header only). Combining the concepts of template Callables with `std::function` allows for all kinds of interesting code.
 
 ## Algorithms and Callables 
-It is possible to write data processing algorithms which incorporate user provided Callables to provide a portion of the implementation. An example of this in the standard library is [std::transform](https://en.cppreference.com/w/cpp/algorithm/transform), which accepts a begin iterator, an end iterator, a begin output iterator, and a Callable. `std::transform` will iterator from begin -> end, callng the Callable with the value pointed to by begin and storing the result in the output iterator. An implemenation of said algorithm might look like:
+It is possible to write data processing algorithms which incorporate user provided Callables to provide a portion of the implementation. An example of this in the standard library is [std::transform](https://en.cppreference.com/w/cpp/algorithm/transform), which accepts a start `cur` iterator, an `end` iterator, an output `out` iterator, and a Callable. `std::transform` will iterate from `cur` to `end`, callng the Callable with the value pointed to by `cur` and storing the result in the `out` iterator. An implemenation of said algorithm might look like:
 ```
 namespace std {
 

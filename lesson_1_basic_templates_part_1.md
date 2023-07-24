@@ -22,7 +22,7 @@ It is important to note that `c++` templates are *recipes* for final code, *NOT*
 ## Manual Type Specification 
 The `typename`/`class` types defined in a `template` are known until the `template` is called in code. This means a template has the ability to *potentially* represent valid code for different types. 
 
-The most basic way a template is called in code is to write the name of the `template` followed by `<`/`>` brackets with the types you want to use between them. You should immediately recognize this pattern with `std::vector`:
+The most basic way a template is called in code is to write the name of the `template` followed by `<`/`>` brackets enclosing the types you want to use. You should immediately recognize this pattern with `std::vector`:
 ```
 #include <vector>
 #include <iostream>

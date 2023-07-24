@@ -38,7 +38,8 @@
  *
  * Algorithms and Objects provided by this header:
  * size() - return a container's size, regardless if it implements a `::size()` method
- * to() - copy from an iterable object to a designated output container type
+ * to() - copy from an iterable object to a designated output container type 
+ * pointers() - return container of the addresses of elements in another container
  * slice() - return a (potentially const) object capable of iterating a subset of a container
  * mslice() - return an object capable of iterating a mutable subset of a container
  * group() - return a container composed of all elements of all argument containers
@@ -303,6 +304,46 @@ auto
 to(C&& c) {
     Result ret(size(c));
     detail::range_copy_or_move(typename std::is_lvalue_reference<C>::type(), ret.begin(), c.begin(), c.end());
+    return ret;
+}
+
+//------------------------------------------------------------------------------
+// pointers
+
+/**
+ * @brief copy the addresses of elements in a container  
+ *
+ * This a helper mechanism for ensuring all calculations on data are by 
+ * reference to a specific set of values. 
+ * 
+ * This can be useful when operating on large sets of data so that downstream 
+ * calculations like `filter()` and `map()` are forced to be efficient even 
+ * if user code doesn't properly use references.
+ *
+ * This algorithm also useful when sorting data without modifying the source 
+ * data's container positions.
+ *
+ * It may be beneficial to apply `pointers()` to the result of `slice()`, to 
+ * only operate on the necessary subset of elements.
+ *
+ * @param c container of elements
+ * @return a container of pointers to elements in the argument container
+ */
+template <typename C>
+auto
+pointers(C& c) {
+    typedef typename std::decay_t<C>::value_type CV;
+    sca::vector<CV*> ret(size(c));
+    std::transform(c.begin(), c.end(), ret.begin(), [](CV& e){ return &e; });
+    return ret;
+}
+
+template <typename C>
+auto
+pointers(const C& c) {
+    typedef typename std::decay_t<C>::value_type CV;
+    sca::vector<const CV*> ret(size(c));
+    std::transform(c.begin(), c.end(), ret.begin(), [](const CV& e){ return &e; });
     return ret;
 }
 

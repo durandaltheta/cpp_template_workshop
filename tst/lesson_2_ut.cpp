@@ -4,6 +4,7 @@
 #include <vector>
 #include <list>
 #include <forward_list>
+#include <algorithm>
 #include "scalgorithm.hpp"
 #include <gtest/gtest.h> 
 
@@ -158,5 +159,129 @@ TEST(lesson_2, group) {
         EXPECT_TRUE(val);
         auto cmp = std::vector<std::string>{"hello", " my", " name", " is", " foo", "faa"};
         EXPECT_EQ(cmp, out);
+    }
+}
+
+namespace lesson_2_ns {
+
+// compare elements of a container to the values pointed to by the elements of
+// another container
+template <typename Container, typename PointerContainer>
+void
+compare_container_to_pointer_container(Container&& c, PointerContainer&& pc) {
+    auto cit = c.begin();
+    auto pcit = pc.begin();
+
+    for(; cit != c.end(); ++cit, ++pcit) {
+        EXPECT_EQ(*cit, **pcit);
+    }
+}
+
+};
+
+
+TEST(lesson_2, pointers) {
+    using namespace lesson_2_ns;
+
+    std::vector<int> v{1,2,3};
+    std::list<int> l{4,5,6};
+    std::forward_list<int> fl{7,8,9};
+
+    {
+        auto outv = sca::pointers(v);
+        auto outl = sca::pointers(l);
+        auto outfl = sca::pointers(fl);
+        auto valv = std::is_same<std::vector<int*>,decltype(outv)>::value;
+        auto vall = std::is_same<std::vector<int*>,decltype(outl)>::value;
+        auto valfl = std::is_same<std::vector<int*>,decltype(outfl)>::value;
+        EXPECT_TRUE(valv);
+        EXPECT_TRUE(vall);
+        EXPECT_TRUE(valfl);
+        compare_container_to_pointer_container(v, outv);
+        compare_container_to_pointer_container(l, outl);
+        compare_container_to_pointer_container(fl, outfl);
+    }
+
+    {
+        const auto& cvr = v;
+        const auto& clr = l;
+        const auto& cflr = fl;
+        auto outv = sca::pointers(cvr);
+        auto outl = sca::pointers(clr);
+        auto outfl = sca::pointers(cflr);
+        auto valv = std::is_same<std::vector<const int*>,decltype(outv)>::value;
+        auto vall = std::is_same<std::vector<const int*>,decltype(outl)>::value;
+        auto valfl = std::is_same<std::vector<const int*>,decltype(outfl)>::value;
+        EXPECT_TRUE(valv);
+        EXPECT_TRUE(vall);
+        EXPECT_TRUE(valfl);
+        compare_container_to_pointer_container(cvr, outv);
+        compare_container_to_pointer_container(clr, outl);
+        compare_container_to_pointer_container(cflr, outfl);
+    }
+
+    {
+        auto v2 = v; // deep copy v
+        auto out = sca::pointers(v2);
+        
+        for(auto e : out) {
+            *e = *e + 2; // increment v2 elements by 2
+        }
+
+        std::vector<int> expect{3,4,5};
+        EXPECT_EQ(expect, v2);
+    }
+
+    {
+        auto pv = sca::pointers(v);
+        auto rpv = sca::reverse(pv);
+
+        EXPECT_EQ(3, *(rpv[0]));
+        EXPECT_EQ(2, *(rpv[1]));
+        EXPECT_EQ(1, *(rpv[2]));
+    }
+
+    {
+        // convert to containers of pointers
+        auto outv = sca::pointers(v);
+        auto outl = sca::pointers(l);
+        auto outfl = sca::pointers(fl);
+
+        // group containers of pointers together in an arbitrary order
+        auto outgrp = sca::group(outfl, outv, outl);
+
+        // verify values are as expected
+        EXPECT_EQ(7, *(outgrp[0]));
+        EXPECT_EQ(8, *(outgrp[1]));
+        EXPECT_EQ(9, *(outgrp[2]));
+        EXPECT_EQ(1, *(outgrp[3]));
+        EXPECT_EQ(2, *(outgrp[4]));
+        EXPECT_EQ(3, *(outgrp[5]));
+        EXPECT_EQ(4, *(outgrp[6]));
+        EXPECT_EQ(5, *(outgrp[7]));
+        EXPECT_EQ(6, *(outgrp[8]));
+
+        // sort pointers by pointed values in ascending order
+        std::sort(outgrp.begin(), outgrp.end(), [](int* a, int* b){ return *a < *b; });
+        EXPECT_EQ(1, *(outgrp[0]));
+        EXPECT_EQ(2, *(outgrp[1]));
+        EXPECT_EQ(3, *(outgrp[2]));
+        EXPECT_EQ(4, *(outgrp[3]));
+        EXPECT_EQ(5, *(outgrp[4]));
+        EXPECT_EQ(6, *(outgrp[5]));
+        EXPECT_EQ(7, *(outgrp[6]));
+        EXPECT_EQ(8, *(outgrp[7]));
+        EXPECT_EQ(9, *(outgrp[8]));
+
+        // verify original mutable containers are unmodified 
+        EXPECT_EQ(1, v[0]);
+        EXPECT_EQ(2, v[1]);
+        EXPECT_EQ(3, v[2]);
+        EXPECT_EQ(4, *std::next(l.begin(), 0));
+        EXPECT_EQ(5, *std::next(l.begin(), 1));
+        EXPECT_EQ(6, *std::next(l.begin(), 2));
+        EXPECT_EQ(7, *std::next(fl.begin(), 0));
+        EXPECT_EQ(8, *std::next(fl.begin(), 1));
+        EXPECT_EQ(9, *std::next(fl.begin(), 2));
     }
 }

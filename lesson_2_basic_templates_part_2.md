@@ -33,7 +33,8 @@ struct my_struct { };
 // the "my_struct()" on the right side of the assignment is an rvalue 
 auto my_struct_instance = my_struct(); 
 
-int another_variable = std::move(a_variable); // std::move() forces a_variable to appear as an rvalue during the assignment
+// std::move() forces a_variable to appear as an rvalue during the assignment
+int another_variable = std::move(a_variable);
 
 int add_1(int&& i) { // double ampersand reference to i is an rvalue
     return i + 1;

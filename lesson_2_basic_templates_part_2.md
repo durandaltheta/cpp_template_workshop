@@ -83,7 +83,7 @@ std::string s1 = "hello world"; // this is a deep copy, each char must be copied
 std::string s2 = s1; // this is also a deep copy
 ```
 
-However, with "rvalue move semantics", if the compiler detects that the `std::string` on the right hand side is about to go out of existence (it is an `rvalue`) then the compiler knows it can safely *steal* the underlying `char *` buffer from that string and give it to the `std::string` on the left (actually the two `std::string` will exchange buffer pointers). This operation is called "swapping". Swapping turns a deep copy into a very shallow copy (for at least that buffer, other `std::string` members may need to be copied).
+However, with "rvalue move semantics", if the compiler detects that the `std::string` on the right hand side is about to go out of existence (it is an `rvalue`) then the compiler knows it can safely *steal* the underlying `char *` buffer from that string and give it to the `std::string` on the left (actually the two `std::string` will exchange buffer pointers). This operation is called "swapping". Swapping turns a deep copy into a very shallow copy (for at least the string character buffer, other `std::string` members may need to be copied).
 ```
 std::string s1 = std::string("hello world"); // rvalue makes this a shallow copy!
 std::string s2 = std::move(s1); // std::move() makes s1 an rvalue also making this a shallow copy!

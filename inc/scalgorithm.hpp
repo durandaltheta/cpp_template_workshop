@@ -324,13 +324,9 @@ to(C&& c) {
 template<typename C>
 class slice_of {
     typedef std::decay_t<C> DC;
-    typedef typename DC::iterator iterator;
-    std::shared_ptr<DC> m_mem; // place to hold container memory if constructed with an rvalue 
-    const size_t m_size;
-    iterator m_begin;
-    iterator m_end;
 
 public:
+    typedef typename DC::iterator iterator;
     typedef typename DC::value_type value_type;
     typedef typename DC::size_type size_type;
 
@@ -366,18 +362,21 @@ public:
     inline auto end() { 
         return m_end;
     }
+
+private:
+    std::shared_ptr<DC> m_mem; // place to hold container memory if constructed with an rvalue 
+    const size_t m_size;
+    iterator m_begin;
+    iterator m_end;
 };
 
 /// const variation of slice_of
 template <typename C>
 class const_slice_of {
     typedef std::decay_t<C> DC;
-    typedef typename DC::const_iterator const_iterator;
-    const size_t m_size;
-    const_iterator m_cbegin;
-    const_iterator m_cend;
 
 public:
+    typedef typename DC::const_iterator const_iterator;
     typedef typename DC::value_type value_type;
     typedef typename DC::size_type size_type;
 
@@ -404,6 +403,11 @@ public:
     inline auto end() const {
         return m_cend;
     }
+
+private:
+    const size_t m_size;
+    const_iterator m_cbegin;
+    const_iterator m_cend;
 };
 
 /**

@@ -164,6 +164,21 @@ TEST(lesson_4, filter) {
     }
 
     {
+        std::vector<std::string> s{"hello", "1", " my", "2", " name", "3", " is", "4", " regret"};
+
+        auto ascii_filter_non_alphabet_or_space = [](std::string& s) {
+            auto is_space = [](const char c){ return c == 32; };
+            auto upper_case = [](const char c){ return 64 < c && c < 91; };
+            auto lower_case = [](const char c){ return 96 < c && c < 123; };
+            return s.size() && (is_space(s[0]) || upper_case(s[0]) || lower_case(s[0]));
+        };
+
+        auto out = sca::filter(ascii_filter_non_alphabet_or_space, s);
+        std::vector<std::string> expect{"hello", " my", " name", " is", " regret"};
+        EXPECT_EQ(expect, out);
+    }
+
+    {
         auto sl = sca::slice(v,4,4);
         auto out = sca::filter([](int i) { return i % 2 == 0; }, sl);
         std::vector<int> expect{6,8};

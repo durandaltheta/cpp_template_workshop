@@ -16,7 +16,7 @@ add_executable(cpp_template_workshop_ut
     lesson_5_ut.cpp 
 )
 
-target_compile_features(cpp_template_workshop_ut PRIVATE cxx_std_17)
+target_compile_features(cpp_template_workshop_ut PRIVATE cxx_std_11)
 target_include_directories(cpp_template_workshop_ut INTERFACE inc)
 
 target_link_libraries(cpp_template_workshop_ut

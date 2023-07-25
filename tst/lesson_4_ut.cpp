@@ -3,7 +3,7 @@
 #include <vector>
 #include <algorithm>
 #include <functional>
-#include "scalgorithm.hpp"
+#include "scalgorithm"
 #include <gtest/gtest.h> 
 
 namespace lesson_4_ns {

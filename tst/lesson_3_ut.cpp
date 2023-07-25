@@ -4,7 +4,7 @@
 #include <list>
 #include <forward_list>
 #include <algorithm>
-#include "scalgorithm.hpp"
+#include "scalgorithm"
 #include <gtest/gtest.h> 
 
 struct lesson_3_f : public ::testing::Test {

@@ -5,7 +5,7 @@
 #include <list>
 #include <forward_list>
 #include <algorithm>
-#include "scalgorithm.hpp"
+#include "scalgorithm"
 #include <gtest/gtest.h> 
 
 namespace lesson_2_ns {

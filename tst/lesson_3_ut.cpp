@@ -104,8 +104,8 @@ TEST(lesson_3, const_lvalue_slice) {
     {
         auto v = v_base;
         auto out = sca::slice(v, 0, 2);
-        auto val = std::is_same<sca::const_slice_of<std::vector<int>>,decltype(out)>::value;
-        EXPECT_TRUE(val);
+        auto is_same = std::is_same<sca::const_slice_of<std::vector<int>>,decltype(out)>::value;
+        EXPECT_TRUE(is_same);
     }
 
     {
@@ -152,8 +152,8 @@ TEST(lesson_3, rvalue_slice) {
     {
         auto v = v_base;
         auto out = sca::slice(std::move(v), 0, 2);
-        auto val = std::is_same<sca::slice_of<std::vector<int>>,decltype(out)>::value;
-        EXPECT_TRUE(val);
+        auto is_same = std::is_same<sca::slice_of<std::vector<int>>,decltype(out)>::value;
+        EXPECT_TRUE(is_same);
     }
 
     {
@@ -210,8 +210,8 @@ TEST(lesson_3, mutable_slice) {
     {
         auto v = v_base;
         auto out = sca::mslice(v, 0, 2);
-        auto val = std::is_same<sca::slice_of<std::vector<int>>,decltype(out)>::value;
-        EXPECT_TRUE(val);
+        auto is_same = std::is_same<sca::slice_of<std::vector<int>>,decltype(out)>::value;
+        EXPECT_TRUE(is_same);
     }
 
     {

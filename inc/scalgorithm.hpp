@@ -7,6 +7,7 @@
 #include <functional>
 #include <iterator>
 #include <memory>
+#include <algorithm>
 
 /**
  * A NOTE ON API DESIGN
@@ -14,21 +15,15 @@
  * effort being put into usability for the user, rather than implementing 
  * minimalist algorithms. 
  *
- * For instance, the algorithms defined in the c++ standard library typically 
- * deal with iterators rather than the containers themselves. Instead, this 
- * library's algorithms accept containers as arguments and return containers, 
- * because this leaves the smallest amount of work for the user and reduces risk 
- * of exception throwing bugs. This also helps the user avoid making trivial 
- * efficiency mistakes when writing algorithm code.
+ * The algorithms defined in the c++ standard library typically deal with 
+ * iterators rather than the containers themselves. Instead, this library's 
+ * data processing algorithms accept containers as arguments and return 
+ * containers, because this leaves the smallest amount of work for the user and 
+ * reduces risk of exception throwing bugs. This also helps the user avoid 
+ * making trivial efficiency mistakes when writing algorithm code.
  *
- * The choice to deal with containers instead of iterators causes a cascade of 
- * issues this library must address, such as what output container types to use 
- * or how to calculate the size of arbitrary output containers, efficiently, in 
- * advance. 
- * 
- * However it is my opinion that this is a valuable exercise because if the 
- * library doesn't do these calculations automatically then it is up to the 
- * user to do them manually, opening the door for unwanted bugs.
+ * In c++, vectors typically outperform other container types, so algorithms in 
+ * this library convert to them internally and return them as the result. 
  *
  * PROVIDED ALGORITHMS 
  * The algorithms in this header library are intended for general usecases and 
@@ -37,13 +32,14 @@
  * simple data processing usecases.
  *
  * Algorithms and Objects provided by this header:
- * size() - return a container's size, regardless if it implements a `::size()` method
- * to() - copy from an iterable object to a designated output container type 
+ * size() - return an iterable container's size, regardless if it implements a `::size()` method
  * pointers() - return container of the addresses of elements in another container
+ * values() - return a container of deep value copies (never pointers) from a container of values or pointers 
  * slice() - return a (potentially const) object capable of iterating a subset of a container
  * mslice() - return an object capable of iterating a mutable subset of a container
  * group() - return a container composed of all elements of all argument containers
- * reverse() - return a container whose elements are in reverse order of input container
+ * reverse() - return a container whose elements are in reverse order of input container 
+ * sort() = return a container whose elements are sorted based on a comparison Callable
  * filter() - return a container filled with only elements which return true when applied to a Callable
  * map() - return the results of applying all elements of argument containers to a Callable
  * fold() - calculate a result after iterating through all elements of argument containers
@@ -60,6 +56,13 @@ namespace detail {
 
 template <typename C>
 using is_lvalue_ref_t = typename std::is_lvalue_reference<C>::type;
+
+//------------------------------------------------------------------------------
+// to_vector_t
+
+// a `std::vector<T>` where `T` is the `::value_type` of a container `C`
+template <typename C>
+using to_vector_t = std::vector<typename std::decay_t<C>::value_type>;
 
 // ----------------------------------------------------------------------------- 
 // callable_return_t 
@@ -134,6 +137,31 @@ void range_transfer(std::false_type, DIT&& dst_cur, IT&& src_cur, IT&& src_end) 
 }
 
 // ----------------------------------------------------------------------------- 
+// values 
+
+// copy pointed values
+template <typename OUT_IT, typename INP_IT>
+void 
+values(std::true_type, OUT_IT&& out_it, INP_IT&& cur_it, INP_IT&& end_it) {
+    while(cur_it != end_it) {
+        *out_it = **cur_it; // dereference pointer
+        ++cur_it;
+        ++out_it;
+    }
+}
+
+// copy values
+template <typename OUT_IT, typename INP_IT>
+void 
+values(std::false_type, OUT_IT&& out_it, INP_IT&& cur_it, INP_IT&& end_it) {
+    while(cur_it != end_it) {
+        *out_it = *cur_it;
+        ++cur_it;
+        ++out_it;
+    }
+}
+
+// ----------------------------------------------------------------------------- 
 // sum 
 
 template <typename V>
@@ -147,7 +175,7 @@ size_t sum(V cur_sum, V v, V v2, Values... vs) {
 }
 
 // ----------------------------------------------------------------------------- 
-// group operations 
+// group 
 
 template <typename IT>
 void group(IT&& cur) {
@@ -255,30 +283,10 @@ some(F&& f, IT&& it, IT&& it_end, ITs&&... its) {
 }
 
 //------------------------------------------------------------------------------
-// default container type 
-
-/**
- * @brief vectors are almost always the correct default choice
- *
- * In C++, algorithms are typically fastest with vectors, so algorithms 
- * implemented in this library typically convert to them internally and return 
- * the result vectors. 
- * 
- * If the user requires a container of elements be converted to another 
- * container type after the data has been processed they can use the `to<T>()` 
- * algorithm defined below.
- */
-template <typename T>
-using vector = std::vector<T>;
-
-template <typename C>
-using to_vector_t = sca::vector<typename std::decay_t<C>::value_type>;
-
-//------------------------------------------------------------------------------
 // size
 
 /**
- * @brief call C::size() if member exists, else calculate the size using iterators
+ * @brief return an iterable container's size, regardless if it implements a `::size()` method
  * @param c a container 
  * @return the size of the container
  */
@@ -286,22 +294,6 @@ template <typename C>
 size_t // size_t is convertable from all std:: container `size_type`s
 size(C&& c) { 
     return detail::size(c, std::integral_constant<bool, detail::has_size<C>::has>()); 
-}
-
-//------------------------------------------------------------------------------
-// to 
-
-/**
- * @brief copy or move elements from a container of one type to a container of another
- * @param c container of elements
- * @return a container of the target type Result
- */
-template <typename Result, typename C>
-auto
-to(C&& c) {
-    Result ret(sca::size(c));
-    detail::range_transfer(detail::is_lvalue_ref_t<C>(), ret.begin(), c.begin(), c.end());
-    return ret;
 }
 
 //------------------------------------------------------------------------------
@@ -313,12 +305,12 @@ to(C&& c) {
  * This a helper mechanism for ensuring all calculations on data are by 
  * reference to a specific set of values. This can be used to simplify 
  * operations on large sets of data so that downstream calculations like 
- * `filter()` and `map()` never have to consider values by reference value 
- * category.
+ * `filter()` and `map()` never have to consider reference value categories.
  *
- * This algorithm also useful when sorting data without modifying the source 
- * data's container positions (while still being able to reference the original 
- * data within the sorted set!).
+ * This algorithm also useful when sorting data in-place without modifying the 
+ * source data's container positions (std::sort()), while still being able to 
+ * reference the original data within the sorted set. Furthermore, any kind of
+ * sort operation when applied to pointers is very fast.
  *
  * It may be beneficial to apply `pointers()` to the result of `slice()`, to 
  * only operate on the necessary subset of elements.
@@ -330,7 +322,7 @@ template <typename C>
 auto
 pointers(C& c) {
     typedef typename std::decay_t<C>::value_type CV;
-    sca::vector<CV*> ret(sca::size(c));
+    std::vector<CV*> ret(sca::size(c));
     std::transform(c.begin(), c.end(), ret.begin(), [](CV& e){ return &e; });
     return ret;
 }
@@ -339,8 +331,34 @@ template <typename C>
 auto
 pointers(const C& c) {
     typedef typename std::decay_t<C>::value_type CV;
-    sca::vector<const CV*> ret(sca::size(c));
+    std::vector<const CV*> ret(sca::size(c));
     std::transform(c.begin(), c.end(), ret.begin(), [](const CV& e){ return &e; });
+    return ret;
+}
+
+//------------------------------------------------------------------------------
+// values
+
+/**
+ * @brief return a container of deep value copies (never pointers) from a container of values or pointers 
+ *
+ * If input argument is a container of pointers, those pointers are dereferenced 
+ * before copying.
+ *
+ * Useful when operations on the result of a call to `sca::pointers()` are
+ * complete and a copy of pointed values is required. It is also useful when 
+ * copying an arbitrary container or slice into a vector.
+ *
+ * @param c a container of values or pointers
+ * @return a container of value copies
+ */
+template <typename C>
+auto 
+values(C&& c) {
+    typedef typename std::decay_t<C>::value_type CV;
+    typedef typename std::decay_t<std::remove_pointer_t<CV>> BCV; // base container value type
+    std::vector<BCV> ret(sca::size(c));
+    detail::values(typename std::is_pointer<CV>::type(), ret.begin(), c.begin(), c.end());
     return ret;
 }
 
@@ -523,14 +541,8 @@ mslice(C& c, size_t idx, size_t len) {
 template <typename C, typename C2, typename... Cs>
 auto
 group(C&& c, C2&& c2, Cs&&... cs) {
-    sca::to_vector_t<C> ret(detail::sum(sca::size(c), sca::size(c2), sca::size(cs)...));
-
-    detail::group(
-            ret.begin(), 
-            std::forward<C>(c), 
-            std::forward<C2>(c2), 
-            std::forward<Cs>(cs)...);
-
+    detail::to_vector_t<C> ret(detail::sum(sca::size(c), sca::size(c2), sca::size(cs)...));
+    detail::group(ret.begin(), std::forward<C>(c), std::forward<C2>(c2), std::forward<Cs>(cs)...);
     return ret;
 }
 
@@ -545,11 +557,28 @@ group(C&& c, C2&& c2, Cs&&... cs) {
 template <typename C>
 auto
 reverse(C&& c) {
-    using DC = std::decay_t<C>;
-    sca::vector<typename DC::value_type> res(sca::size(c));
-    detail::range_transfer(detail::is_lvalue_ref_t<C>(), res.begin(), c.begin(), c.end());
-    std::reverse(res.begin(), res.end());
-    return res; 
+    detail::to_vector_t<C> ret(sca::size(c));
+    detail::range_transfer(detail::is_lvalue_ref_t<C>(), ret.begin(), c.begin(), c.end());
+    std::reverse(ret.begin(), ret.end());
+    return ret; 
+}
+
+//------------------------------------------------------------------------------
+// sort 
+
+/**
+ * @brief return a container whose elements are sorted based on a comparison Callable
+ * @param c container whose elements will be copied and sorted in the output
+ * @param cmp a function which must accept two elements from the container and return a boolean
+ * @return a sorted container of elements 
+ */
+template <typename C, typename F>
+auto
+sort(C&& c, F&& cmp) {
+    detail::to_vector_t<C> ret(sca::size(c));
+    detail::range_transfer(detail::is_lvalue_ref_t<C>(), ret.begin(), c.begin(), c.end());
+    std::sort(ret.begin(), ret.end(), cmp);
+    return ret;
 }
 
 //------------------------------------------------------------------------------
@@ -564,8 +593,7 @@ reverse(C&& c) {
 template <typename F, typename C>
 auto
 filter(F&& f, C&& c) {
-    typedef std::decay_t<C> DC;
-    sca::vector<typename DC::value_type> ret(sca::size(c));
+    detail::to_vector_t<C> ret(sca::size(c));
     size_t cur = 0;
 
     for(auto& e : c) {
@@ -586,7 +614,7 @@ filter(F&& f, C&& c) {
  * @brief evaluate function with the elements of containers grouped by index and return a container filled with the results of each function call
  *
  * Evaluation begins at index 0, and ends when every traversible element in 
- * container c has been iterated. It returns an `sca::vector<T>` (where `T` is 
+ * container c has been iterated. It returns an `std::vector<T>` (where `T` is 
  * the deduced return value of user function `f`) containing the result of 
  * every invocation of user function `f`.
  *
@@ -601,7 +629,7 @@ filter(F&& f, C&& c) {
 template <typename F, typename C, typename... Cs>
 auto
 map(F&& f, C&& c, Cs&&... cs) {
-    sca::vector<detail::callable_elem_return_t<F,C,Cs...>> ret(sca::size(c));
+    std::vector<detail::callable_elem_return_t<F,C,Cs...>> ret(sca::size(c));
     detail::map(ret.begin(), c.begin(), c.end(), cs.begin()...);
     return ret;
 }

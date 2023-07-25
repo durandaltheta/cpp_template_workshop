@@ -78,37 +78,13 @@ TEST(lesson_2, type_decay) {
     int i = 3;
     const int& ref_i = i;
     {
-        bool val = std::is_same<int,decltype(ref_i)>::value;
-        EXPECT_FALSE(val);
+        bool is_same = std::is_same<int,decltype(ref_i)>::value;
+        EXPECT_FALSE(is_same);
     }
 
     {
-        bool val = std::is_same<int,std::decay<decltype(ref_i)>::type>::value;
-        EXPECT_TRUE(val);
-    }
-}
-
-TEST(lesson_2, to) {
-    std::list<int> l{1,2,3};
-    std::vector<double> v{1.0,2.0,3.0};
-    std::forward_list<std::string> fl{"hello"," world"};
-
-    {
-        auto out = sca::to<std::vector<int>>(l);
-        auto val = std::is_same<std::vector<int>,decltype(out)>::value;
-        EXPECT_TRUE(val);
-    }
-
-    {
-        auto out = sca::to<std::list<double>>(v);
-        auto val = std::is_same<std::list<double>,decltype(out)>::value;
-        EXPECT_TRUE(val);
-    }
-
-    {
-        auto out = sca::to<std::list<std::string>>(fl);
-        auto val = std::is_same<std::list<std::string>,decltype(out)>::value;
-        EXPECT_TRUE(val);
+        bool is_same = std::is_same<int,std::decay<decltype(ref_i)>::type>::value;
+        EXPECT_TRUE(is_same);
     }
 }
 
@@ -118,8 +94,8 @@ TEST(lesson_2, reverse) {
 
     {
         auto out = sca::reverse(fl);
-        auto val = std::is_same<std::vector<int>,decltype(out)>::value;
-        EXPECT_TRUE(val);
+        auto is_same = std::is_same<std::vector<int>,decltype(out)>::value;
+        EXPECT_TRUE(is_same);
         EXPECT_EQ(3, out[0]);
         EXPECT_EQ(2, out[1]);
         EXPECT_EQ(1, out[2]);
@@ -127,8 +103,8 @@ TEST(lesson_2, reverse) {
 
     {
         auto out = sca::reverse(l);
-        auto val = std::is_same<std::vector<std::string>,decltype(out)>::value;
-        EXPECT_TRUE(val);
+        auto is_same = std::is_same<std::vector<std::string>,decltype(out)>::value;
+        EXPECT_TRUE(is_same);
         EXPECT_EQ(std::string(" gal"), out[0]);
         EXPECT_EQ(std::string(" ragtime"), out[1]);
         EXPECT_EQ(std::string(" my"), out[2]);
@@ -143,8 +119,8 @@ TEST(lesson_2, group) {
         std::forward_list<int> fl{5,6};
 
         auto out = sca::group(l, fl, v);
-        auto val = std::is_same<std::vector<int>,decltype(out)>::value;
-        EXPECT_TRUE(val);
+        auto is_same = std::is_same<std::vector<int>,decltype(out)>::value;
+        EXPECT_TRUE(is_same);
         auto cmp = std::vector<int>{3,4,5,6,1,2};
         EXPECT_EQ(cmp, out);
     }
@@ -155,8 +131,8 @@ TEST(lesson_2, group) {
         std::vector<std::string> v{" foo","faa"};
 
         auto out = sca::group(l, fl, v);
-        auto val = std::is_same<std::vector<std::string>,decltype(out)>::value;
-        EXPECT_TRUE(val);
+        auto is_same = std::is_same<std::vector<std::string>,decltype(out)>::value;
+        EXPECT_TRUE(is_same);
         auto cmp = std::vector<std::string>{"hello", " my", " name", " is", " foo", "faa"};
         EXPECT_EQ(cmp, out);
     }
@@ -164,11 +140,10 @@ TEST(lesson_2, group) {
 
 namespace lesson_2_ns {
 
-// compare elements of a container to the values pointed to by the elements of
-// another container
+// compare elements of a container to the values pointed to by the elements of another container
 template <typename Container, typename PointerContainer>
 void
-compare_container_to_pointer_container(Container&& c, PointerContainer&& pc) {
+cmp_cont_to_pnt_cont(Container&& c, PointerContainer&& pc) {
     auto cit = c.begin();
     auto pcit = pc.begin();
 
@@ -194,15 +169,15 @@ TEST(lesson_2, pointers) {
         auto outv = sca::pointers(cvr);
         auto outl = sca::pointers(clr);
         auto outfl = sca::pointers(cflr);
-        auto valv = std::is_same<std::vector<const int*>,decltype(outv)>::value;
-        auto vall = std::is_same<std::vector<const int*>,decltype(outl)>::value;
-        auto valfl = std::is_same<std::vector<const int*>,decltype(outfl)>::value;
-        EXPECT_TRUE(valv);
-        EXPECT_TRUE(vall);
-        EXPECT_TRUE(valfl);
-        compare_container_to_pointer_container(cvr, outv);
-        compare_container_to_pointer_container(clr, outl);
-        compare_container_to_pointer_container(cflr, outfl);
+        auto is_samev = std::is_same<std::vector<const int*>,decltype(outv)>::value;
+        auto is_samel = std::is_same<std::vector<const int*>,decltype(outl)>::value;
+        auto is_samefl = std::is_same<std::vector<const int*>,decltype(outfl)>::value;
+        EXPECT_TRUE(is_samev);
+        EXPECT_TRUE(is_samel);
+        EXPECT_TRUE(is_samefl);
+        cmp_cont_to_pnt_cont(cvr, outv);
+        cmp_cont_to_pnt_cont(clr, outl);
+        cmp_cont_to_pnt_cont(cflr, outfl);
     }
 
     {
@@ -214,15 +189,15 @@ TEST(lesson_2, pointers) {
         auto outv = sca::pointers(cpv);
         auto outl = sca::pointers(cpl);
         auto outfl = sca::pointers(cpfl);
-        auto valv = std::is_same<std::vector<int*>,decltype(outv)>::value;
-        auto vall = std::is_same<std::vector<int*>,decltype(outl)>::value;
-        auto valfl = std::is_same<std::vector<int*>,decltype(outfl)>::value;
-        EXPECT_TRUE(valv);
-        EXPECT_TRUE(vall);
-        EXPECT_TRUE(valfl);
-        compare_container_to_pointer_container(cpv, outv);
-        compare_container_to_pointer_container(cpl, outl);
-        compare_container_to_pointer_container(cpfl, outfl);
+        auto is_samev = std::is_same<std::vector<int*>,decltype(outv)>::value;
+        auto is_samel = std::is_same<std::vector<int*>,decltype(outl)>::value;
+        auto is_samefl = std::is_same<std::vector<int*>,decltype(outfl)>::value;
+        EXPECT_TRUE(is_samev);
+        EXPECT_TRUE(is_samel);
+        EXPECT_TRUE(is_samefl);
+        cmp_cont_to_pnt_cont(cpv, outv);
+        cmp_cont_to_pnt_cont(cpl, outl);
+        cmp_cont_to_pnt_cont(cpfl, outfl);
     }
 
     {
@@ -246,7 +221,81 @@ TEST(lesson_2, pointers) {
         EXPECT_EQ(2, *(rpv[1]));
         EXPECT_EQ(1, *(rpv[2]));
     }
+}
 
+TEST(lesson_2, values) {
+    using namespace lesson_2_ns;
+
+    const std::vector<int> v{1,2,3};
+
+    // values() copies v
+    {
+        auto vv = sca::values(v);
+        auto is_same = std::is_same<std::vector<int>,decltype(vv)>::value;
+        EXPECT_TRUE(is_same);
+        EXPECT_EQ(v, vv);
+    }
+
+    // values() copies elements of pv, still equal to v
+    {
+        auto pv = sca::pointers(v);
+        auto vv = sca::values(pv);
+        auto is_same = std::is_same<std::vector<int>,decltype(vv)>::value;
+        EXPECT_TRUE(is_same);
+        cmp_cont_to_pnt_cont(vv, pv);
+        EXPECT_EQ(v, vv);
+    }
+}
+
+TEST(lesson_2, sort) {
+
+    const std::vector<int> v{1,2,3};
+    const std::list<int> l{4,5,6};
+    const std::forward_list<int> fl{7,8,9};
+
+    // sort elements
+    {
+        auto cpv = v;
+        auto cpl = l;
+        auto cpfl = fl;
+
+        auto outgrp = sca::group(cpfl, cpl, cpv);
+
+        {
+            auto is_same = std::is_same<std::vector<int>,decltype(outgrp)>::value;
+            EXPECT_TRUE(is_same);
+        }
+
+        EXPECT_EQ(7, outgrp[0]);
+        EXPECT_EQ(8, outgrp[1]);
+        EXPECT_EQ(9, outgrp[2]);
+        EXPECT_EQ(4, outgrp[3]);
+        EXPECT_EQ(5, outgrp[4]);
+        EXPECT_EQ(6, outgrp[5]);
+        EXPECT_EQ(1, outgrp[6]);
+        EXPECT_EQ(2, outgrp[7]);
+        EXPECT_EQ(3, outgrp[8]);
+
+        // sort in ascending order
+        auto outsort = sca::sort(outgrp, [](int a, int b) { return a < b; });
+
+        {
+            auto is_same = std::is_same<std::vector<int>,decltype(outsort)>::value;
+            EXPECT_TRUE(is_same);
+        }
+
+        EXPECT_EQ(1, outsort[0]);
+        EXPECT_EQ(2, outsort[1]);
+        EXPECT_EQ(3, outsort[2]);
+        EXPECT_EQ(4, outsort[3]);
+        EXPECT_EQ(5, outsort[4]);
+        EXPECT_EQ(6, outsort[5]);
+        EXPECT_EQ(7, outsort[6]);
+        EXPECT_EQ(8, outsort[7]);
+        EXPECT_EQ(9, outsort[8]);
+    }
+
+    // sort pointers
     {
         // copy elements from source containers
         auto cpv = v;
@@ -273,16 +322,16 @@ TEST(lesson_2, pointers) {
         EXPECT_EQ(6, *(outgrp[8]));
 
         // sort pointers by pointed values in ascending order
-        std::sort(outgrp.begin(), outgrp.end(), [](int* a, int* b){ return *a < *b; });
-        EXPECT_EQ(1, *(outgrp[0]));
-        EXPECT_EQ(2, *(outgrp[1]));
-        EXPECT_EQ(3, *(outgrp[2]));
-        EXPECT_EQ(4, *(outgrp[3]));
-        EXPECT_EQ(5, *(outgrp[4]));
-        EXPECT_EQ(6, *(outgrp[5]));
-        EXPECT_EQ(7, *(outgrp[6]));
-        EXPECT_EQ(8, *(outgrp[7]));
-        EXPECT_EQ(9, *(outgrp[8]));
+        auto outsort = sca::sort(outgrp, [](int* a, int* b){ return *a < *b; });
+        EXPECT_EQ(1, *(outsort[0]));
+        EXPECT_EQ(2, *(outsort[1]));
+        EXPECT_EQ(3, *(outsort[2]));
+        EXPECT_EQ(4, *(outsort[3]));
+        EXPECT_EQ(5, *(outsort[4]));
+        EXPECT_EQ(6, *(outsort[5]));
+        EXPECT_EQ(7, *(outsort[6]));
+        EXPECT_EQ(8, *(outsort[7]));
+        EXPECT_EQ(9, *(outsort[8]));
 
         // verify original mutable containers are unmodified 
         EXPECT_EQ(v, cpv);

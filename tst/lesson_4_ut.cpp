@@ -139,9 +139,9 @@ TEST(lesson_4, filter) {
     // simple filter
     {
         auto out = sca::filter([](int i) { return i % 2 == 0; }, v);
-        auto val = std::is_same<std::vector<int>,decltype(out)>::value;
+        auto is_same = std::is_same<std::vector<int>,decltype(out)>::value;
         std::vector<int> expect{2,4,6,8,10};
-        EXPECT_TRUE(val);
+        EXPECT_TRUE(is_same);
         EXPECT_EQ(expect, out);
     }
    
@@ -188,9 +188,9 @@ TEST(lesson_4, filter) {
         };
 
         auto out = sca::filter(ascii_filter_non_alphabet_or_space, s);
-        auto val = std::is_same<std::vector<std::string>,decltype(out)>::value;
+        auto is_same = std::is_same<std::vector<std::string>,decltype(out)>::value;
         std::vector<std::string> expect{"hello", " my", " name", " is", " regret"};
-        EXPECT_TRUE(val);
+        EXPECT_TRUE(is_same);
         EXPECT_EQ(expect, out);
     }
 }

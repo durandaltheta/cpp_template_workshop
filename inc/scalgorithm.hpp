@@ -56,15 +56,21 @@ namespace sca { // simple cpp algorithm
 namespace detail {
 
 // ----------------------------------------------------------------------------- 
-// callable_return_type 
+// is_lvalue_ref_t
+
+template <typename C>
+using is_lvalue_ref_t = typename std::is_lvalue_reference<C>::type;
+
+// ----------------------------------------------------------------------------- 
+// callable_return_t 
 
 // handle pre and post c++17 
 #if __cplusplus >= 201703L
 template <typename F, typename... Ts>
-using callable_return_type = typename std::invoke_result<std::decay_t<F>,Ts...>::type;
+using callable_return_t = typename std::invoke_result<std::decay_t<F>,Ts...>::type;
 #else 
 template <typename F, typename... Ts>
-using callable_return_type = typename std::result_of<std::decay_t<F>(Ts...)>::type;
+using callable_return_t = typename std::result_of<std::decay_t<F>(Ts...)>::type;
 #endif
 
 // -----------------------------------------------------------------------------
@@ -91,45 +97,37 @@ size_t size(C& c, std::false_type) {
 }
 
 // ----------------------------------------------------------------------------- 
-// copy_or_move  
+// transfer  
 
-// Copy or move only one value. Keeping this as a separate template removes 
-// having to rewrite templates which need to forward value categories based on 
-// different types than their own type. IE, use the value category of a 
-// `container<T>` to determine the copy/move operation when assigning values 
-// between `container::<T>::iterator`s.
+// Copy or move only one value
 template <typename DEST, typename SRC>
-void copy_or_move(std::true_type, DEST& dst, SRC& src) {
+void transfer(std::true_type, DEST& dst, SRC& src) {
     dst = src;
 }
 
 template <typename DEST, typename SRC>
-void copy_or_move(std::false_type, DEST& dst, SRC& src) {
+void transfer(std::false_type, DEST& dst, SRC& src) {
     dst = std::move(src);
 }
 
-
 // ----------------------------------------------------------------------------- 
-// range_copy_or_move 
+// range_transfer 
 
-// Don't use `std::copy()` or `std::move()` because we want to ensure that 
-// side effects of incrementing iterators are preserved.
-//
-// Think of this as a container and value category aware memcpy() :).
+// Copy or move a range of data to another range of data. Don't use std::copy or 
+// std::move algorithms to preserve the side effects of incrementing iterators
 template <typename DIT, typename IT>
-void range_copy_or_move(std::true_type, DIT&& dst_cur, IT&& src_cur, IT&& src_end) {
+void range_transfer(std::true_type, DIT&& dst_cur, IT&& src_cur, IT&& src_end) {
     for(; src_cur != src_end; ++src_cur, ++dst_cur) {
         *dst_cur = *src_cur;
     }
 }
 
 template <typename DIT, typename IT>
-void range_copy_or_move(std::false_type, DIT&& dst_cur, IT&& src_cur, IT&& src_end) {
+void range_transfer(std::false_type, DIT&& dst_cur, IT&& src_cur, IT&& src_end) {
     for(; src_cur != src_end; ++src_cur, ++dst_cur) {
         *dst_cur = std::move(*src_cur);
     }
 }
-
 
 // ----------------------------------------------------------------------------- 
 // sum 
@@ -144,7 +142,6 @@ size_t sum(V cur_sum, V v, V v2, Values... vs) {
     return sum(cur_sum + v, v2, vs...);
 }
 
-
 // ----------------------------------------------------------------------------- 
 // group operations 
 
@@ -154,10 +151,9 @@ void group(IT&& cur) {
 
 template <typename IT, typename C, typename... Cs>
 void group(IT&& cur, C&& c, Cs&&... cs) {
-    detail::range_copy_or_move(typename std::is_lvalue_reference<C>::type(), cur, c.begin(), c.end());
+    detail::range_transfer(detail::is_lvalue_ref_t<C>(), cur, c.begin(), c.end());
     group(cur, std::forward<Cs>(cs)...);
 }
-
 
 // ----------------------------------------------------------------------------- 
 // advance group 
@@ -176,7 +172,6 @@ void advance_group(IT& it, IT2& it2, ITs&... its) {
     advance_group(it2, its...);
 }
 
-
 // ----------------------------------------------------------------------------- 
 // map
 template <typename F, typename RIT, typename IT, typename... ITs>
@@ -186,7 +181,6 @@ void map(F&& f, RIT&& rit, IT&& it, IT&& it_end, ITs&&... its) {
         advance_group(rit, it, its...);
     }
 }
-
 
 // ----------------------------------------------------------------------------
 // fold
@@ -207,7 +201,6 @@ fold(F& f, R&& init, IT&& it, IT&& it_end, ITs&&... its) {
     return mutable_state;
 }
 
-
 // ----------------------------------------------------------------------------- 
 // each
 template <typename F, typename IT, typename... ITs>
@@ -217,7 +210,6 @@ void each(F&& f, IT&& it, IT&& it_end, ITs&&... its) {
         advance_group(it, its...);
     }
 }
-
 
 // ----------------------------------------------------------------------------
 // all
@@ -237,7 +229,6 @@ all(F&& f, IT&& it, IT&& it_end, ITs&&... its) {
 
     return ret;
 }
-
 
 // ----------------------------------------------------------------------------
 // some
@@ -277,6 +268,9 @@ some(F&& f, IT&& it, IT&& it_end, ITs&&... its) {
 template <typename T>
 using vector = std::vector<T>;
 
+template <typename C>
+using to_vector_t = sca::vector<typename std::decay_t<C>::value_type>;
+
 //------------------------------------------------------------------------------
 // size
 
@@ -303,7 +297,7 @@ template <typename Result, typename C>
 auto
 to(C&& c) {
     Result ret(size(c));
-    detail::range_copy_or_move(typename std::is_lvalue_reference<C>::type(), ret.begin(), c.begin(), c.end());
+    detail::range_transfer(detail::is_lvalue_ref_t<C>(), ret.begin(), c.begin(), c.end());
     return ret;
 }
 
@@ -314,11 +308,10 @@ to(C&& c) {
  * @brief copy the addresses of elements in a container to a new container
  *
  * This a helper mechanism for ensuring all calculations on data are by 
- * reference to a specific set of values. 
- * 
- * This can be useful when operating on large sets of data so that downstream 
- * calculations like `filter()` and `map()` are forced to be efficient even 
- * if user code doesn't properly use references.
+ * reference to a specific set of values. This can be used to simplify 
+ * operations on large sets of data so that downstream calculations like 
+ * `filter()` and `map()` never have to consider values by reference value 
+ * category.
  *
  * This algorithm also useful when sorting data without modifying the source 
  * data's container positions (while still being able to reference the original 
@@ -348,19 +341,10 @@ pointers(const C& c) {
     return ret;
 }
 
-
 //------------------------------------------------------------------------------
 // slice 
 
-/**
- * @brief the underlying type returned by `slice()` representing a subset of a container
- *
- * This object implements `begin()` and `end()`, returning iterators to the 
- * beginning and end of a range of values in the source container.
- *
- * There is no need to use this object directly. `slice()` methods will detect 
- * the necessary template information and return the proper `slice_of` object.
- */
+/// the underlying type returned by `slice()` representing a subset of a container
 template<typename C>
 class slice_of {
     typedef std::decay_t<C> DC;
@@ -522,7 +506,6 @@ mslice(C& c, size_t idx, size_t len) {
     return slice_of<C>(c, idx, len);
 }
 
-
 //------------------------------------------------------------------------------
 // group
 
@@ -537,8 +520,8 @@ mslice(C& c, size_t idx, size_t len) {
 template <typename C, typename C2, typename... Cs>
 auto
 group(C&& c, C2&& c2, Cs&&... cs) {
-    using DC = std::decay_t<C>;
-    sca::vector<typename DC::value_type> ret(detail::sum(size(c), size(c2), size(cs)...));
+    sca::to_vector_t<C> ret(detail::sum(size(c), size(c2), size(cs)...));
+
     detail::group(
             ret.begin(), 
             std::forward<C>(c), 
@@ -548,48 +531,43 @@ group(C&& c, C2&& c2, Cs&&... cs) {
     return ret;
 }
 
-
 //------------------------------------------------------------------------------
 // reverse
 
 /** 
  * @brief return a container where the order of elements is the reverse of the input container
- * @param container an input container 
+ * @param c an input container 
  * @return a new container with elements reversed from the input container
  */
 template <typename C>
 auto
-reverse(C&& container) {
+reverse(C&& c) {
     using DC = std::decay_t<C>;
-    sca::vector<typename DC::value_type> res(size(container));
-    detail::range_copy_or_move(typename std::is_lvalue_reference<C>::type(), res.begin(), container.begin(), container.end());
+    sca::vector<typename DC::value_type> res(size(c));
+    detail::range_transfer(detail::is_lvalue_ref_t<C>(), res.begin(), c.begin(), c.end());
     std::reverse(res.begin(), res.end());
     return res; 
 }
-
 
 //------------------------------------------------------------------------------
 // filter
 
 /**
- * @brief return a container of results for which applying the predicate function returns true on each element of the input container
- *
- * Return container defaults to `std::vector<T>`, where `T` is the type
- * contained in the input container
- *
+ * @brief return a filtered container of elements 
  * @param f a predicate function which gets applied to each element of the input container
- * @param container the input container
+ * @param c the input container 
+ * @return a container of only the elements for which applying the predicate returned `true`
  */
 template <typename F, typename C>
 auto
-filter(F&& f, C&& container) {
+filter(F&& f, C&& c) {
     typedef std::decay_t<C> DC;
-    sca::vector<typename DC::value_type> ret(size(container));
+    sca::vector<typename DC::value_type> ret(size(c));
     size_t cur = 0;
 
-    for(auto& e : container) {
+    for(auto& e : c) {
         if(f(e)) {
-            detail::copy_or_move(typename std::is_lvalue_reference<C>::type(), ret[cur], e);
+            detail::transfer(detail::is_lvalue_ref_t<C>(), ret[cur], e);
             ++cur;
         }
     }
@@ -597,7 +575,6 @@ filter(F&& f, C&& container) {
     ret.resize(cur);
     return ret;
 }
-
 
 //------------------------------------------------------------------------------
 // map 
@@ -622,7 +599,7 @@ template <typename F, typename C, typename... Cs>
 auto
 map(F&& f, C&& c, Cs&&... cs) {
     // get the return type of `f`
-    using FReturnType = detail::callable_return_type<
+    using FReturnType = detail::callable_return_t<
         F,
         typename C::value_type, 
         typename Cs::value_type...>;
@@ -635,20 +612,17 @@ map(F&& f, C&& c, Cs&&... cs) {
 
 }
 
-
 //------------------------------------------------------------------------------
 // fold 
 
 /**
- * @brief perform a calculation on the values stored in a range of indices across one or more containers 
+ * @brief perform a calculation on the elements of containers grouped by index
  *
  * Evaluation ends when traversible element in container c has been iterated. 
  *
  * The argument function must accept the current value as its first argument, 
- * and one or more elements stored in the current index (the count of elements 
- * passed to the function is identical to the number of containers).
- *
- * The value returned by the function becomes the new current value. When all 
+ * and the elements of the argument containers stored in the current index. The 
+ * value returned by the function becomes the new current value. When all 
  * indices have been processed `fold()` will return the final return value of 
  * the function.
  *
@@ -666,7 +640,6 @@ auto
 fold(F&& f, Result&& init, C&& c, Cs&&... cs) {
     return detail::fold(f, std::forward<Result>(init), c.begin(), c.end(), cs.begin()...);
 }
-
 
 //------------------------------------------------------------------------------
 // for_each
@@ -692,16 +665,13 @@ each(F&& f, C&& c, Cs&&... cs) {
     detail::each(f, c.begin(), c.end(), cs.begin()...);
 }
 
-
 //------------------------------------------------------------------------------
 // all
 
 /**
- * @brief verify if all input elements cause the argument function to return `true`
+ * @brief evaluate if a function returns `true` with all the elements of containers grouped by index 
  *
- * The set of elements from all input containers at the current index are
- * simultaneously passed to the predicate function. Element argument ordering 
- * matches the order their source containers appear in the function invocation.
+ * Evaluation ends when traversible element in container c has been iterated. 
  *
  * Each container can contain a different value type as long as the value type 
  * can be passed to the function.
@@ -717,16 +687,13 @@ all(F&& f, C&& c, Cs&&... cs) {
     return detail::all(f, c.begin(), c.end(), cs.begin()...);
 }
 
-
 //------------------------------------------------------------------------------
 // some
 
 /**
- * @brief verify if at least one input elements cause an argument function to return `true`
+ * @brief evaluate if a function returns `true` with at least one of the elements of containers grouped by index 
  *
- * The set of elements from all input containers at the current index are
- * simultaneously passed to the predicate function. Element argument ordering 
- * matches the order their source containers appear in the function invocation.
+ * Evaluation ends when traversible element in container c has been iterated. 
  *
  * Each container can contain a different value type as long as the value type 
  * can be passed to the function.

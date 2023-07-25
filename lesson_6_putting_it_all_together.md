@@ -124,7 +124,7 @@ void user_thread_func() {
     // ... 
 
     {
-        auto lk = g_shared_value.lock();
+        auto lk = g_shared_value.acquire();
 
         // can interact safely with value
         std::cout << lk.value << std::endl;

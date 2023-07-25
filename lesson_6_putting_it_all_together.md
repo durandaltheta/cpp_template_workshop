@@ -147,12 +147,12 @@ int main() {
 All of this illustrates the point that templates expand what is possible in `c++`, potentially improving your code. Therefore, if a feature in a different language seems useful in your `c++` library or project, it may be worth considering how efficiently the concept could be ported.
 
 ## Further examples of well designed API
-I'm a fan of the [scheme](https://www.scheme.com/tspl4/) functional programming language. `scheme` is a `LISP` variant with a focus on efficient, minimal API. It is also one of those languages (alongside `LISP` variants more generally) which incorporate very flexible data processing algorithms. In fact many of the powerful features that pop up in other languages find their roots or were pioneered in practice in the `LISP` family of programming languages. These include:
+I'm a fan of the [scheme](https://www.scheme.com/tspl4/) functional programming language. `scheme` is a `LISP` variant with a focus on efficient, minimal API. It is also one of those languages (alongside `LISP` variants more generally) which incorporate very flexible data processing algorithms. These algorithms consistently find their way in some form into other high level programming languages. In fact many of the most powerful features that pop up in other languages were pioneered in the `LISP` family of programming languages. These include:
 - generics, templates, and macros
 - closures (lambda captures)
 - coroutines (built from continuations)
 
-In fact, these algorithms seem to find their way in some form into most high level programming languages. It should also be noted that `scheme` primarily operates on linked lists instead of arrays or vectors, and their algorithms are normally written against said lists. A short list of some of the most important algorithms: 
+It should also be noted that `scheme` primarily operates on linked lists instead of arrays or vectors, and their algorithms are normally written against said lists. A short list of some of the most `scheme` important algorithms: 
 - [map](https://www.scheme.com/tspl4/control.html#./control:s30): apply a function to elements of one or more lists, returning the results in a list 
 - [for-each](https://www.scheme.com/tspl4/control.html#./control:s33): similar to `map` but does not return a list of values.
 - [fold-left](https://www.scheme.com/tspl4/control.html#./control:s38): perform a calculation on one or more lists by evaluating it with a function with an init value, evaluating from left to right 

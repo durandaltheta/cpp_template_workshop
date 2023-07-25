@@ -92,9 +92,8 @@ This can happen when using `std::thread`s where a signal handler needs to be set
 
 Now you have to do some scary `std::condition_variable` blocking to wait for your child `std::thread` to complete the necessary initialization. Wouldn't it be nice to write a pattern of code which could do this *dangerous* operation *multiple times* in *different ways* with an *undefined number of arguments* that was maintainable from a *single template function*?
 
-Example Solution (if this doesn't make sense right away, consider coming back here throughout the workshop to re-examine with your new knowledge):
+Example Solution (if this doesn't make sense right away, consider coming back here throughout the workshop to re-examine with your new knowledge). In some header:
 ```
-// in some header 
 #include <thread>
 #include <mutex>
 #include <condition_variable>

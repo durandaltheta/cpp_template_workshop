@@ -71,7 +71,11 @@ using callable_return_t = typename std::invoke_result<std::decay_t<F>,Ts...>::ty
 #else 
 template <typename F, typename... Ts>
 using callable_return_t = typename std::result_of<std::decay_t<F>(Ts...)>::type;
-#endif
+#endif 
+
+// return type of applying a function to the elements of containers
+template <typename F, typename... Cs>
+using callable_elem_return_t = callable_return_t<F,typename Cs::value_type...>;
 
 // -----------------------------------------------------------------------------
 // size  
@@ -114,7 +118,7 @@ void transfer(std::false_type, DEST& dst, SRC& src) {
 // range_transfer 
 
 // Copy or move a range of data to another range of data. Don't use std::copy or 
-// std::move algorithms to preserve the side effects of incrementing iterators
+// std::move algorithms to preserve the side effects of incrementing 
 template <typename DIT, typename IT>
 void range_transfer(std::true_type, DIT&& dst_cur, IT&& src_cur, IT&& src_end) {
     for(; src_cur != src_end; ++src_cur, ++dst_cur) {
@@ -190,8 +194,7 @@ template <typename F,
           typename... ITs>
 std::decay_t<R>
 fold(F& f, R&& init, IT&& it, IT&& it_end, ITs&&... its) {
-    using M = std::decay_t<R>;
-    M mutable_state(std::forward<R>(init));
+    std::decay_t<R> mutable_state(std::forward<R>(init));
 
     while(it != it_end) {
         mutable_state = f(std::move(mutable_state), *it, *its...);
@@ -296,7 +299,7 @@ size(C&& c) {
 template <typename Result, typename C>
 auto
 to(C&& c) {
-    Result ret(size(c));
+    Result ret(sca::size(c));
     detail::range_transfer(detail::is_lvalue_ref_t<C>(), ret.begin(), c.begin(), c.end());
     return ret;
 }
@@ -327,7 +330,7 @@ template <typename C>
 auto
 pointers(C& c) {
     typedef typename std::decay_t<C>::value_type CV;
-    sca::vector<CV*> ret(size(c));
+    sca::vector<CV*> ret(sca::size(c));
     std::transform(c.begin(), c.end(), ret.begin(), [](CV& e){ return &e; });
     return ret;
 }
@@ -336,7 +339,7 @@ template <typename C>
 auto
 pointers(const C& c) {
     typedef typename std::decay_t<C>::value_type CV;
-    sca::vector<const CV*> ret(size(c));
+    sca::vector<const CV*> ret(sca::size(c));
     std::transform(c.begin(), c.end(), ret.begin(), [](const CV& e){ return &e; });
     return ret;
 }
@@ -520,7 +523,7 @@ mslice(C& c, size_t idx, size_t len) {
 template <typename C, typename C2, typename... Cs>
 auto
 group(C&& c, C2&& c2, Cs&&... cs) {
-    sca::to_vector_t<C> ret(detail::sum(size(c), size(c2), size(cs)...));
+    sca::to_vector_t<C> ret(detail::sum(sca::size(c), sca::size(c2), sca::size(cs)...));
 
     detail::group(
             ret.begin(), 
@@ -543,7 +546,7 @@ template <typename C>
 auto
 reverse(C&& c) {
     using DC = std::decay_t<C>;
-    sca::vector<typename DC::value_type> res(size(c));
+    sca::vector<typename DC::value_type> res(sca::size(c));
     detail::range_transfer(detail::is_lvalue_ref_t<C>(), res.begin(), c.begin(), c.end());
     std::reverse(res.begin(), res.end());
     return res; 
@@ -562,7 +565,7 @@ template <typename F, typename C>
 auto
 filter(F&& f, C&& c) {
     typedef std::decay_t<C> DC;
-    sca::vector<typename DC::value_type> ret(size(c));
+    sca::vector<typename DC::value_type> ret(sca::size(c));
     size_t cur = 0;
 
     for(auto& e : c) {
@@ -598,18 +601,9 @@ filter(F&& f, C&& c) {
 template <typename F, typename C, typename... Cs>
 auto
 map(F&& f, C&& c, Cs&&... cs) {
-    // get the return type of `f`
-    using FReturnType = detail::callable_return_t<
-        F,
-        typename C::value_type, 
-        typename Cs::value_type...>;
-
-    // determine the return type of this function
-    using Result = sca::vector<FReturnType>;
-    Result ret(size(c));
+    sca::vector<detail::callable_elem_return_t<F,C,Cs...>> ret(sca::size(c));
     detail::map(ret.begin(), c.begin(), c.end(), cs.begin()...);
     return ret;
-
 }
 
 //------------------------------------------------------------------------------

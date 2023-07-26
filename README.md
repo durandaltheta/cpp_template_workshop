@@ -64,7 +64,7 @@ make cpp_template_workshop_ut
 ### Simple C++ Algorithms 
 This repository's `main` branch implements a set of high level algorithms which operate on containers and user Callables. 
 
-[Documentation](https://durandaltheta.github.io/cpp_template_workshop/)
+[Doxygen Documentation](https://durandaltheta.github.io/cpp_template_workshop/)
 
 The header [scalgorithm.hpp](inc/scalgorithm.hpp) and convenience header [scalgorithm](inc/scalgorithm) can be included in a project as-is. They can also be installed on your machine with:
 ```

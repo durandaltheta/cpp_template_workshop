@@ -272,7 +272,7 @@ Iterator group advancement</h1>
 <div class="line">9</div>
 <div class="line">$</div>
 </div><!-- fragment --><h1><a class="anchor" id="autotoc_md42"></a>
-Thunks and Callbacks</h1>
+Callbacks, Thunks, and Variadics</h1>
 <p>One common usecase for template code is implementing callbacks. A callback is a Callable which is executed when an event occurs. The classic example of a callback is executing a function when a state machine processes an event and executes a some event "on entry" function. However the "event" which triggers a callback can be anything, even implicit events, like a Callable being at the front of queue of other callbacks waiting to execute on a worker thread. Another callback usecase is a timer, where a function is executed after a certain amount of time has elapsed.</p>
 <p>But how do we write callback functions? Classically this was done with function pointers and an associated <code>void*</code> data pointer. To keep things simple, lets look at a theoretical worker thread queue which can have functions and data registered for execution on it. In some worker queue header: </p><div class="fragment"><div class="line">struct worker_thread_t { </div>
 <div class="line">    // ...</div>

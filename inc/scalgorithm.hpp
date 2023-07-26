@@ -67,7 +67,7 @@ using to_vector_t = std::vector<typename std::decay_t<C>::value_type>;
 // ----------------------------------------------------------------------------- 
 // container_reference_value_t  
 
-// acquire the value_type of a container (normally T) as a refer (T&)
+// acquire the value_type of a container<T> (normally T) as a reference (T&)
 template <typename C>
 using container_reference_value_t = typename std::decay_t<C>::value_type&;
 

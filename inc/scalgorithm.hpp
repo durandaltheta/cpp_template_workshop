@@ -65,13 +65,14 @@ template <typename C>
 using to_vector_t = std::vector<typename std::decay_t<C>::value_type>;
 
 // ----------------------------------------------------------------------------- 
+// container_reference_value_t  
+
+// acquire the value_type of a container (normally T) as a refer (T&)
+template <typename C>
+using container_reference_value_t = typename std::decay_t<C>::value_type&;
+
+// ----------------------------------------------------------------------------- 
 // callable_return_t 
-
-template <typename C>
-using container_value_type = typename std::decay_t<C>::value_type;
-
-template <typename C>
-using container_reference_value_type = container_value_type<C>&;
 
 // handle pre and post c++17 
 #if __cplusplus >= 201703L
@@ -633,8 +634,8 @@ auto
 map(F&& f, C&& c, Cs&&... cs) {
     typedef detail::callable_return_t<
         F,
-        detail::container_reference_value_type<C>,
-        detail::container_reference_value_type<Cs>...
+        detail::container_reference_value_t<C>,
+        detail::container_reference_value_t<Cs>...
     > FR;
 
     std::vector<FR> ret(sca::size(c));

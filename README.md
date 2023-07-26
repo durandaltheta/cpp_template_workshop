@@ -1,4 +1,4 @@
-# C++ template workshop 2023
+# C++ template workshop 2023 
 
 ## Introduction to templates - building a toolbox 
 Templates are a very powerful tool for writing code in c++. They allow you to do just about everything a C macro would allow (and more!), but with type safety and namespace awareness. My goal in this workshop is to give my knowledge of c++ templates away so that others might benefiti and significantly advance their understanding of c++. 
@@ -61,13 +61,28 @@ make cpp_template_workshop_ut
 ./tst/cpp_template_workshop_ut
 ```
 
+### Simple C++ Algorithms 
+This repository's `main` branch implements a set of high level algorithms which operate on containers and user Callables. 
+
+[Documentation](https://durandaltheta.github.io/cpp_template_workshop_2023/)
+
+The header [scalgorithm.hpp](inc/scalgorithm.hpp) and convenience header [scalgorithm](inc/scalgorithm) can be included in a project as-is. They can also be installed on your machine with:
+```
+cmake .
+make install
+```
+
+One of the targets of this course is to imbue students with the knowledge required to make `template` code of a high enough quality it can be used in real projects. Aside from the unit tests and extra credit work, which test the templates, students can easily experiment with the provided algorithms at their leasure to prove to themselves that what they are learning is, in fact, the real deal.
+
 ### Grading
 Grading for this workshop reflects Elektrobit's employee yearly performance goals scale of 1-5 (1 is bad, 3 is you did your job, 5 is perfect). As such, your score, if used by your manager to influence any of your yearly goals, can easily reason about how well you did and how they should adjust your end of year scores.
 
 - a branch checkout in their user name exists at end of workshop: 1 point
     - if no branch checkout in their user name exists at the end of the workshop I will assume the user has not participated. This means no score, good or bad, will be forwarded to any line manager
 - implement solution provided unit tests
-    - every 25% of unit tests passing grants 1 point (total of 4 points)
+    - every 25% of solution provided unit tests passing grants 1 point (up to a total of 2 points)
+- implement extra credit unit tests
+    - every 25% of extra credit unit tests passing grants 1 point (up to a total of 2 points)
 
 Possible point total: 5
 

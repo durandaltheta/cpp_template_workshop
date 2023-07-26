@@ -1,4 +1,4 @@
-# C++ template workshop 2023 
+# C++ template workshop
 
 ## Introduction to templates - building a toolbox 
 Templates are a very powerful tool for writing code in c++. They allow you to do just about everything a C macro would allow (and more!), but with type safety and namespace awareness. My goal in this workshop is to give my knowledge of c++ templates away so that others might benefiti and significantly advance their understanding of c++. 
@@ -31,7 +31,7 @@ It's true the intended audience of this workshop is not c++ beginners. However, 
 ### What is expected of participants 
 Each participant will be expected to get a series of unit tests passing on a (remote) branch. The `main` branch of this code repository contains *the complete working algorithm code and implemented unit tests*. There is a secondary branch named `student` with much of the algorithm and unit test code either absent or commented out, create your branch from that branch with: 
 ```
-git clone --recurse-submodules git@github.com:durandaltheta/cpp_template_workshop_2023.git && git checkout student && git checkout -b your_branch_name && git push --set-upstream origin your_branch_name
+git clone --recurse-submodules git@github.com:durandaltheta/cpp_template_workshop.git && git checkout student && git checkout -b your_branch_name && git push --set-upstream origin your_branch_name
 ```
 
 NOTE: as implied by the `git` argument `--recurse-submodules`, this repo uses submodules, so clones of this repo will always require `--recurse-submodules` argument if you want unit tests to work :D.
@@ -64,7 +64,7 @@ make cpp_template_workshop_ut
 ### Simple C++ Algorithms 
 This repository's `main` branch implements a set of high level algorithms which operate on containers and user Callables. 
 
-[Documentation](https://durandaltheta.github.io/cpp_template_workshop_2023/)
+[Documentation](https://durandaltheta.github.io/cpp_template_workshop/)
 
 The header [scalgorithm.hpp](inc/scalgorithm.hpp) and convenience header [scalgorithm](inc/scalgorithm) can be included in a project as-is. They can also be installed on your machine with:
 ```

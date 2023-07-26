@@ -1,0 +1,25 @@
+name: CMake
+
+on: [push, pull_request]
+
+env:
+  BUILD_TYPE: Release
+
+jobs:
+  build-and-test:
+    concurrency:  ci-${{ github.ref }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+        with:
+          submodules: "true"
+
+      - name: Configure CMake
+        run: cmake -DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}}
+
+      - name: Build
+        run: make cpp_template_workshop_ut
+
+      - name: Test
+        run: ./tst/cpp_template_workshop_ut

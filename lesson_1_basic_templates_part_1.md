@@ -105,7 +105,6 @@ $
 ## Multiple Template Types
 There's no limitation on the number of templated types a template can have. This allows us to write templates which can take more than one unknown argument type. Rewriting out `add` template:
 ```
-#include <string>
 #include <iostream>
 
 template <typename T, typename T2>
@@ -209,5 +208,43 @@ Executing this program:
 $ ./a.out
 1
 2
+$
+```
+
+## Templates and Iterators 
+Templates are very useful for writing code that utilize iterators because the compiler will deduce the iterator types:
+```
+#include <vector>
+#include <list>
+#include <string>
+#include <iostream>
+
+template <typename IT>
+void print_its(IT cur, IT end) {
+    while(cur != end) {
+        std::cout << *cur;
+        ++cur;
+    }
+
+    std::cout << std::endl;
+}
+
+int main() {
+    std::list<int> l{1,2,3};
+    // `std::string` provides a constructor which can accept `const char*`
+    std::vector<std::string> v{"hello"," ","world!"};
+
+    print_its(l.begin(), l.end());
+    print_its(v.begin(), v.end());
+
+    return 0;
+}
+```
+
+Executing this program:
+```
+$ ./a.out
+123
+hello world!
 $
 ```

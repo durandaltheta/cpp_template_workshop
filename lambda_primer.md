@@ -45,6 +45,17 @@ void func(int a, int b, int c, int d) {
 }
 ```
 
+If no arguments are used by the lambda, then the parenthesis clause `()` after the capture clause `[]` can be omitted:
+```
+#include <iostream>
+#include <string>
+
+int main() {
+    std::cout << []{ return std::string("hello world"); } << std::endl;
+    return 0;
+}
+```
+
 ## Lambda Captures
 Lambdas can also "capture" values or references from the enclosing scope. This is similar to the behavior of functions with global variables or other normal functions. Example:
 ```
@@ -78,6 +89,11 @@ Values or references can be automatically captured as needed if given a '=' or '
 ```
 [=](..){...}; //default automatic const value capture
 [&](..){...}; //default automatic mutable reference capture
+```
+
+The default behavior for by-value captures is that they are automatically `const`. To make by-value captures mutable, the following lambda format must be used with the `mutable` keyword. Note, with this variant the argument parenthesis clause `()` can *never* be omitted:
+```
+[=, ... other captures ...](... required parenthesis clause ...) mutable { ... lambda statements ... }
 ```
 
 Even if a default, automatic capture behavior is specified, additional captures can still be specified that use the same or opposite behavior:

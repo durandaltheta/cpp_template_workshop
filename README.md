@@ -43,7 +43,7 @@ I have provided the solutions for all code in the `main` branch. It is *intended
 - open your branch in your code editor on the left side of your screen (or other monitor)
 - type *BY HAND* each unit test solution (and relevant algorithm implementation in `inc/algorithm.hpp` or `inc/detail/algorithm.hpp`), into your branch
     - *NO COPY PASTE*. The point of this unit test is to force all parts of your brain to engage with the learning process
-- optionally, compile and run the unit tests locally with `cmake . && make cpp_template_2023_ut && tst/cpp_template_workshop_ut`
+- optionally, compile and run the unit tests locally with `cmake . && make cpp_template_workshop_ut && tst/cpp_template_workshop_ut`
     - a single unit test can be run with `tst/cpp_template_workshop_ut unit_test_name`
 - `git add`, `commit`, and `push` your changes to your remote branch 
 - see if the github action succeeds in compiling and the relevant unit tests pass

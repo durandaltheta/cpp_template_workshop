@@ -18,12 +18,12 @@ std::function<function_return_type(arg_0_type, ..., arg_N_type)> object_name;
 object_name = [capture0, ..., captureN](arg0, ..., argN){ statement0; ...; statmentN; };
 ```
 
-Lambdas can be invoked using parenthesis '()' with their required arguments. What this might look like in example code:
+Lambdas can be invoked using parenthesis `()` with their required arguments. What this might look like in example code:
 ```
 #include <functional>
 #include <iostream>
 
-int main(int argc, char** argv) {
+int main() {
     // the "auto" keyword can be used here instead for my_lambda's type
     std::function<int(int,int)> my_lambda = [](int a, int b){ return a + b; };
 
@@ -32,6 +32,7 @@ int main(int argc, char** argv) {
 }
 ```
 
+## Whitespace
 Whitespace is arbitrary in lambdas, and can be written in different ways if the function has many statements:
 ```
 void func(int a, int b, int c, int d) {
@@ -45,6 +46,20 @@ void func(int a, int b, int c, int d) {
 }
 ```
 
+## Inline invocation
+Lambdas can be invoked inline with `()`:
+```
+#include <iostream>
+#include <string>
+
+int main() {
+    // the following prints "3" on the terminal
+    std::cout << [](int i){ return i + 1; }(3) << std::endl;
+    return 0;
+}
+```
+
+## Omitting Parenthesis
 If no arguments are used by the lambda, then the parenthesis clause `()` after the capture clause `[]` can be omitted:
 ```
 #include <iostream>
@@ -56,13 +71,30 @@ int main() {
 }
 ```
 
+## Lambda Return Types 
+The compiler tends to do a pretty good job of deducing the return type of lambdas based on their return statement. However, lambdas can explicitly specify their return type if necessary, something that can be useful the return type is ambiguous. To specify the return type, the following form is used (the arguments parenthesis clause is required `()`):
+```
+[... required capture clause ...](... required arguments clause...) -> ReturnType { ... statements ... }
+```
+
+Usage can look something like this:
+```
+#include <iostream>
+#include <string>
+
+int main() {
+    std::cout << []() -> std::string { return "hello world"; } << std::endl;
+    return 0;
+}
+```
+
 ## Lambda Captures
 Lambdas can also "capture" values or references from the enclosing scope. This is similar to the behavior of functions with global variables or other normal functions. Example:
 ```
 #include <functional>
 #include <iostream>
 
-int main(int argc, char**argv) {
+int main() {
     int a = 2;
     int b = 3;
     auto my_lambda = [a,b](){ return a + b };
@@ -85,15 +117,11 @@ Or by reference:
 
 Capturing by reference allows the user to refer back to the original variable, and potentially modify it. 
 
+## Automatic Lambda Captures
 Values or references can be automatically captured as needed if given a '=' or '&' at the beginning of the capture clause. IE, If the first "variable" in the capture clause is a "=" it will implicitly capture any variable not specified in the clause by value as required. If the first "variable" in the capture clause is instead a "&" values will implicitly be captured by reference instead:
 ```
 [=](..){...}; //default automatic const value capture
 [&](..){...}; //default automatic mutable reference capture
-```
-
-The default behavior for by-value captures is that they are automatically `const`. To make by-value captures mutable, the following lambda format must be used with the `mutable` keyword. Note, with this variant the argument parenthesis clause `()` can *never* be omitted:
-```
-[=, ... other captures ...](... required parenthesis clause ...) mutable { ... lambda statements ... }
 ```
 
 Even if a default, automatic capture behavior is specified, additional captures can still be specified that use the same or opposite behavior:
@@ -102,8 +130,21 @@ Even if a default, automatic capture behavior is specified, additional captures 
 [&,a_local_value,&a_local_reference,...](..){...};
 ```
 
-Lambda captures by value are const by default. This allows lambdas to be dynamically constructed on the stack and to pass around state without modifying it.
+Automatic captures allow for simpler invocations:
+```
+#include <functional>
+#include <iostream>
 
+int main() {
+    int i = 5;
+    int u = 6;
+    std::cout << [=]{ return i + u; }() << std::endl;
+    return 0;
+}
+```
+
+## By Value Const and Mutable Semantics
+Lambda captures by value are const by default. This allows lambdas to be dynamically constructed on the stack and to pass around state without modifying it, potentially implementing some compiler optimization:
 ```
 int high_level_func() {
     int i = 5;
@@ -114,6 +155,27 @@ int high_level_func() {
     auto l = [=]{ return i + u; };
 
     return l(); // return 11
+}
+```
+
+If the user needs to make by value captures mutable, the following lambda format must be used with the `mutable` keyword. Note, with this variant the argument parenthesis clause `()` can *never* be omitted:
+```
+[=, ... other captures ...](... required parenthesis clause ...) mutable { ... lambda statements ... }
+```
+
+With the above format the lambda can write to captures:
+```
+int high_level_func() {
+    int i = 5;
+    int u = 6;
+
+    auto l = [=]() mutable { 
+        ++i;
+        ++u;
+        return i + u; 
+    };
+
+    return l(); // return 13
 }
 ```
 

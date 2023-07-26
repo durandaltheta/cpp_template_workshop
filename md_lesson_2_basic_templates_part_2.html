@@ -65,9 +65,9 @@ $(function() {
 <div class="title">Basic Templates Part 2 </div>  </div>
 </div><!--header-->
 <div class="contents">
-<div class="textblock"><h1><a class="anchor" id="autotoc_md12"></a>
+<div class="textblock"><h1><a class="anchor" id="autotoc_md18"></a>
 Lvalues and Rvalues</h1>
-<h2><a class="anchor" id="autotoc_md13"></a>
+<h2><a class="anchor" id="autotoc_md19"></a>
 What are they?</h2>
 <p><code>lvalue</code>s and <code>rvalue</code>s are a concept in <code>c++</code> called <a href="https://en.cppreference.com/w/cpp/language/value_category">value categories</a>. However, that hyperlinked list is <em>extremely</em> confusing and contains many sub-categories which are commonly also called <code>lvalue</code>s or <code>rvalue</code>s but are in fact some other value type (<code>prvalue</code>, <code>xvalue</code>, etc.).</p>
 <p>Historically, an <code>lvalue</code> might be described as the value on the left side of a statement, whereas an rvalue is on the right side. The classic example is an assignment: </p><div class="fragment"><div class="line">int i_am_an_lvalue = 3; // 3 is an rvalue</div>
@@ -78,7 +78,7 @@ What are they?</h2>
 <p>If you can take the address of an expression, the expression is an lvalue. If the type of an expression is an lvalue reference (e.g., T&amp; or const T&amp;, etc.), that expression is an lvalue. Otherwise, the expression is an rvalue. Conceptually (and typically also in fact), rvalues correspond to temporary objects, such as those returned from functions or created through implicit type conversions. Most literal values (e.g., 10 and 5.3) are also rvalues. </p>
 </blockquote>
 <p>To further simplify what Scott described you can generalize the two value categories as such:</p>
-<h3><a class="anchor" id="autotoc_md14"></a>
+<h3><a class="anchor" id="autotoc_md20"></a>
 rvalue</h3>
 <p>Any variable or object which is going to go out of existence after the current statement. Examples: </p><div class="fragment"><div class="line">int a_variable = 3; // 3 is an rvalue</div>
 <div class="line"> </div>
@@ -93,7 +93,7 @@ rvalue</h3>
 <div class="line">int add_1(int&amp;&amp; i) { // double ampersand reference to i is an rvalue</div>
 <div class="line">    return i + 1;</div>
 <div class="line">}</div>
-</div><!-- fragment --><h3><a class="anchor" id="autotoc_md15"></a>
+</div><!-- fragment --><h3><a class="anchor" id="autotoc_md21"></a>
 lvalue</h3>
 <p>Every other kind of variable or object: </p><div class="fragment"><div class="line">int a_variable; // lvalue</div>
 <div class="line"> </div>
@@ -111,7 +111,7 @@ lvalue</h3>
 <div class="line">    return i - 2;</div>
 <div class="line">}</div>
 </div><!-- fragment --><p>This doesn't capture the <em>exact</em> meaning, you may need to refer to the <a href="https://en.cppreference.com/w/cpp/language/value_category">value categories</a> page for greater detail, but in my experience this is a useful mental model, because the utility this concept brings to <code>c++</code> programming is tied to the idea of something "about to go out of existence" which in turn enables something called "rvalue move semantics".</p>
-<h2><a class="anchor" id="autotoc_md16"></a>
+<h2><a class="anchor" id="autotoc_md22"></a>
 Why are lvalues and rvalues important?</h2>
 <p>In <code>c</code> there are two ways to store data, by-value (variables) and by-reference (pointers). Variables exist at a memory address, while pointers hold the value of <em>another</em> value's memory address.</p>
 <p>Assigning values to variables is called a "deep copy", while assigning a variable to a pointer is a "shallow copy". All this means is that, if the variable is large (some kind of struct or array), deep copying to it is a more expensive operation than shallow copying, which only needs to assign a single value (the memory address). </p><div class="fragment"><div class="line">char str[10]; // a character buffer to hold our string</div>
@@ -130,7 +130,7 @@ Why are lvalues and rvalues important?</h2>
 <div class="line">    *a = b;</div>
 <div class="line">    *b = temp; </div>
 <div class="line">}</div>
-</div><!-- fragment --><h2><a class="anchor" id="autotoc_md17"></a>
+</div><!-- fragment --><h2><a class="anchor" id="autotoc_md23"></a>
 Lvalue and Rvalue References</h2>
 <p>Most objects can be assigned or constructed using rvalues (operations which compiler may write for you if you don't explicitly write them for your objects). But how can we write code which recognizes an argument as an <code>rvalue</code>?</p>
 <p>In <em>non-templates</em> the solution is to denote an <code>rvalue</code> reference by a double ampersand <code>&amp;&amp;</code>, instead of a single ampersand <code>&amp;</code> used in normal (lvalue!) references. In <em>templates</em> the double ampersand <code>&amp;&amp;</code> has special meaning, which we will address later.</p>
@@ -155,9 +155,9 @@ Lvalue and Rvalue References</h2>
 <div class="line"> </div>
 <div class="line">    std::string m_str;</div>
 <div class="line">};</div>
-</div><!-- fragment --><h1><a class="anchor" id="autotoc_md18"></a>
+</div><!-- fragment --><h1><a class="anchor" id="autotoc_md24"></a>
 Forwarding</h1>
-<h2><a class="anchor" id="autotoc_md19"></a>
+<h2><a class="anchor" id="autotoc_md25"></a>
 Moving vs Forwarding</h2>
 <p><code>rvalues</code>, unless explicitly <code>std::move</code>ed or <code>std::forward</code>ed, will be automatically converted to <code>lvalues</code> when passed to subsequent functions in order to limit unintended side effects.</p>
 <p>Forwarding is the method of taking either an <code>rvalue</code> or <code>lvalue</code> passed to a method/function and calling <em>another</em> method/function in such a way as to preserve the <code>rvalue</code>ness/<code>lvalue</code>ness in the subsequent call.</p>
@@ -195,7 +195,7 @@ Moving vs Forwarding</h2>
 <div class="line">    return 0;</div>
 <div class="line">}</div>
 </div><!-- fragment --><p>The takeaway here is that to write efficient template code for all usecases the author may need to incorporate universal references and forwarding. However, it is often <em>much</em> easier to write and maintain template code utilizing universal references and forwarding rather than be forced to write <code>lvalue</code> AND <code>rvalue</code> implementations of methods (where they are required).</p>
-<h2><a class="anchor" id="autotoc_md20"></a>
+<h2><a class="anchor" id="autotoc_md26"></a>
 Universal References in Template Objects</h2>
 <p>An important note here is that the universal reference treatment of the double ampersand <code>&amp;&amp;</code> <em>ONLY</em> takes place in top level templates. If you are writing a template <code>struct</code> or <code>class</code>, and you want to write a template method that uses universal references, you must add an additional <code>template</code> header to your method: </p><div class="fragment"><div class="line">template &lt;typename T&gt;</div>
 <div class="line">struct my_struct {</div>
@@ -216,7 +216,7 @@ Universal References in Template Objects</h2>
 <div class="line">    T m_value;</div>
 <div class="line">};</div>
 </div><!-- fragment --><p>This is behavior may seem strange initially, but it has to do with what stage of compilation the code is being examined by the compiler. Once a template struct has been been constructed by the compiler (like if you wrote the statement <code>my_struct&lt;int&gt; ms;</code>), this forces the compiler to actually generate the final code for that struct (making <code>&amp;&amp;</code> represent <code>rvalue</code> references in calls to <code>my_rvalue_assignment()</code> because that's what the double ampersand means in non-template <code>c++</code> code!). The exception to this bevavior is in sub-templates (like in <code>my_universal_reference_assignment()</code>) which can be left un-generated by the compiler until they are actually called in the code.</p>
-<h1><a class="anchor" id="autotoc_md21"></a>
+<h1><a class="anchor" id="autotoc_md27"></a>
 Type Decay</h1>
 <p>Type decay is the ability to take a template type and remove all references and const modifiers from it. This is useful when you are writing a template which which needs to accept a universal reference but will need to return the base form of that type. This can be done with <code>std::decay_t</code>, part of the <code>&lt;type_traits&gt;</code> standard library: </p><div class="fragment"><div class="line">#include &lt;utility&gt;</div>
 <div class="line">#include &lt;type_traits&gt;</div>
@@ -239,7 +239,7 @@ Type Decay</h1>
 <div class="line">6</div>
 <div class="line">5</div>
 <div class="line">$</div>
-</div><!-- fragment --><h1><a class="anchor" id="autotoc_md22"></a>
+</div><!-- fragment --><h1><a class="anchor" id="autotoc_md28"></a>
 Compiler Behavior with Templates and Inlining</h1>
 <p><a href="https://en.cppreference.com/w/cpp/language/inline">Inlining in c++</a> is the language feature for writing code which can be "copy pasted" by the compiler wherever it is called in code instead of actually triggering a new function call on the stack. Inlining is a useful compiler technique because setting up new function calls on the stack during runtime has its own computation cost, in addition to the cost of actually <em>executing</em> the function.</p>
 <p>Inlining is very similar to <a href="https://gcc.gnu.org/onlinedocs/cpp/Macros.html">macros in c</a>, with the distinction that inlining in <code>c++</code> is actually at the discretion of the compiler (the <code>inline</code> keyword is just a suggestion). Additionally, <code>inline</code> code is namespace aware, unlike macros which blindly paste text. There's also varous edgecases around efficiency and compilation which requires <code>inline</code> functions to be a true function on the stack rather than an effective text copy/paste, which the compiler will handle internally.</p>
@@ -270,7 +270,7 @@ Compiler Behavior with Templates and Inlining</h1>
 </div><!-- fragment --><p>There are some limitations around writing code like this. For instance, header only libraries tend to produce larger binaries because the compiler copy pastes so much code (which also increases program start time as more data has to be loaded into memory to begin execution, even though execution may be faster once started). The fact that portions of a program are not pre-compiled also means that compilation speed can be slower as more code needs to be compiled every time. In the average case this is not going to be a problem when used in a project (remember, templates are used all the time by the standard library, see <code>std::string</code> which is a type alias to an underlying type <code>std::basic_string&lt;CharT&gt;</code> or <code>std::vector&lt;T&gt;</code>), but it is worth considering.</p>
 <p>As a side note, <a href="https://en.cppreference.com/w/cpp/language/lambda">c++ lambdas</a> will also be inlined by the compiler where possible, making them very efficient by default.</p>
 <p>It should be noted that if templates are required as part of a library's API, they are typically <em>required</em> to be implemented in a header, at least for any code where a type needs to be deduced by the user code's compiler.</p>
-<h2><a class="anchor" id="autotoc_md23"></a>
+<h2><a class="anchor" id="autotoc_md29"></a>
 Takeway</h2>
 <p>For almost all developers, the best way to determine your usage of inlining and templates is <em>not</em> to consider the performance beforehand. Except cases where efficiency is a real bottleneck (and even there care must be taken to determine what, when, where and why the bottleneck is occurring), the main advantage to these tools is how much they improve the writability and readability of your code!</p>
 <p>Being able to write libraries which don't require pre-compilation is very useful for distributing code to projects because it is both quicker and easier to install. Another advantage is you can write normal code alongside your templates allowing <em>all relevant</em> code to exist in the same file, rather than creating labyrinthine source and header dependencies and avoid populating your source with early function declarations just to get things to compile. The fact these libraries may add some startup overhead (reading slightly larger executable binary files from the disk) is unlikely to be the bottleneck to meet performance standards <em>in most cases</em>.</p>

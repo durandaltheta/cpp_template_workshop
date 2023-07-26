@@ -282,3 +282,176 @@ $ ./a.out
 9
 $
 ```
+
+## Thunks and Callbacks 
+One common usecase for template code is implementing callbacks. A callback is a Callable which is executed when an event occurs. The classic example of a callback is executing a function when a state machine processes an event and executes a some event "on entry" function. However the "event" which triggers a callback can be anything, even implicit events, like a Callable being at the front of queue of other callbacks waiting to execute on a worker thread. Another callback usecase is a timer, where a function is executed after a certain amount of time has elapsed.
+
+But how do we write callback functions? Classically this was done with function pointers and an associated `void*` data pointer. To keep things simple, lets look at a theoretical worker thread queue which can have functions and data registered for execution on it. In some worker queue header:
+```
+struct worker_thread_t { 
+    // ...
+};
+
+void init_worker_thread(worker_thread_t* worker);
+void launch_worker_thread(worker_thread_t* worker);
+void shutdown_worker_thread(worker_thread_t* worker);
+void schedule_work(worker_thread_t* worker, void(*callback)(void*), void* data);
+```
+
+Then in some user code:
+```
+#include <string.h>
+#include <stdio.h>
+#include "worker_thread.h"
+
+// ...
+
+void print_something(void* data) {
+    printf("%s\n",(const char*)data);
+}
+
+// ...
+
+int main() {
+    int retval = 0;
+    // ...
+    worker_thread_t my_worker;
+    init_worker_thread(&my_worker);
+    launch_worker_thread(&my_worker);
+    // ...
+    schedule_work(&my_worker, print_something, "hello world!");
+    // ...
+    shutdown_worker_thread(&my_worker);
+    // ...
+    return retval;
+}
+```
+
+Executing this might look something like:
+```
+$ ./a.out 
+// ... potentially other things printed ...
+hello world!
+// ... potentially other things printed ...
+$
+```
+
+You could do something similar with `c++` Functors which implement some base type that a worker object understands:
+```
+#include <iostream>
+#include "worker_thread.hpp"
+
+struct worker_thread { 
+    // ...
+    struct callback {
+        virtual ~callback() { };
+        virtual void execute() = 0;
+    };
+    // ...
+    worker_thread();
+    void launch();
+    void shutdown();
+    void schedule_work(callback* cb);
+    // ...
+};
+
+struct user_callback : public worker_thread::callback {
+    virtual void execute() {
+        // ...
+        std::cout << "hello world!" << std::endl;
+        // ...
+    }
+};
+
+// ... 
+
+int main() {
+    int retval = 0;
+    // ...
+    worker_thread wt;
+    wt.launch();
+    // ...
+    wt.schedule_work(new user_callback);
+    // ...
+    wt.shutdown();
+    // ...
+    return retval;
+}
+```
+
+The output of such a function would be similar to the previous. Both of these techniques are clunky, they require lots of boilerplate and nothing is too convenient about them other than the fact that they *work*. But can templates help us make something better? Behold the noble `c++` thunk:
+```
+typedef std::function<void()> thunk;
+```
+
+A [thunk](https://stackoverflow.com/questions/2641489/what-is-a-thunk) is conceptually just a function (or Functor) that when called does something, although its purpose is abstracted from the calling code. They typically don't return anything (unless the user is implementing a [trampoline](https://en.wikipedia.org/wiki/Trampoline_(computing))). `std::function<void()>` is capable of holding any callable and therefore is an excellent replacement for both function pointer/void* data pairs and Functor inheritance. 
+
+However, with templates we can do even better, we can convert *any* Callable into a thunk using templated lambda captures:
+```
+template <typename F, typename... As>
+thunk to_thunk(F&& f, As&&... as) {
+    return [=]() mutable { f(std::forward<As>(as)...); };
+}
+```
+
+If we rewrite out worker thread with this in mind we can achieve great things:
+```
+struct worker_thread { 
+    typedef std::function<void()> thunk;
+
+    // ...
+    worker_thread();
+    void launch();
+    void shutdown();
+    void schedule_work(thunk);
+
+    // wrap non-thunks as a thunk
+    template <typename F, typename... As>
+    void schedule_work(F&& f, As&&... as) {
+        schedule_work(thunk([=]() mutable { f(std::forward<As>(as)...); }));
+    }
+    // ...
+};
+```
+
+Now we are free to wildly execute callbacks with great abandon:
+```
+#include <iostream>
+#include "worker_thread.hpp"
+
+void print_something(const char* s) {
+    std::cout << s << std::endl;
+}
+
+struct my_functor {
+    void operator()(const char* s) {
+        std::cout << s << std::endl;
+    }
+};
+
+int main() {
+    int retval = 0;
+    // ...
+    worker_thread wt;
+    wt.launch();
+    // ...
+    wt.schedule_work(print_something, "this is print_something!");
+    wt.schedule_work(my_functor(), "this is my_functor!");
+    wt.schedule_work([](const char* s) { std::cout << s << std::endl; }, "this is my lambda!");
+    // ...
+    wt.shutdown();
+    // ...
+    return retval;
+}
+```
+
+You of course get:
+```
+$ ./a.out 
+// ... potentially other output ...
+this is print_something!
+this is my_functor!
+this is my lambda!
+// ... potentially other output ...
+$
+```

@@ -271,6 +271,142 @@ Iterator group advancement</h1>
 <div class="line">7</div>
 <div class="line">9</div>
 <div class="line">$</div>
+</div><!-- fragment --><h1><a class="anchor" id="autotoc_md43"></a>
+Thunks and Callbacks</h1>
+<p>One common usecase for template code is implementing callbacks. A callback is a Callable which is executed when an event occurs. The classic example of a callback is executing a function when a state machine processes an event and executes a some event "on entry" function. However the "event" which triggers a callback can be anything, even implicit events, like a Callable being at the front of queue of other callbacks waiting to execute on a worker thread. Another callback usecase is a timer, where a function is executed after a certain amount of time has elapsed.</p>
+<p>But how do we write callback functions? Classically this was done with function pointers and an associated <code>void*</code> data pointer. To keep things simple, lets look at a theoretical worker thread queue which can have functions and data registered for execution on it. In some worker queue header: </p><div class="fragment"><div class="line">struct worker_thread_t { </div>
+<div class="line">    // ...</div>
+<div class="line">};</div>
+<div class="line"> </div>
+<div class="line">void init_worker_thread(worker_thread_t* worker);</div>
+<div class="line">void launch_worker_thread(worker_thread_t* worker);</div>
+<div class="line">void shutdown_worker_thread(worker_thread_t* worker);</div>
+<div class="line">void schedule_work(worker_thread_t* worker, void(*callback)(void*), void* data);</div>
+</div><!-- fragment --><p>Then in some user code: </p><div class="fragment"><div class="line">#include &lt;string.h&gt;</div>
+<div class="line">#include &lt;stdio.h&gt;</div>
+<div class="line">#include &quot;worker_thread.h&quot;</div>
+<div class="line"> </div>
+<div class="line">// ...</div>
+<div class="line"> </div>
+<div class="line">void print_something(void* data) {</div>
+<div class="line">    printf(&quot;%s\n&quot;,(const char*)data);</div>
+<div class="line">}</div>
+<div class="line"> </div>
+<div class="line">// ...</div>
+<div class="line"> </div>
+<div class="line">int main() {</div>
+<div class="line">    int retval = 0;</div>
+<div class="line">    // ...</div>
+<div class="line">    worker_thread_t my_worker;</div>
+<div class="line">    init_worker_thread(&amp;my_worker);</div>
+<div class="line">    launch_worker_thread(&amp;my_worker);</div>
+<div class="line">    // ...</div>
+<div class="line">    schedule_work(&amp;my_worker, print_something, &quot;hello world!&quot;);</div>
+<div class="line">    // ...</div>
+<div class="line">    shutdown_worker_thread(&amp;my_worker);</div>
+<div class="line">    // ...</div>
+<div class="line">    return retval;</div>
+<div class="line">}</div>
+</div><!-- fragment --><p>Executing this might look something like: </p><div class="fragment"><div class="line">$ ./a.out </div>
+<div class="line">// ... potentially other things printed ...</div>
+<div class="line">hello world!</div>
+<div class="line">// ... potentially other things printed ...</div>
+<div class="line">$</div>
+</div><!-- fragment --><p>You could do something similar with <code>c++</code> Functors which implement some base type that a worker object understands: </p><div class="fragment"><div class="line">#include &lt;iostream&gt;</div>
+<div class="line">#include &quot;worker_thread.hpp&quot;</div>
+<div class="line"> </div>
+<div class="line">struct worker_thread { </div>
+<div class="line">    // ...</div>
+<div class="line">    struct callback {</div>
+<div class="line">        virtual ~callback() { };</div>
+<div class="line">        virtual void execute() = 0;</div>
+<div class="line">    };</div>
+<div class="line">    // ...</div>
+<div class="line">    worker_thread();</div>
+<div class="line">    void launch();</div>
+<div class="line">    void shutdown();</div>
+<div class="line">    void schedule_work(callback* cb);</div>
+<div class="line">    // ...</div>
+<div class="line">};</div>
+<div class="line"> </div>
+<div class="line">struct user_callback : public worker_thread::callback {</div>
+<div class="line">    virtual void execute() {</div>
+<div class="line">        // ...</div>
+<div class="line">        std::cout &lt;&lt; &quot;hello world!&quot; &lt;&lt; std::endl;</div>
+<div class="line">        // ...</div>
+<div class="line">    }</div>
+<div class="line">};</div>
+<div class="line"> </div>
+<div class="line">// ... </div>
+<div class="line"> </div>
+<div class="line">int main() {</div>
+<div class="line">    int retval = 0;</div>
+<div class="line">    // ...</div>
+<div class="line">    worker_thread wt;</div>
+<div class="line">    wt.launch();</div>
+<div class="line">    // ...</div>
+<div class="line">    wt.schedule_work(new user_callback);</div>
+<div class="line">    // ...</div>
+<div class="line">    wt.shutdown();</div>
+<div class="line">    // ...</div>
+<div class="line">    return retval;</div>
+<div class="line">}</div>
+</div><!-- fragment --><p>The output of such a function would be similar to the previous. Both of these techniques are clunky, they require lots of boilerplate and nothing is too convenient about them other than the fact that they <em>work</em>. But can templates help us make something better? Behold the noble <code>c++</code> thunk: </p><div class="fragment"><div class="line">typedef std::function&lt;void()&gt; thunk;</div>
+</div><!-- fragment --><p>A <a href="https://stackoverflow.com/questions/2641489/what-is-a-thunk">thunk</a> is conceptually just a function (or Functor) that when called does something, although its purpose is abstracted from the calling code. They typically don't return anything (unless the user is implementing a <a href="https://en.wikipedia.org/wiki/Trampoline_(computing)">trampoline</a>). <code>std::function&lt;void()&gt;</code> is capable of holding any callable and therefore is an excellent replacement for both function pointer/void* data pairs and Functor inheritance.</p>
+<p>However, with templates we can do even better, we can convert <em>any</em> Callable into a thunk using templated lambda captures: </p><div class="fragment"><div class="line">template &lt;typename F, typename... As&gt;</div>
+<div class="line">thunk to_thunk(F&amp;&amp; f, As&amp;&amp;... as) {</div>
+<div class="line">    return [=]() mutable { f(std::forward&lt;As&gt;(as)...); };</div>
+<div class="line">}</div>
+</div><!-- fragment --><p>If we rewrite out worker thread with this in mind we can achieve great things: </p><div class="fragment"><div class="line">struct worker_thread { </div>
+<div class="line">    typedef std::function&lt;void()&gt; thunk;</div>
+<div class="line"> </div>
+<div class="line">    // ...</div>
+<div class="line">    worker_thread();</div>
+<div class="line">    void launch();</div>
+<div class="line">    void shutdown();</div>
+<div class="line">    void schedule_work(thunk);</div>
+<div class="line"> </div>
+<div class="line">    // wrap non-thunks as a thunk</div>
+<div class="line">    template &lt;typename F, typename... As&gt;</div>
+<div class="line">    void schedule_work(F&amp;&amp; f, As&amp;&amp;... as) {</div>
+<div class="line">        schedule_work(thunk([=]() mutable { f(std::forward&lt;As&gt;(as)...); }));</div>
+<div class="line">    }</div>
+<div class="line">    // ...</div>
+<div class="line">};</div>
+</div><!-- fragment --><p>Now we are free to wildly execute callbacks with great abandon: </p><div class="fragment"><div class="line">#include &lt;iostream&gt;</div>
+<div class="line">#include &quot;worker_thread.hpp&quot;</div>
+<div class="line"> </div>
+<div class="line">void print_something(const char* s) {</div>
+<div class="line">    std::cout &lt;&lt; s &lt;&lt; std::endl;</div>
+<div class="line">}</div>
+<div class="line"> </div>
+<div class="line">struct my_functor {</div>
+<div class="line">    void operator()(const char* s) {</div>
+<div class="line">        std::cout &lt;&lt; s &lt;&lt; std::endl;</div>
+<div class="line">    }</div>
+<div class="line">};</div>
+<div class="line"> </div>
+<div class="line">int main() {</div>
+<div class="line">    int retval = 0;</div>
+<div class="line">    // ...</div>
+<div class="line">    worker_thread wt;</div>
+<div class="line">    wt.launch();</div>
+<div class="line">    // ...</div>
+<div class="line">    wt.schedule_work(print_something, &quot;this is print_something!&quot;);</div>
+<div class="line">    wt.schedule_work(my_functor(), &quot;this is my_functor!&quot;);</div>
+<div class="line">    wt.schedule_work([](const char* s) { std::cout &lt;&lt; s &lt;&lt; std::endl; }, &quot;this is my lambda!&quot;);</div>
+<div class="line">    // ...</div>
+<div class="line">    wt.shutdown();</div>
+<div class="line">    // ...</div>
+<div class="line">    return retval;</div>
+<div class="line">}</div>
+</div><!-- fragment --><p>You of course get: </p><div class="fragment"><div class="line">$ ./a.out </div>
+<div class="line">// ... potentially other output ...</div>
+<div class="line">this is print_something!</div>
+<div class="line">this is my_functor!</div>
+<div class="line">this is my lambda!</div>
+<div class="line">// ... potentially other output ...</div>
+<div class="line">$</div>
 </div><!-- fragment --> </div></div><!-- contents -->
 </div><!-- PageDoc -->
 <!-- start footer part -->

@@ -9,11 +9,11 @@
 #include <gtest/gtest.h> 
 
 TEST(lesson_6, map) {
-    {
-        const std::vector<int> v{1,2,3};
-        const std::list<int> l{4,5,6};
-        const std::forward_list<int> fl{7,8,9};
+    const std::vector<int> v{1,2,3};
+    const std::list<int> l{4,5,6};
+    const std::forward_list<int> fl{7,8,9};
 
+    {
         auto out = sca::map([](int a, int b, int c) { return a+b+c; }, v, l, fl);
         auto is_same = std::is_same<std::vector<int>,decltype(out)>::value;
         EXPECT_TRUE(is_same);
@@ -28,9 +28,10 @@ TEST(lesson_6, map) {
     }
 
     {
-        std::vector<int> v{1,2,3};
-        std::list<int> l{4,5,6};
-        std::forward_list<int> fl{7,8,9};
+        // copies
+        auto cpv = v;
+        auto cpl = l;
+        auto cpfl = fl;
 
         // mapped Callables can accept references 
         auto add_and_reset = [](int& a, int& b, int& c) {
@@ -41,27 +42,27 @@ TEST(lesson_6, map) {
             return sum;
         };
 
-        auto out = sca::map(add_and_reset, v, l, fl);
+        auto out = sca::map(add_and_reset, cpv, cpl, cpfl);
 
         EXPECT_EQ(12, out[0]);
         EXPECT_EQ(15, out[1]);
         EXPECT_EQ(18, out[2]);
 
-        EXPECT_EQ(3, sca::size(v));
+        EXPECT_EQ(3, sca::size(cpv));
 
-        for(auto& e : v) {
+        for(auto& e : cpv) {
             EXPECT_EQ(0, e);
         }
 
-        EXPECT_EQ(3, sca::size(l));
+        EXPECT_EQ(3, sca::size(cpl));
 
-        for(auto& e : l) {
+        for(auto& e : cpl) {
             EXPECT_EQ(1, e);
         }
 
-        EXPECT_EQ(3, sca::size(fl));
+        EXPECT_EQ(3, sca::size(cpfl));
 
-        for(auto& e : fl) {
+        for(auto& e : cpfl) {
             EXPECT_EQ(2, e);
         }
     }
@@ -103,6 +104,7 @@ TEST(lesson_6, all) {
         const std::vector<int> v{1,2,3,4,5,6};
         const std::vector<int> v2{2,4,6};
         const std::vector<int> v3{1,3,5};
+        const std::vector<int> v4{};
 
         auto is_even = [](int i) { return i % 2 == 0; };
         auto is_odd = [](int i) { return i % 2 != 0; };
@@ -117,6 +119,9 @@ TEST(lesson_6, all) {
 
         out = sca::all(is_even, v3);
         EXPECT_FALSE(out);
+
+        out = sca::all(is_even, v4);
+        EXPECT_TRUE(out);
         
         out = sca::all(is_odd, v);
         EXPECT_FALSE(out);
@@ -126,19 +131,30 @@ TEST(lesson_6, all) {
 
         out = sca::all(is_odd, v3);
         EXPECT_TRUE(out);
+
+        out = sca::all(is_odd, v4);
+        EXPECT_TRUE(out);
     }
 
     {
-        const std::forward_list<std::string> l{"I", " ", "am", " ", "a", " ", "stick!"};
-        const std::list<std::string> fl{"I", " ", "am", "groot", ""};
+        const std::forward_list<std::string> fl{"I", " ", "am", " ", "a", " ", "stick!"};
+        const std::list<std::string> l{"I", " ", "am", "groot", ""};
+        const std::vector<std::string> v{"","",""};
+        const std::vector<std::string> ve{};
 
         auto not_empty = [](const std::string& e) { return e != std::string(""); };
 
-        auto out = sca::all(not_empty, l);
+        auto out = sca::all(not_empty, fl);
         EXPECT_TRUE(out);
 
-        out = sca::all(not_empty, fl);
+        out = sca::all(not_empty, l);
         EXPECT_FALSE(out);
+        
+        out = sca::all(not_empty, v);
+        EXPECT_FALSE(out);
+        
+        out = sca::all(not_empty, ve);
+        EXPECT_TRUE(out);
     }
 }
 
@@ -147,6 +163,7 @@ TEST(lesson_6, some) {
         const std::vector<int> v{1,2,3,4,5,6};
         const std::vector<int> v2{2,4,6};
         const std::vector<int> v3{1,3,5};
+        const std::vector<int> v4{};
 
         auto is_even = [](int i) { return i % 2 == 0; };
         auto is_odd = [](int i) { return i % 2 != 0; };
@@ -161,6 +178,9 @@ TEST(lesson_6, some) {
 
         out = sca::some(is_even, v3);
         EXPECT_FALSE(out);
+
+        out = sca::some(is_even, v4);
+        EXPECT_FALSE(out);
         
         out = sca::some(is_odd, v);
         EXPECT_TRUE(out);
@@ -170,19 +190,30 @@ TEST(lesson_6, some) {
 
         out = sca::some(is_odd, v3);
         EXPECT_TRUE(out);
+
+        out = sca::some(is_odd, v4);
+        EXPECT_FALSE(out);
     }
 
     {
-        const std::forward_list<std::string> l{"I", " ", "am", " ", "a", " ", "stick!"};
-        const std::list<std::string> fl{"I", " ", "am", "groot", ""};
+        const std::forward_list<std::string> fl{"I", " ", "am", " ", "a", " ", "stick!"};
+        const std::list<std::string> l{"I", " ", "am", "groot", ""};
+        const std::vector<std::string> v{"","",""};
+        const std::vector<std::string> ve{};
 
         auto not_empty = [](const std::string& e) { return e != std::string(""); };
 
-        auto out = sca::some(not_empty, l);
+        auto out = sca::some(not_empty, fl);
         EXPECT_TRUE(out);
 
-        out = sca::some(not_empty, fl);
+        out = sca::some(not_empty, l);
         EXPECT_TRUE(out);
+        
+        out = sca::some(not_empty, v);
+        EXPECT_FALSE(out);
+
+        out = sca::some(not_empty, ve);
+        EXPECT_FALSE(out);
     }
 }
 

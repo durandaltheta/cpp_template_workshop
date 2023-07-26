@@ -65,11 +65,11 @@ $(function() {
 <div class="title">Putting it All Together </div>  </div>
 </div><!--header-->
 <div class="contents">
-<div class="textblock"><h1><a class="anchor" id="autotoc_md45"></a>
+<div class="textblock"><h1><a class="anchor" id="autotoc_md44"></a>
 What now?</h1>
 <p>The techniques covered in the previous lessons are all I'm going to explicitly teach in this course, they are already a pretty good foundation. There are many minor sub-features of templates, many helper structs and functions in the standard library, and many composite techniques which build on the essentials. All of these are nice but they don't matter until you explicitly need them, and they can be discovered as necessary when you need them.</p>
 <p>What's more important now is to consider the question: <em>how</em> should I write <em>my</em> templates?</p>
-<h1><a class="anchor" id="autotoc_md46"></a>
+<h1><a class="anchor" id="autotoc_md45"></a>
 Keep it simple stupid</h1>
 <p>In my opinion, good templates are not about what's possible, they are about what's helpful. Therefore, you should <a href="https://en.wikipedia.org/wiki/Principle_of_least_astonishment">follow the principle of least surprise</a>.</p>
 <p>A programmer using your templates has very many things they need to do in their day, learning the ins and outs of your particular flavor of template library code doesn't need to be one of them. In almost every case, a developer's most pressing concern is getting their code working correctly, not forming the perfect algorithm.</p>
@@ -122,11 +122,11 @@ Keep it simple stupid</h1>
 <li>The name <code>init_thread</code> and types <code>InitFunction</code>, <code>Function</code>, <code>OptionalArgs</code> succinctly describe their purpose</li>
 <li>The overall design only adds one new argument above <code>std::thread::thread()</code>, it would be difficult to simplify it further</li>
 </ul>
-<h1><a class="anchor" id="autotoc_md47"></a>
+<h1><a class="anchor" id="autotoc_md46"></a>
 The clockwork internals</h1>
 <p>With all that said about simplicity of API, my experience has simultaneously shown that the <em>internals</em> of template code can as complicated as necessary in order to better solve problems. As long as the API is thoroughly tested, the user doesn't have to learn <em>how</em> it works, only be confident it <em>will</em> work.</p>
 <p>This doesn't mean that complexity should be blindly accepted within template internals, as over-complexity may be a sign of bad design. Only, the template author shouldn't feel inhibited by adding complexity where it is warranted.</p>
-<h1><a class="anchor" id="autotoc_md48"></a>
+<h1><a class="anchor" id="autotoc_md47"></a>
 Expanding on the foundations of the language</h1>
 <p>Templates allow the creation of new <code>c++</code> language features that may be entirely outside of the design scope of the base language and standard library. While not always necessary or desirable, in some cases it may be worth considering using new ideas.</p>
 <p>For example, in the Rust programming language, they have a different philosophy of how mutexes work. The <a href="https://doc.rust-lang.org/std/sync/struct.Mutex.html">rust std::sync::Mutex object</a> is both a value and a lower level mutex. In order to read or write to the stored value, the user must first lock the <code>std::sync::Mutex</code> object which returns another object that contains the (Rust equivalent to a) reference to the value. This design eleminates an entire class of issues arising from accessing shared values because it forces users to correctly lock their data while also helping to scope the lifetime of that lock.</p>
@@ -190,7 +190,7 @@ Expanding on the foundations of the language</h1>
 <div class="line">    // ...</div>
 <div class="line">}</div>
 </div><!-- fragment --><p>All of this illustrates the point that templates expand what is possible in <code>c++</code>, potentially improving your code. Therefore, if a feature in a different language seems useful in your <code>c++</code> library or project, it may be worth considering how efficiently the concept could be ported.</p>
-<h1><a class="anchor" id="autotoc_md49"></a>
+<h1><a class="anchor" id="autotoc_md48"></a>
 Further examples of well designed API</h1>
 <p>I'm a fan of the <a href="https://www.scheme.com/tspl4/">scheme</a> functional programming language. <code>scheme</code> is a <code>LISP</code> variant with a focus on efficient, minimal API. It is also one of those languages (alongside <code>LISP</code> variants more generally) which incorporate very flexible data processing algorithms. These algorithms consistently find their way in some form into other high level programming languages. In fact many of the most powerful features that pop up in other languages were pioneered in the <code>LISP</code> family of programming languages. These include:</p><ul>
 <li>generics, templates, and macros</li>

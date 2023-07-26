@@ -72,7 +72,7 @@ int main() {
 ```
 
 ## Lambda Return Types 
-The compiler tends to do a pretty good job of deducing the return type of lambdas based on their return statement. However, lambdas can explicitly specify their return type if necessary, something that can be useful the return type is ambiguous. To specify the return type, the following form is used (the arguments parenthesis clause is required `()`):
+The compiler tends to do a pretty good job of deducing the return type of lambdas based on their return statement. However, lambdas can explicitly specify their return type if necessary, something that can be useful when the return type is ambiguous. To specify the return type, the following form is used (the arguments parenthesis clause is required `()`):
 ```
 [... required capture clause ...](... required arguments clause...) -> ReturnType { ... statements ... }
 ```

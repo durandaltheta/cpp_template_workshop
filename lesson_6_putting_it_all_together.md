@@ -1,4 +1,4 @@
-# Putting it all together 
+# Putting it All Together 
 ## What now?
 The techniques covered in the previous lessons are all I'm going to explicitly teach in this course, they are already a pretty good foundation. There are many minor sub-features of templates, many helper structs and functions in the standard library, and many composite techniques which build on the essentials. All of these are nice but they don't matter until you explicitly need them, and they can be discovered as necessary when you need them.
 
@@ -19,11 +19,6 @@ When attempting to address a problem with a template consider these factors:
 
 Think back to the `init_thread` example in the README.md:
 ```
-#include <thread>
-#include <mutex>
-#include <condition_variable>
-#include <memory>
-
 template <typename InitFunction, typename Function, typename... OptionalArgs>
 std::thread init_thread(InitFunction&& init_f, Function&& f, OptionalArgs&&... args) {
     // figure out the scary synchronization once
@@ -56,7 +51,9 @@ std::thread init_thread(InitFunction&& init_f, Function&& f, OptionalArgs&&... a
         }
     }
 
-    return std::move(thd);
+    // don't need to move local variable, compiler will use copy elision 
+    // https://en.cppreference.com/w/cpp/language/copy_elision
+    return thd; 
 }
 ```
 
@@ -94,13 +91,13 @@ struct value_guard {
 
     // intialize value T during constructor
     template <typename... As>
-    static value_guard(As&&... as) : 
+    value_guard(As&&... as) : 
         m_t(std::forward<As>(as)...)
     { }
 
     // Acquire a locked unique_lock containing a reference to stored value T.
     inline value_guard::unique_lock acquire() {
-        return unique_lock{std::unique_lock<MUTEX>(m_mtx), *m_t};
+        return unique_lock{std::unique_lock<MUTEX>(m_mtx), m_t};
     }
 
 private:

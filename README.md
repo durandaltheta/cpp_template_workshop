@@ -131,7 +131,9 @@ std::thread init_thread(InitFunction&& init_f, Function&& f, OptionalArgs&&... a
         }
     }
 
-    return std::move(thd);
+    // don't need to move local variable, compiler will use copy elision 
+    // https://en.cppreference.com/w/cpp/language/copy_elision
+    return thd; 
 }
 ```
 
@@ -191,21 +193,4 @@ Here are the links to all the lesson notes. We will meet regularly (probably eve
   [unit tests](tst/lesson_3_ut.cpp)
 - [Lesson 4: Callables](lesson_4_callables.md) -- [unit tests](tst/lesson_4_ut.cpp)
 - [Lesson 5: Variadic Templates](lesson_5_variadic_templates.md) -- [unit tests](tst/lesson_5_ut.cpp)
-
-### Callables
-#### Callables - Techniques - SFINAE Callable argument type detection 
-#### Callables - Techniques - SFINAE Callable return value type detection 
-
-### Variadics
-#### Variadics - Techniques - variadic rvalue iterator trampolines
-
-### Putting it all together 
-#### Building API - broad functionality versus selecting sane defaults
-#### Building API - composability
-#### unit tests
-##### unit test - map(func, container0, ..., containerN)
-##### unit test - fold(func, container0, ..., containerN)
-##### unit test - detail::all(func, ItOut, It0Begin, It0End, It1, It2, ..., ItN)
-##### unit test - detail::some(func, ItOut, It0Begin, It0End, It1, It2, ..., ItN)
-##### unit test - all(func, container0, ..., containerN)
-##### unit test - some(func, container0, ..., containerN)
+- [Lesson 6: Putting it All Together](lesson_6_putting_it_all_together.md) -- [unit tests](tst/lesson_6_ut.cpp)

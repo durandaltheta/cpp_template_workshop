@@ -67,6 +67,12 @@ using to_vector_t = std::vector<typename std::decay_t<C>::value_type>;
 // ----------------------------------------------------------------------------- 
 // callable_return_t 
 
+template <typename C>
+using container_value_type = typename std::decay_t<C>::value_type;
+
+template <typename C>
+using container_reference_value_type = container_value_type<C>&;
+
 // handle pre and post c++17 
 #if __cplusplus >= 201703L
 template <typename F, typename... Ts>
@@ -75,10 +81,6 @@ using callable_return_t = typename std::invoke_result<std::decay_t<F>,Ts...>::ty
 template <typename F, typename... Ts>
 using callable_return_t = typename std::result_of<std::decay_t<F>(Ts...)>::type;
 #endif 
-
-// return type of applying a function to the elements of containers
-template <typename F, typename... Cs>
-using callable_elem_return_t = callable_return_t<F,typename Cs::value_type...>;
 
 // -----------------------------------------------------------------------------
 // size  
@@ -629,8 +631,14 @@ filter(F&& f, C&& c) {
 template <typename F, typename C, typename... Cs>
 auto
 map(F&& f, C&& c, Cs&&... cs) {
-    std::vector<detail::callable_elem_return_t<F,C,Cs...>> ret(sca::size(c));
-    detail::map(ret.begin(), c.begin(), c.end(), cs.begin()...);
+    typedef detail::callable_return_t<
+        F,
+        detail::container_reference_value_type<C>,
+        detail::container_reference_value_type<Cs>...
+    > FR;
+
+    std::vector<FR> ret(sca::size(c));
+    detail::map(std::forward<F>(f), ret.begin(), c.begin(), c.end(), cs.begin()...);
     return ret;
 }
 

@@ -30,7 +30,7 @@ std::string convert_to_string(std::string&& s) {
     return std::move(s);
 }
 
-// lis_sameue overloads explicitly return a reference to avoid copying
+// lvalue overloads explicitly return a reference to avoid copying
 std::string& convert_to_string(std::string& s) {
     return s;
 }
@@ -64,21 +64,21 @@ std::string concatenate(As&&... as) {
 TEST(lesson_5, concatenate) {
     using namespace lesson_5_ns;
 
-    // concatenate 3 ris_sameue `std::string`s
+    // concatenate 3 rvalue `std::string`s
     {
         auto s = concatenate(std::string("foo"), std::string(" "), std::string("faa"));
         EXPECT_EQ(std::string("foo faa"), s);
     }
     
-    // concatenate 2 ris_sameue `std::string`s and an lis_sameue `std::string`
+    // concatenate 2 rvalue `std::string`s and an lvalue `std::string`
     {
         std::string third("faa");
         auto s = concatenate(std::string("foo"), std::string(" "), third);
         EXPECT_EQ(std::string("foo faa"), s);
     }
     
-    // concatenate 1 ris_sameue `std::string`s, an lis_sameue `std::string`, and
-    // a const lis_sameue `std::string`
+    // concatenate 1 rvalue `std::string`s, an lvalue `std::string`, and
+    // a const lvalue `std::string`
     {
         const std::string first("foo");
         std::string third("faa");
@@ -229,8 +229,8 @@ TEST(lesson_5, detail_fold) {
 
     {
         // sum 1 vector at a time
-        auto sum = [](int cur_sum, int new_is_sameue) { 
-            return cur_sum + new_is_sameue; 
+        auto sum = [](int cur_sum, int new_value) { 
+            return cur_sum + new_value; 
         };
         
         auto out = sca::detail::fold(sum, 0, v1.begin(), v1.end());
@@ -240,8 +240,8 @@ TEST(lesson_5, detail_fold) {
 
     {
         // sum 2 vectors simultaneously
-        auto sum = [](int cur_sum, int new_is_sameue_1, int new_is_sameue_2) { 
-            return cur_sum + new_is_sameue_1 + new_is_sameue_2; 
+        auto sum = [](int cur_sum, int new_value_1, int new_value_2) { 
+            return cur_sum + new_value_1 + new_value_2; 
         };
 
         auto out = sca::detail::fold(sum, 0, v1.begin(), v1.end(), v2.begin());

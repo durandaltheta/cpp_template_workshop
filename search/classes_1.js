@@ -1,5 +1,4 @@
 var searchData=
 [
-  ['functor_5f1_38',['Functor_1',['../structlesson__4__ns_1_1_functor__1.html',1,'lesson_4_ns']]],
-  ['functor_5f2_39',['Functor_2',['../structlesson__4__ns_1_1_functor__2.html',1,'lesson_4_ns']]]
+  ['has_5fsize_31',['has_size',['../structsca_1_1detail_1_1has__size.html',1,'sca::detail']]]
 ];

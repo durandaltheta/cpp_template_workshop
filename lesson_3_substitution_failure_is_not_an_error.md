@@ -195,4 +195,4 @@ MyString add(MyString s1, Mystring s2) { // this is just as specialized as 'std:
 In the above scenario, because MyString can be cast to a it's parent type `std::string`, the above implementation of `Mystring add(MyString s1, Mystring s2)` is probably unnecessary. However, it will probably be selected by the compiler over `std::string add(std::string,std::string)` should said function be defined.
 
 ## SFINAE challenge 
-Before heading into the unit tests, consider studying the [sfinae challenge section](lesson_3_sfinae_challenge_section.md). This section covers an sfinae example too complicated to be required by this course. HOWEVER, it is a very useful example because of the challenge it presents, so take it as an opportunity to *really grok* some of the concepts presented in this lesson.
+Before heading into the unit tests, consider studying the [sfinae challenge section](sfinae_challenge_section.md). This section covers an sfinae example too complicated to be required by this course. HOWEVER, it is a very useful example because of the challenge it presents, so take it as an opportunity to *really grok* some of the concepts presented in this lesson.

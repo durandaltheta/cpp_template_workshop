@@ -91,6 +91,13 @@ A Gentle Introduction</h1>
 <div class="line"> </div>
 <div class="line">    std::cout &lt;&lt; &quot;lambda output: &quot; &lt;&lt; l(1,2,3,4) &lt;&lt; std::endl;</div>
 <div class="line">}</div>
+</div><!-- fragment --><p>If no arguments are used by the lambda, then the parenthesis clause <code>()</code> after the capture clause <code>[]</code> can be omitted: </p><div class="fragment"><div class="line">#include &lt;iostream&gt;</div>
+<div class="line">#include &lt;string&gt;</div>
+<div class="line"> </div>
+<div class="line">int main() {</div>
+<div class="line">    std::cout &lt;&lt; []{ return std::string(&quot;hello world&quot;); } &lt;&lt; std::endl;</div>
+<div class="line">    return 0;</div>
+<div class="line">}</div>
 </div><!-- fragment --><h1><a class="anchor" id="autotoc_md2"></a>
 Lambda Captures</h1>
 <p>Lambdas can also "capture" values or references from the enclosing scope. This is similar to the behavior of functions with global variables or other normal functions. Example: </p><div class="fragment"><div class="line">#include &lt;functional&gt;</div>
@@ -110,6 +117,7 @@ Lambda Captures</h1>
 </div><!-- fragment --><p>Capturing by reference allows the user to refer back to the original variable, and potentially modify it.</p>
 <p>Values or references can be automatically captured as needed if given a '=' or '&amp;' at the beginning of the capture clause. IE, If the first "variable" in the capture clause is a "=" it will implicitly capture any variable not specified in the clause by value as required. If the first "variable" in the capture clause is instead a "&amp;" values will implicitly be captured by reference instead: </p><div class="fragment"><div class="line">[=](..){...}; //default automatic const value capture</div>
 <div class="line">[&amp;](..){...}; //default automatic mutable reference capture</div>
+</div><!-- fragment --><p>The default behavior for by-value captures is that they are automatically <code>const</code>. To make by-value captures mutable, the following lambda format must be used with the <code>mutable</code> keyword. Note, with this variant the argument parenthesis clause <code>()</code> can <em>never</em> be omitted: </p><div class="fragment"><div class="line">[=, ... other captures ...](... required parenthesis clause ...) mutable { ... lambda statements ... }</div>
 </div><!-- fragment --><p>Even if a default, automatic capture behavior is specified, additional captures can still be specified that use the same or opposite behavior: </p><div class="fragment"><div class="line">[=,&amp;a_local_reference,a_local_value,...](..){...};</div>
 <div class="line">[&amp;,a_local_value,&amp;a_local_reference,...](..){...};</div>
 </div><!-- fragment --><p>Lambda captures by value are const by default. This allows lambdas to be dynamically constructed on the stack and to pass around state without modifying it.</p>

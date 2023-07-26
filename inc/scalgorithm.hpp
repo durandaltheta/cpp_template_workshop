@@ -732,7 +732,7 @@ all(F&& f, C&& c, Cs&&... cs) {
  * @param f a predicate function applied to elements of input containers
  * @param c the first container whose elements will have f applied to 
  * @param cs the optional remaining containers whose elements will have f applied to
- * @return `true` if `f` returns `true` for at least one iterated elements, else `false`
+ * @return `true` if `f` returns `true` for at least one iterated element, else `false`
  */
 template <typename F, typename C, typename... Cs>
 bool 

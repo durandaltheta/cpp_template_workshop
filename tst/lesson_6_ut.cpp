@@ -312,12 +312,37 @@ std::thread init_thread2(InitFunction&& init_f, Function&& f, OptionalArgs&&... 
 
 TEST(lesson_6, extra_credit_init_thread) {
     using namespace lesson_6_ns;
+    
+    auto do_nothing = []{};
+    auto assign_string = [](std::string s){ std::string s2 = s; };
+    auto iterate_count = [](unsigned int ui){ for(unsigned int cnt = ui; cnt; --cnt) { } };
+
+    auto iterate_and_assign = [=](unsigned int ui, std::string s) {
+        for(unsigned int cnt = ui; cnt; --cnt) { 
+            std::string s2 = s;
+        }
+    };
 
     for(size_t cnt = 10000; cnt; --cnt) {
         bool flag = false;
         auto init = [&]{ flag = true; };
-        auto do_nothing = []{};
+
         auto thd = init_thread(init, do_nothing);
+        EXPECT_TRUE(flag);
+        thd.join();
+
+        flag = false;
+        thd = init_thread(init, assign_string, "hello world");
+        EXPECT_TRUE(flag);
+        thd.join();
+
+        flag = false;
+        thd = init_thread(init, iterate_count, 1000);
+        EXPECT_TRUE(flag);
+        thd.join();
+
+        flag = false;
+        thd = init_thread(init, iterate_and_assign, 1000, "the saints go marching on");
         EXPECT_TRUE(flag);
         thd.join();
     }
@@ -327,6 +352,21 @@ TEST(lesson_6, extra_credit_init_thread) {
         auto init = [&]{ flag = true; };
         auto do_nothing = []{};
         auto thd = init_thread2(init, do_nothing);
+        EXPECT_TRUE(flag);
+        thd.join();
+
+        flag = false;
+        thd = init_thread2(init, assign_string, "hello world");
+        EXPECT_TRUE(flag);
+        thd.join();
+
+        flag = false;
+        thd = init_thread2(init, iterate_count, 1000);
+        EXPECT_TRUE(flag);
+        thd.join();
+
+        flag = false;
+        thd = init_thread2(init, iterate_and_assign, 1000, "the saints go marching on");
         EXPECT_TRUE(flag);
         thd.join();
     }

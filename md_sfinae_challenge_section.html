@@ -130,9 +130,13 @@ $(function() {
 <p><code>std::integral_constant&lt;T,T2&gt;</code> is a <code>c++</code> helper struct which has a <code>constexpr</code> method <code>std::integral_constant&lt;T,T2&gt;::operator()()</code> which returns either a <code>std::true_type</code> if the types <code>T</code> and <code>T2</code> are identical or <code>std::false_type</code> otherwise.</p>
 <p>Since said method <code>std::integral_constant&lt;T,T2&gt;::operator()()</code> is a <code>constexpr</code>, the compiler <em>always</em> knows what this return type will be during compilation, allowing us select one of the two implementations of <code>detail::size()</code>:</p>
 <p>If <code>std::true_type</code> (object has a <code>size()</code> method): </p><div class="fragment"><div class="line">template &lt;typename C&gt;</div>
-<div class="line">size_t size(C&amp; c, std::true_type);</div>
+<div class="line">size_t size(C&amp; c, std::true_type) {</div>
+<div class="line">    return c.size(); </div>
+<div class="line">}</div>
 </div><!-- fragment --><p>Otherwise <code>std::false_type</code> (object has no <code>size()</code> method): </p><div class="fragment"><div class="line">template &lt;typename C&gt;</div>
-<div class="line">size_t size(C&amp; c, std::false_type);</div>
+<div class="line">size_t size(C&amp; c, std::false_type) {</div>
+<div class="line">    return std::distance(c.begin(), c.end());</div>
+<div class="line">}</div>
 </div><!-- fragment --> </div></div><!-- contents -->
 </div><!-- PageDoc -->
 <!-- start footer part -->

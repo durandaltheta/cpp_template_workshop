@@ -74,10 +74,11 @@ $(function() {
 <div class="line"> </div>
 <div class="line">template&lt;typename T&gt;</div>
 <div class="line">struct has_size {</div>
+<div class="line">    typedef typename std::decay_t&lt;T&gt; BT; </div>
 <div class="line">    template&lt;typename U, typename U::size_type (U::*)() const&gt; struct SFINAE {};</div>
 <div class="line">    template&lt;typename U&gt; static char test(SFINAE&lt;U, &amp;U::size&gt;*);</div>
 <div class="line">    template&lt;typename U&gt; static int test(...);</div>
-<div class="line">    static const bool has = sizeof(test&lt;T&gt;(0)) == sizeof(char);</div>
+<div class="line">    static const bool has = sizeof(test&lt;BT&gt;(0)) == sizeof(char);</div>
 <div class="line">};</div>
 <div class="line"> </div>
 <div class="line">}</div>
@@ -87,6 +88,8 @@ $(function() {
 <div class="fragment"><div class="line">template&lt;typename T&gt;</div>
 <div class="line">struct has_size {</div>
 </div><!-- fragment --><p>We are defining a placeholder struct named <code>has_size&lt;T&gt;</code>. We need this struct because we need to use SFINAE to determine if type <code>T</code> has a method named <code>size()</code> which returns an unsigned number.</p>
+<div class="fragment"><div class="line">typedef typename std::decay_t&lt;T&gt; BT; </div>
+</div><!-- fragment --><p><code>std::decay&lt;&gt;</code> removes any reference types or constness from the given type <code>T</code>. IE, <code>std::decay&lt;T&amp;&gt;</code>, <code>std::decay&lt;T&amp;&amp;&gt;</code>, <code>std::decay&lt;const T&amp;&gt;</code>, and <code>std::decay&lt;const T&amp;&amp;&gt;</code> are automatically converted to the base type <code>T</code>. This is necessary because the compiler techniques used below only work with base types, not with reference types. We are defining the base type of <code>T</code> as <code>BT</code>, or "base T".</p>
 <div class="fragment"><div class="line">template&lt;typename U, typename U::size_type (U::*)() const&gt; struct SFINAE {};</div>
 </div><!-- fragment --><p>We are declaring a template struct <em>inside</em> of the template struct <code>has_size</code> with potentially a different type <code>U</code> because we don't want the compiler to try to produce the final code <em>yet</em>. Instead, we want to wait to make the final code once the compiler has figured out what type of container <code>U</code> we are dealing with.</p>
 <p>The code <code>U::size_type</code> is specifying that whatever <code>U</code> is <em>must</em> have some type defined called <code>size_type</code>. Every <code>std</code> container defines this type. <code>size_type</code> is always some number type, typically an unsigned integer.</p>
@@ -97,7 +100,7 @@ $(function() {
 <p>This <code>SFINAE</code> object must be able to declare a function pointer to a method <code>U::size</code> as its second template argument. If this template succeeds, this test will be selected and <code>has_size</code> will have a method named <code>test</code> which returns a <code>char</code>. If this is the case, then we know type <code>U</code> has a method <code>size()</code>!</p>
 <div class="fragment"><div class="line">template&lt;typename U&gt; static int test(...);</div>
 </div><!-- fragment --><p>This is a forward declaration of a template method as a fallback in case the previous test template cannot produce valid code (in which case <code>T</code> does <em>NOT</em> have a <code>size()</code> method!).</p>
-<div class="fragment"><div class="line">static const bool has = sizeof(test&lt;T&gt;(0)) == sizeof(char);</div>
+<div class="fragment"><div class="line">static const bool has = sizeof(test&lt;BT&gt;(0)) == sizeof(char);</div>
 </div><!-- fragment --><p><code>has</code> is created by comparing <em>theoretical</em> return value type sizes. Essentially <em>IF</em> the method <code>test&lt;T&gt;</code> was called (remember, <code>T</code> is the type of <code>has_size</code>, the object we checking for a <code>size()</code> method), then <code>sizeof()</code> can determine the byte size of <code>test&lt;T&gt;</code>'s return value.</p>
 <p>Our first <code>test()</code> template returns a <code>char</code>, while the second returns an <code>int</code>, which are guaranteed by the c++ standard to be of <em>different byte sizes</em>.</p>
 <p>If <code>test()</code> returns a <code>char</code>, then <code>T</code> has the function <code>size()</code>. Otherwise if <code>test()</code> returns an <code>int</code>, then <code>T</code> does <em>NOT</em> have the function <code>size()</code>.</p>

@@ -135,14 +135,12 @@ struct wrapped_value {
     template <typename T>
     void set(T& t) {
         ptr = &t;
-        //code = typeid(typename std::decay<T>).hash_code();
         tip = &typeid(typename std::decay<T>);
     }
 
     // return `true` if a value is assigned and the value type matches `T`, else return `false`
     template <typename T>
     bool is() {
-        //return ptr != nullptr && code == typeid(typename std::decay<T>).hash_code();
         return ptr != nullptr && *tip == typeid(typename std::decay<T>);
     }
 

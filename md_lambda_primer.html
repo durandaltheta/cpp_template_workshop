@@ -180,6 +180,23 @@ By Value Const and Mutable Semantics</h1>
 <div class="line">    return l(); // return 13</div>
 <div class="line">}</div>
 </div><!-- fragment --><h1><a class="anchor" id="autotoc_md9"></a>
+Capture Initializers</h1>
+<p>A feature added to <code>c++14</code> is the ability to initialize a capture with a value. This might be useful if the user needs to capture an incremented number: </p><div class="fragment"><div class="line">void some_func() {</div>
+<div class="line">    //...</div>
+<div class="line">    int i = 14;</div>
+<div class="line">    //...</div>
+<div class="line">    auto l = [i = i + 1]{ return i; }; // captured i == 15</div>
+<div class="line">    //... </div>
+<div class="line">}</div>
+</div><!-- fragment --><p>This feature may seem trivial but it allows rvalue <code>std::move()</code> assignment and perfect forwarding using <code>std::forward&lt;T&gt;</code>: </p><div class="fragment"><div class="line">template &lt;typename T&gt;</div>
+<div class="line">void some_func(T&amp;&amp; t) { // t is a universal reference </div>
+<div class="line">    //...</div>
+<div class="line">    auto l = [t = std::forward&lt;T&gt;(t)]{ // captured t is moved or copied as required</div>
+<div class="line">        // do something with t</div>
+<div class="line">    }; </div>
+<div class="line">    //... </div>
+<div class="line">}</div>
+</div><!-- fragment --><h1><a class="anchor" id="autotoc_md10"></a>
 Returning Lambdas</h1>
 <p>Lambdas can also be returned. Functions that take <em>other</em> functions as arguments or return <em>other</em> functions are called "higher order functions":</p>
 <div class="fragment"><div class="line">std::function&lt;int()&gt; high_level_func() {</div>

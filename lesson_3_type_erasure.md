@@ -147,7 +147,15 @@ $
 
 It should be noted that the above technique is only safe when used on values that are part of the same program, you cannot safely use this technique when sending values via inter-process mechanims.
 
-With templates we can improve this process, it is possible to write an object which "wraps" a value of any type using template functions and then can use further templates to unwrap it at runtime:
+### type_info mysteries
+Some things about `std::type_info` are mysterious. For one, I would expect `std::type_info::hash_code()` to return a unique value, but it does not, it only returns a value that is guaranteed to be the same as another `std::type_info` which represents the same type. 
+
+As such it appear that the expected way to compare types are the same is with the `==` operator (`std::type_info::operator==(const type_info& rhs)`). However, we cannot take a copy of the `std::type_info` object all construction and assignment of the type are explicitly deleted, so we can only get a reference to it via `typeid()`. 
+
+However, another related standard library type utility, `std::type_index`, takes a const reference to a `std::type_info` in its constructor. The [std::type_index documentation on cppreference](https://en.cppreference.com/w/cpp/types/type_index) explicitly mentions that its constructor takes a *pointer* to a given `type_info` object. With this we can step out in faith we can do the same, because, wherever the `type_info` object lives, it's a const value and is therefore safe to read at all times (assuming the `type_info` object isn't created as a `thread_local` or some nonsense, though this seems unlikely because it is unnecessary).
+
+## Using type_info in templates
+With templates we can improve the process of type erasure, because is possible to write an object which "wraps" a value of any type using template functions and then can use further templates to unwrap it at runtime:
 ```
 #include <iostream>
 #include <string>
@@ -156,16 +164,15 @@ With templates we can improve this process, it is possible to write an object wh
 struct wrapped_value {
     // assign a value to this value wrapper
     template <typename T>
-    void assign(T& t) {
+    void set(T& t) {
         ptr = &t;
-        // std::decay<> removes const and references from a type
-        code = typeid(typename std::decay<T>).hash_code();
+        tip = &typeid(typename std::decay<T>);
     }
 
     // return `true` if a value is assigned and the value type matches `T`, else return `false`
     template <typename T>
     bool is() {
-        return ptr != std::nullptr && code == typeid(typename std::decay<T>).hash_code();
+        return ptr != nullptr && *tip == typeid(typename std::decay<T>);
     }
 
     // return a reference to the assigned value
@@ -175,8 +182,8 @@ struct wrapped_value {
     }
 
 private:
-    void* ptr = std::nullptr; // default point to nothing
-    size_t code = 0;
+    void* ptr = nullptr;
+    const std::type_info* tip;
 };
 
 void print_wrapped_value(wrapped_value wv) {

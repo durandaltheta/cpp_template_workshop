@@ -65,12 +65,12 @@ $(function() {
 <div class="title">C++ template workshop </div>  </div>
 </div><!--header-->
 <div class="contents">
-<div class="textblock"><h1><a class="anchor" id="autotoc_md57"></a>
+<div class="textblock"><h1><a class="anchor" id="autotoc_md53"></a>
 Introduction to templates - building a toolbox</h1>
 <p>Templates are a very powerful tool for writing code in c++. They allow you to do just about everything a C macro would allow (and more!), but with type safety and namespace awareness. My goal in this workshop is to give my knowledge of c++ templates away so that others might benefit and significantly advance their understanding of c++.</p>
 <p>Even if you never write a single template in production code (though you probably will), this knowledge is <em>extremely</em> useful for reading and understanding existing template code, including standard library code. I did not become an expert in the standard library until I learned templates, for the simple reason that the standard library uses them all over the place :D.</p>
 <p>Be warned, this is <em>not</em> a templates basics course. This course will cover advanced templating, though the first couple of lessons will cover the basics. The intended audience for this course is <em>advanced c++ developers</em>.</p>
-<h2><a class="anchor" id="autotoc_md58"></a>
+<h2><a class="anchor" id="autotoc_md54"></a>
 A note on course design</h2>
 <p>I modeled this course after my favorite programming book <a href="https://www.webpages.uidaho.edu/~stevel/504/LearnPythonTheHardWay.pdf">Learn Python the Hard Way</a>. Said book is for very inexperienced students looking to learn the Python programming language. However, I was so impressed by how <em>successful</em> the book was at educating readers that I decided to steal his ideas :).</p>
 <p>It's true the intended audience of this workshop is not c++ beginners. However, many (or all) will be beginners when it comes to c++ templating, which is a very niche skill :). Here's the opening paragraph from his book, which contains the core ideas I'm seeking to emulate:</p>
@@ -84,7 +84,7 @@ A note on course design</h2>
 </ol>
 <p>That’s it. This will be very difficult at first, but stick with it. If you go through this book, and do each unit test for one or two hours a night, you will have a good foundation for moving onto another book. You might not really learn “programming” from this book, but you will learn the foundation skills you need to start learning the language. This book’s job is to teach you the three most essential skills that a beginning programmer needs to know: Reading and Writing, Attention to Detail, Spotting Differences. </p>
 </blockquote>
-<h2><a class="anchor" id="autotoc_md59"></a>
+<h2><a class="anchor" id="autotoc_md55"></a>
 What is expected of participants</h2>
 <p>Each participant will be expected to get a series of unit tests passing on a (remote) branch. The <code>main</code> branch of this code repository contains <em>the complete working algorithm code and implemented unit tests</em>. There is a secondary branch named <code>student</code> with much of the algorithm and unit test code either absent or commented out, create your branch from that branch with: </p><div class="fragment"><div class="line">git clone --recurse-submodules git@github.com:durandaltheta/cpp_template_workshop.git &amp;&amp; git checkout student &amp;&amp; git checkout -b your_branch_name &amp;&amp; git push --set-upstream origin your_branch_name</div>
 </div><!-- fragment --><p>NOTE: as implied by the <code>git</code> argument <code>--recurse-submodules</code>, this repo uses submodules, so clones of this repo will always require <code>--recurse-submodules</code> argument if you want unit tests to work :D.</p>
@@ -107,14 +107,14 @@ What is expected of participants</h2>
 <div class="line">cmake .</div>
 </div><!-- fragment --><p>To build and run unit tests: </p><div class="fragment"><div class="line">make cpp_template_workshop_ut </div>
 <div class="line">./tst/cpp_template_workshop_ut</div>
-</div><!-- fragment --><h2><a class="anchor" id="autotoc_md60"></a>
+</div><!-- fragment --><h2><a class="anchor" id="autotoc_md56"></a>
 Simple C++ Algorithms</h2>
 <p>This repository's <code>main</code> branch implements a set of high level algorithms which operate on containers and user Callables.</p>
 <p><a href="https://durandaltheta.github.io/cpp_template_workshop/namespacesca.html">Doxygen Algorithm Documentation</a></p>
 <p>The header <a href="inc/scalgorithm.hpp">scalgorithm.hpp</a> and convenience header <a href="inc/scalgorithm">scalgorithm</a> can be included in a project as-is. They can also be installed on your machine with: </p><div class="fragment"><div class="line">cmake .</div>
 <div class="line">make install</div>
 </div><!-- fragment --><p>One of the targets of this course is to imbue students with the knowledge required to make <code>template</code> code of a high enough quality it can be used in real projects. Aside from the unit tests and extra credit work, which test the templates, students can easily experiment with the provided algorithms at their leasure to prove to themselves that what they are learning is, in fact, the real deal.</p>
-<h2><a class="anchor" id="autotoc_md61"></a>
+<h2><a class="anchor" id="autotoc_md57"></a>
 Grading</h2>
 <p>Grading for this workshop reflects Elektrobit's employee yearly performance goals scale of 1-5 (1 is bad, 3 is you did your job, 5 is perfect). As such, your score, if used by your manager to influence any of your yearly goals, can easily reason about how well you did and how they should adjust your end of year scores.</p>
 <ul>
@@ -132,7 +132,7 @@ Grading</h2>
 </li>
 </ul>
 <p>Possible point total: 5</p>
-<h2><a class="anchor" id="autotoc_md62"></a>
+<h2><a class="anchor" id="autotoc_md58"></a>
 Template theory - when to use templates?</h2>
 <p>Here are my opinions on the topic:</p>
 <p>Shorthand Rule:</p><ul>
@@ -233,16 +233,17 @@ Template theory - when to use templates?</h2>
 <div class="line">    g_my_child_1 = init_thread([]{ set_handler(my_child_1_sighdl); }, child_func_1, &quot;everybody wants to rule the&quot;, &quot;world&quot;);</div>
 <div class="line">    g_my_child_2 = init_thread([]{ set_handler(my_child_2_sighdl); }, child_func_2);</div>
 <div class="line">}</div>
-</div><!-- fragment --><h1><a class="anchor" id="autotoc_md63"></a>
+</div><!-- fragment --><h1><a class="anchor" id="autotoc_md59"></a>
 Lesson Notes</h1>
 <p>Here are the links to all the lesson notes. We will meet regularly (probably every 2 weeks or so) where I will go through the lesson notes and have extended question/answer session (if necessary). We can live debug together if necessary, though I can't promise I can immediately solve every problem on the spot :D. The goal is you should do your unit tests sometime in the intervening days, though I won't track your progress (and I don't care! I only care about helping you learn this skill).</p>
 <ul>
 <li><a class="el" href="md_lesson_1_basic_templates_part_1.html">Lesson 1: Basic Templates Part 1</a> &ndash; <a href="tst/lesson_1_ut.cpp">unit tests</a></li>
 <li><a class="el" href="md_lesson_2_basic_templates_part_2.html">Lesson 2: Basic Templates Part 2</a> &ndash; <a href="tst/lesson_2_ut.cpp">unit tests</a></li>
-<li><a class="el" href="md_lesson_3_substitution_failure_is_not_an_error.html">Lesson 3: Substitution Failure Is Not An Error</a> &ndash; <a href="tst/lesson_3_ut.cpp">unit tests</a></li>
-<li><a class="el" href="md_lesson_4_callables.html">Lesson 4: Callables</a> &ndash; <a href="tst/lesson_4_ut.cpp">unit tests</a></li>
-<li><a class="el" href="md_lesson_5_variadic_templates.html">Lesson 5: Variadic Templates</a> &ndash; <a href="tst/lesson_5_ut.cpp">unit tests</a></li>
-<li><a class="el" href="md_lesson_6_putting_it_all_together.html">Lesson 6: Putting it All Together</a> &ndash; <a href="tst/lesson_6_ut.cpp">unit tests</a> </li>
+<li><a class="el" href="md_lesson_3_type_erasure.html">Lesson 3: Type Erasure</a> &ndash;</li>
+<li>Lesson 4: Substitution Failure Is Not An Error &ndash; <a href="tst/lesson_4_ut.cpp">unit tests</a></li>
+<li><a class="el" href="md_lesson_5_callables.html">Lesson 5: Callables</a> &ndash; <a href="tst/lesson_5_ut.cpp">unit tests</a></li>
+<li>Lesson 6: Variadic Templates &ndash; <a href="tst/lesson_6_ut.cpp">unit tests</a></li>
+<li><a class="el" href="md_lesson_7_putting_it_all_together.html">Lesson 7: Putting it All Together</a> &ndash; <a href="tst/lesson_7_ut.cpp">unit tests</a> </li>
 </ul>
 </div></div><!-- contents -->
 </div><!-- PageDoc -->

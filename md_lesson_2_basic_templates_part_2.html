@@ -66,9 +66,45 @@ $(function() {
 </div><!--header-->
 <div class="contents">
 <div class="textblock"><h1><a class="anchor" id="autotoc_md19"></a>
+Template References and Pointers</h1>
+<p>Templates can be written to accept references <code>&amp;</code> and pointers <code>*</code> in the same way as normal functions: </p><div class="fragment"><div class="line">#include &lt;string&gt;</div>
+<div class="line">#include &lt;iostream&gt;</div>
+<div class="line"> </div>
+<div class="line">template &lt;typename T&gt;</div>
+<div class="line">void modify_by_reference(T&amp; t, T new_value) {</div>
+<div class="line">    t = new_value;</div>
+<div class="line">}</div>
+<div class="line"> </div>
+<div class="line">template &lt;typename T&gt;</div>
+<div class="line">void modify_by_pointer(T* t, T new_value) {</div>
+<div class="line">    *t = new_value;</div>
+<div class="line">}</div>
+<div class="line"> </div>
+<div class="line">print_vals(int&amp; i, std::string&amp; s) {</div>
+<div class="line">    std::cout &lt;&lt; &quot;i: &quot; &lt;&lt; i &lt;&lt; &quot;, s: &quot; &lt;&lt; s &lt;&lt; std::endl;</div>
+<div class="line">}</div>
+<div class="line"> </div>
+<div class="line">int main() {</div>
+<div class="line">    int i = 3;</div>
+<div class="line">    std::string s(&quot;foo&quot;);</div>
+<div class="line"> </div>
+<div class="line">    print_vals(i, s);</div>
+<div class="line">    modify_by_reference(i, 4);</div>
+<div class="line">    modify_by_reference(s, &quot;faa&quot;);</div>
+<div class="line">    print_vals(i, s);</div>
+<div class="line">    modify_by_pointere(&amp;i, 5);</div>
+<div class="line">    modify_by_pointer(&amp;s, &quot;goodbye!&quot;);</div>
+<div class="line">    print_vals(i, s);</div>
+<div class="line">    return 0;</div>
+<div class="line">}</div>
+</div><!-- fragment --><p>Executing this program: </p><div class="fragment"><div class="line">$ ./a.out</div>
+<div class="line">i: 3, s: foo</div>
+<div class="line">i: 4, s: faa</div>
+<div class="line">i: 5, s: goodbye! </div>
+<div class="line">$</div>
+</div><!-- fragment --><h1><a class="anchor" id="autotoc_md20"></a>
 Lvalues and Rvalues</h1>
-<h2><a class="anchor" id="autotoc_md20"></a>
-What are they?</h2>
+<p>In <code>c++</code> there is actually more than one kind of reference, there are <code>lvalue</code> and <code>rvalue</code> references.</p>
 <p><code>lvalue</code>s and <code>rvalue</code>s are a concept in <code>c++</code> called <a href="https://en.cppreference.com/w/cpp/language/value_category">value categories</a>. However, that hyperlinked list is <em>extremely</em> confusing and contains many sub-categories which are commonly also called <code>lvalue</code>s or <code>rvalue</code>s but are in fact some other value type (<code>prvalue</code>, <code>xvalue</code>, etc.).</p>
 <p>Historically, an <code>lvalue</code> might be described as the value on the left side of a statement, whereas an rvalue is on the right side. The classic example is an assignment: </p><div class="fragment"><div class="line">int i_am_an_lvalue = 3; // 3 is an rvalue</div>
 </div><!-- fragment --><p>However, the exceptions to this case are enormous, because the right hand side of a statement can <em>very easily</em> be an lvalue: </p><div class="fragment"><div class="line">int i_am_an_lvalue = 3; </div>
@@ -78,8 +114,8 @@ What are they?</h2>
 <p>If you can take the address of an expression, the expression is an lvalue. If the type of an expression is an lvalue reference (e.g., T&amp; or const T&amp;, etc.), that expression is an lvalue. Otherwise, the expression is an rvalue. Conceptually (and typically also in fact), rvalues correspond to temporary objects, such as those returned from functions or created through implicit type conversions. Most literal values (e.g., 10 and 5.3) are also rvalues. </p>
 </blockquote>
 <p>To further simplify what Scott described you can generalize the two value categories as such:</p>
-<h3><a class="anchor" id="autotoc_md21"></a>
-rvalue</h3>
+<h2><a class="anchor" id="autotoc_md21"></a>
+rvalue</h2>
 <p>Any variable or object which is going to go out of existence after the current statement. Examples: </p><div class="fragment"><div class="line">int a_variable = 3; // 3 is an rvalue</div>
 <div class="line"> </div>
 <div class="line">struct my_struct { };</div>
@@ -93,8 +129,8 @@ rvalue</h3>
 <div class="line">int add_1(int&amp;&amp; i) { // double ampersand reference to i is an rvalue</div>
 <div class="line">    return i + 1;</div>
 <div class="line">}</div>
-</div><!-- fragment --><h3><a class="anchor" id="autotoc_md22"></a>
-lvalue</h3>
+</div><!-- fragment --><h2><a class="anchor" id="autotoc_md22"></a>
+lvalue</h2>
 <p>Every other kind of variable or object: </p><div class="fragment"><div class="line">int a_variable; // lvalue</div>
 <div class="line"> </div>
 <div class="line">struct my_struct {</div>
@@ -111,8 +147,8 @@ lvalue</h3>
 <div class="line">    return i - 2;</div>
 <div class="line">}</div>
 </div><!-- fragment --><p>This doesn't capture the <em>exact</em> meaning, you may need to refer to the <a href="https://en.cppreference.com/w/cpp/language/value_category">value categories</a> page for greater detail, but in my experience this is a useful mental model, because the utility this concept brings to <code>c++</code> programming is tied to the idea of something "about to go out of existence" which in turn enables something called "rvalue move semantics".</p>
-<h2><a class="anchor" id="autotoc_md23"></a>
-Why are lvalues and rvalues important?</h2>
+<h1><a class="anchor" id="autotoc_md23"></a>
+Why are lvalues and rvalues important?</h1>
 <p>In <code>c</code> there are two ways to store data, by-value (variables) and by-reference (pointers). Variables exist at a memory address, while pointers hold the value of <em>another</em> value's memory address.</p>
 <p>Assigning values to variables is called a "deep copy", while assigning a variable to a pointer is a "shallow copy". All this means is that, if the variable is large (some kind of struct or array), deep copying to it is a more expensive operation than shallow copying, which only needs to assign a single value (the memory address). </p><div class="fragment"><div class="line">char str[10]; // a character buffer to hold our string</div>
 <div class="line">memset(str, 0, sizeof(str));</div>
@@ -130,8 +166,8 @@ Why are lvalues and rvalues important?</h2>
 <div class="line">    *a = b;</div>
 <div class="line">    *b = temp; </div>
 <div class="line">}</div>
-</div><!-- fragment --><h2><a class="anchor" id="autotoc_md24"></a>
-Lvalue and Rvalue References</h2>
+</div><!-- fragment --><h1><a class="anchor" id="autotoc_md24"></a>
+Lvalue and Rvalue References</h1>
 <p>Most objects can be assigned or constructed using rvalues (operations which compiler may write for you if you don't explicitly write them for your objects). But how can we write code which recognizes an argument as an <code>rvalue</code>?</p>
 <p>In <em>non-templates</em> the solution is to denote an <code>rvalue</code> reference by a double ampersand <code>&amp;&amp;</code>, instead of a single ampersand <code>&amp;</code> used in normal (lvalue!) references. In <em>templates</em> the double ampersand <code>&amp;&amp;</code> has special meaning, which we will address later.</p>
 <p>A simple struct with a lvalue and rvalue constructors/assignment explicitly written: </p><div class="fragment"><div class="line">struct my_struct() {</div>

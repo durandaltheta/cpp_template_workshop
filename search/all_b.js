@@ -8,5 +8,5 @@ var searchData=
   ['slice_5fof_24',['slice_of',['../classsca_1_1slice__of.html',1,'sca']]],
   ['some_25',['some',['../namespacesca.html#addcfb883c20eadaed8da521efdac6d34',1,'sca']]],
   ['sort_26',['sort',['../namespacesca.html#ac51d8227d350b7ace5217c3b4562b869',1,'sca']]],
-  ['substitution_20failure_20is_20not_20an_20error_20_2d_20sfinae_27',['Substitution Failure Is Not An Error - SFINAE',['../md_lesson_3_substitution_failure_is_not_an_error.html',1,'']]]
+  ['substitution_20failure_20is_20not_20an_20error_20_2d_20sfinae_27',['Substitution Failure Is Not An Error - SFINAE',['../md_lesson_4_substitution_failure_is_not_an_error.html',1,'']]]
 ];

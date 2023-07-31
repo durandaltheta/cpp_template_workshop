@@ -65,7 +65,7 @@ $(function() {
 <div class="title">Callables </div>  </div>
 </div><!--header-->
 <div class="contents">
-<div class="textblock"><h1><a class="anchor" id="autotoc_md37"></a>
+<div class="textblock"><h1><a class="anchor" id="autotoc_md40"></a>
 What is a Callable?</h1>
 <p>According to <a href="https://en.cppreference.com/w/cpp/named_req/Callable">cppreference</a> a Callable is: </p><blockquote class="doxtable">
 <p>A Callable type is a type for which the INVOKE and INVOKE&lt;R&gt; operations (used by, e.g., <code>std::function</code>, <code>std::bind</code>, and <code>std::thread::thread</code>) are applicable. </p>
@@ -91,7 +91,7 @@ What is a Callable?</h1>
 <div class="line">    std::function&lt;int()&gt; w(l); // function wrapper w is a Callable</div>
 <div class="line">    return 0;</div>
 <div class="line">}</div>
-</div><!-- fragment --><h1><a class="anchor" id="autotoc_md38"></a>
+</div><!-- fragment --><h1><a class="anchor" id="autotoc_md41"></a>
 Callables and templates</h1>
 <p>Because of SFINAE it is possible to write generic templates which accept Callables as an argument, allowing a broad range of possible argument types: </p><div class="fragment"><div class="line">int f() { // function f is a Callable</div>
 <div class="line">    return 1;</div>
@@ -130,7 +130,7 @@ Callables and templates</h1>
 <div class="line">3</div>
 <div class="line">$</div>
 </div><!-- fragment --><p>A function which accepts another function is known as a <a href="https://en.wikipedia.org/wiki/Higher-order_function">higher order function</a>. Higher order functions are very powerful tools (especially when written as templates!) for encapsulating executable behavior. For instance, a library function can be written that accepts a user Callable as an argument that the library function promises to call when certain conditions are met (a callback). With templated Callables said API can be very flexible instead of rigorously strict.</p>
-<h1><a class="anchor" id="autotoc_md39"></a>
+<h1><a class="anchor" id="autotoc_md42"></a>
 Callable arguments</h1>
 <p>SFINAE also allows the ability to pass arguments to an argument function: </p><div class="fragment"><div class="line">int foo(int i) {</div>
 <div class="line">    return i + 1;</div>
@@ -191,9 +191,9 @@ Callable arguments</h1>
 <div class="line">hello world</div>
 <div class="line">this is a number: 7</div>
 <div class="line">$</div>
-</div><!-- fragment --><h1><a class="anchor" id="autotoc_md40"></a>
+</div><!-- fragment --><h1><a class="anchor" id="autotoc_md43"></a>
 Wrapping Callables as finalized types</h1>
-<p>When a defined type is needed, user Callables can be wrapped inside the <a href="https://en.cppreference.com/w/cpp/utility/functional/function">std::function polymorphic function wrapper</a>. <code>std::function</code> instances use a templating technique called <a href="https://en.wikipedia.org/wiki/Type_erasure">type erasure</a> to remove the <em>actual</em> type from being visible to the holder of an <code>std::function</code> so that only the <code>std::function</code> itself knows what it truly contains.</p>
+<p>When a defined type is needed, user Callables can be wrapped inside the <a href="https://en.cppreference.com/w/cpp/utility/functional/function">std::function polymorphic function wrapper</a> <code>std::function</code> instances using type erasure (see lesson 1).</p>
 <p><code>std::function</code>s are defined with the return value and argument types inside of the template <code>&lt;&gt;</code> brackets following the pattern <code>std::function&lt;ReturnType(Arg1Type, Arg2Type, ..., ArgNType)&gt;</code>: </p><div class="fragment"><div class="line">#include &lt;functional&gt;</div>
 <div class="line"> </div>
 <div class="line">int foo(int i) {</div>
@@ -223,10 +223,11 @@ Wrapping Callables as finalized types</h1>
 <div class="line">4</div>
 <div class="line">$</div>
 </div><!-- fragment --><p>A wrapper like <code>std::function</code> is often necessary when writing parts of code which <em>need</em> to be precompiled (IE, code which is not header only). Combining the concepts of template Callables with <code>std::function</code> allows for all kinds of interesting code.</p>
-<h1><a class="anchor" id="autotoc_md41"></a>
+<h1><a class="anchor" id="autotoc_md44"></a>
 Examining lambdas</h1>
 <p>Lambdas are a type of callable introduced in <code>c++11</code> that I've found both extremely useful and often ill-understood by developers generally. To address this deficit of knowledge I have written this optional <a class="el" href="md_lambda_primer.html">lambda primer</a> as an educational aid for anyone who wants to know more about them.</p>
-<h1><a class="anchor" id="autotoc_md42"></a>
+<p>Be warned, I will not hold back from using lambdas in future examples, so refer to this primer as necessary.</p>
+<h1><a class="anchor" id="autotoc_md45"></a>
 Algorithms and Callables</h1>
 <p>It is possible to write data processing algorithms which incorporate user provided Callables to provide a portion of the implementation. An example of this in the standard library is <a href="https://en.cppreference.com/w/cpp/algorithm/transform">std::transform</a>, which accepts a start <code>cur</code> iterator, an <code>end</code> iterator, an output <code>out</code> iterator, and a Callable. <code>std::transform</code> will iterate from <code>cur</code> to <code>end</code>, callng the Callable with the value pointed to by <code>cur</code> and storing the result in the <code>out</code> iterator. An implemenation of said algorithm might look like: </p><div class="fragment"><div class="line">namespace std {</div>
 <div class="line"> </div>

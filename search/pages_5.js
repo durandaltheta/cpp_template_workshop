@@ -1,4 +1,4 @@
 var searchData=
 [
-  ['variadic_20templates_59',['Variadic Templates',['../md_lesson_5_variadic_templates.html',1,'']]]
+  ['type_20erasure_59',['Type Erasure',['../md_lesson_3_type_erasure.html',1,'']]]
 ];

@@ -118,7 +118,7 @@ $(function() {
 <div class="line">    // use MyClass&#39;s internal standard addition operator</div>
 <div class="line">    return rhs + lhs; </div>
 <div class="line">}</div>
-</div><!-- fragment --><h1><a class="anchor" id="autotoc_md32"></a>
+</div><!-- fragment --><h1><a class="anchor" id="autotoc_md35"></a>
 SFINAE template selection</h1>
 <p>Compiler selection between competing templates in C++ is a bit stranger than you'd expect. When I first started studying this topic I assumed the "first valid definition" the compiler came across to be selected, to match behavior in other parts of the <code>C</code> programming language, like linking after compilation (if multiple identical function definitions are provided to the linker, the first valid one the linker comes across will be selected and the others discarded).</p>
 <p>Instead, <a href="https://stackoverflow.com/questions/15497004/c-template-selection">as described in this answer</a> when the compiler has several valid template candidates available it selects the one that is <em>most specific</em>.</p>
@@ -154,7 +154,7 @@ SFINAE template selection</h1>
 </div><!-- fragment --><p>Executing this program: </p><div class="fragment"><div class="line">$ ./a.out</div>
 <div class="line">ADD 4</div>
 <div class="line">$</div>
-</div><!-- fragment --><h2><a class="anchor" id="autotoc_md33"></a>
+</div><!-- fragment --><h2><a class="anchor" id="autotoc_md36"></a>
 Full Template Specialization</h2>
 <p>There is a concept in <code>c++</code> called <a href="https://en.cppreference.com/w/cpp/language/template_specialization">full template specialization</a> that is very similar to writing a fully specified non-template version of a function. In practice, a full specialization <em>is</em> a fully specified non-template version of a function (just like <code>std::string add(std::string, std::string)</code> in the previous section), but it does it in a different way.</p>
 <p>Instead of simply writing a new template definition, template specializations write versions of <code>template</code> code with the template <code>&lt;&gt;</code> types hard coded: </p><div class="fragment"><div class="line">#include &lt;iostream&gt;</div>
@@ -193,7 +193,7 @@ Full Template Specialization</h2>
 <div class="line">10 </div>
 <div class="line">$</div>
 </div><!-- fragment --><p>Explicit/full template specialization is a complicated topic which is not very useful most of the time, so I will leave further exploration of this topic to the reader.</p>
-<h2><a class="anchor" id="autotoc_md34"></a>
+<h2><a class="anchor" id="autotoc_md37"></a>
 Template and Overload Selection</h2>
 <p>It should be noted that when all other template rules are accounted for, the compiler follows <a href="https://en.cppreference.com/w/cpp/language/overload_resolution">overload resolution rules</a>, such as when dealing with versions of functions accepting objects with different positions in an inheritence tree. For instance: </p><div class="fragment"><div class="line">#include &lt;string&gt; </div>
 <div class="line"> </div>
@@ -205,7 +205,7 @@ Template and Overload Selection</h2>
 <div class="line">    return s1 + s2;</div>
 <div class="line">}</div>
 </div><!-- fragment --><p>In the above scenario, because MyString can be cast to a it's parent type <code>std::string</code>, the above implementation of <code>Mystring add(MyString s1, Mystring s2)</code> is probably unnecessary. However, it will probably be selected by the compiler over <code>std::string add(std::string,std::string)</code> should said function be defined.</p>
-<h1><a class="anchor" id="autotoc_md35"></a>
+<h1><a class="anchor" id="autotoc_md38"></a>
 SFINAE challenge</h1>
 <p>Before heading into the unit tests, consider studying the <a class="el" href="md_sfinae_challenge_section.html">sfinae challenge section</a>. This section covers "method detection", an sfinae example too complicated to be required by this course. HOWEVER, it is a very useful example because of the challenge it presents, so take it as an opportunity to <em>really grok</em> some of the concepts presented in this lesson. </p>
 </div></div><!-- contents -->

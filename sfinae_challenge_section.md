@@ -122,11 +122,15 @@ Since said method `std::integral_constant<T,T2>::operator()()` is a `constexpr`,
 If `std::true_type` (object has a `size()` method):
 ```
 template <typename C>
-size_t size(C& c, std::true_type);
+size_t size(C& c, std::true_type) {
+    return c.size(); 
+}
 ```
 
 Otherwise `std::false_type` (object has no `size()` method):
 ```
 template <typename C>
-size_t size(C& c, std::false_type);
+size_t size(C& c, std::false_type) {
+    return std::distance(c.begin(), c.end());
+}
 ```

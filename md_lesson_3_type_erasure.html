@@ -240,7 +240,7 @@ C++ Templated Type Erasure</h1>
 <div class="line">wrapped value is an int: 3</div>
 <div class="line">wrapped value is a std::string: foo</div>
 <div class="line">$</div>
-</div><!-- fragment --><p><a href="https://en.cppreference.com/w/cpp/utility/any">std::any</a> is a <code>c++17</code> object which can store any type using type erasure. The above is possibly how the <code>c++17</code> object <code>std::any</code> internally encapsulates its data. However, <code>std::any</code> extends the above functionality by implementing enforced type checking via <code>std::bad_any_cast</code> exception throws as well as being able to store an actual value (not just a pointer to a value) and properly destroy said value when the <code>std::any</code> goes out of scope, as necessary. I will leave it to the reader to guess at or research how this is done (hint: function pointers to destructors are involved). </p>
+</div><!-- fragment --><p><a href="https://en.cppreference.com/w/cpp/utility/any">std::any</a> is a <code>c++17</code> object which can store any type using type erasure. Some of the techniques show above are possibly how the <code>c++17</code> object <code>std::any</code> internally encapsulates its data. However, <code>std::any</code> extends the above functionality by implementing enforced type checking via <code>std::bad_any_cast</code> exception throws. <code>std::any</code> can also store an actual value (not just a pointer to a value) and properly destroy said value when the <code>std::any</code> goes out of scope, as necessary. I will leave it to the reader to guess at or research how this is done (hint: function pointers to destructors are involved). </p>
 </div></div><!-- contents -->
 </div><!-- PageDoc -->
 <!-- start footer part -->

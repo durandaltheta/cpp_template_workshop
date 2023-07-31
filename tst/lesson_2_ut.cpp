@@ -392,6 +392,10 @@ struct lvalue_allowed {
         return m_t;
     }
 
+    const T& value() const {
+        return m_t;
+    }
+
 private:
     T m_t;
 };
@@ -420,8 +424,9 @@ private:
 
 }
 
+#ifdef COMPILE_EXTRA_CREDIT
 /*
-Implement the following constructor's initialization list so that
+Implement the following constructors so that
 - lvalue_allowed(const lvalue_allowed&): m_t is initialized via deep copy
 - lvalue_allowed(lvalue_allowed&): m_t is initialized via deep copy
 - lvalue_allowed(T2&&): m_t is initialized via perfect forwarding
@@ -437,12 +442,18 @@ TEST(lesson_2, extra_credit) {
        lvalue_allowed<int> la2(la);
        lvalue_allowed<value_category_aware> la3;
        lvalue_allowed<value_category_aware> la4(la3);
+       const lvalue_allowed<value_category_aware> la5;
+       lvalue_allowed<value_category_aware> la6(la5);
        EXPECT_EQ(3, la.value());
        EXPECT_EQ(3, la2.value());
        EXPECT_FALSE(la3.value().lvalue_constructed);
        EXPECT_FALSE(la3.value().rvalue_constructed);
        EXPECT_TRUE(la4.value().lvalue_constructed);
        EXPECT_FALSE(la4.value().rvalue_constructed);
+       EXPECT_FALSE(la5.value().lvalue_constructed);
+       EXPECT_FALSE(la5.value().rvalue_constructed);
+       EXPECT_TRUE(la6.value().lvalue_constructed);
+       EXPECT_FALSE(la6.value().rvalue_constructed);
     }
 
     {
@@ -455,3 +466,4 @@ TEST(lesson_2, extra_credit) {
     }
 
 }
+#endif

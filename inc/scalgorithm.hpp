@@ -86,13 +86,17 @@ using callable_return_t = typename std::result_of<std::decay_t<F>(Ts...)>::type;
 // -----------------------------------------------------------------------------
 // size  
 
-template<typename T>
-struct has_size {
+template <typename T>
+struct has_size_struct {
+    typedef typename std::decay_t<T> DT; // remove any references from T
     template<typename U, typename U::size_type (U::*)() const> struct SFINAE {};
     template<typename U> static char test(SFINAE<U, &U::size>*);
     template<typename U> static int test(...);
-    static const bool has = sizeof(test<T>(0)) == sizeof(char);
+    static const bool has = sizeof(test<DT>(0)) == sizeof(char);
 };
+
+template <typename T>
+using has_size = std::integral_constant<bool, detail::has_size_struct<T>::has>;
 
 // Get the size of an object with its `size()` method
 template <typename C>
@@ -296,7 +300,7 @@ some(F&& f, IT&& it, IT&& it_end, ITs&&... its) {
 template <typename C>
 size_t // size_t is convertable from all std:: container `size_type`s
 size(C&& c) { 
-    return detail::size(c, std::integral_constant<bool, detail::has_size<C>::has>()); 
+    return detail::size(c, detail::has_size<C>()); 
 }
 
 //------------------------------------------------------------------------------

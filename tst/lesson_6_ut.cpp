@@ -310,6 +310,7 @@ std::thread init_thread2(InitFunction&& init_f, Function&& f, OptionalArgs&&... 
 
 };
 
+#ifdef COMPILE_EXTRA_CREDIT
 TEST(lesson_6, extra_credit_init_thread) {
     using namespace lesson_6_ns;
     
@@ -371,3 +372,4 @@ TEST(lesson_6, extra_credit_init_thread) {
         thd.join();
     }
 }
+#endif

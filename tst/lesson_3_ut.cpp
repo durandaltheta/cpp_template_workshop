@@ -93,6 +93,27 @@ TEST(lesson_3, size) {
     std::list<std::string> l{"one", "two", "three"};
     std::forward_list<double> fl{1.0,2.0,3.0,4.0,5.0};
 
+    {
+        auto is_same = std::is_same<
+            sca::detail::has_size<std::vector<int>>,
+            std::true_type>::value;
+        EXPECT_TRUE(is_same);
+    }
+    
+    {
+        auto is_same = std::is_same<
+            sca::detail::has_size<std::list<int>>,
+            std::true_type>::value;
+        EXPECT_TRUE(is_same);
+    }
+
+    {
+        auto is_same = std::is_same<
+            sca::detail::has_size<std::forward_list<int>>,
+            std::false_type>::value;
+        EXPECT_TRUE(is_same);
+    }
+
     EXPECT_EQ(8, sca::size(v));
     EXPECT_EQ(3, sca::size(l));
     EXPECT_EQ(5, sca::size(fl));
@@ -255,3 +276,109 @@ TEST(lesson_3, mutable_slice) {
         EXPECT_EQ(sl.end(), it);
     }
 }
+
+#ifdef COMPILE_EXTRA_CREDIT
+namespace lesson_3_ns {
+namespace detail {
+
+template<typename T>
+struct has_resize_struct {
+    typedef typename std::decay_t<T> DT; // remove any references from T
+    template<typename U, void (U::*)(typename U::size_type)> struct SFINAE {};
+    template<typename U> static char test(SFINAE<U, &U::resize>*);
+    template<typename U> static int test(...);
+    static const bool has = sizeof(test<T>(0)) == sizeof(char);
+};
+
+template <typename T>
+using has_resize = std::integral_constant<bool, detail::has_resize_struct<T>::has>;
+
+// Resize the container via C::resize() method
+template <typename C>
+void resize(C& c, size_t new_size, std::true_type) { 
+    c.resize(new_size);
+}
+
+// Resize the container via C(size) construction
+template <typename C>
+void resize(C& c, size_t new_size, std::false_type) {
+    c = C(new_size);
+}
+
+}
+
+template <typename C>
+void resize(C& c, size_t new_size) {
+    detail::resize(c, new_size, detail::has_resize<C>()); 
+}
+
+template <typename T>
+struct no_resize {
+    typedef size_t size_type;
+
+    no_resize(size_type sz) : m_sz(sz) { }
+
+    // let compiler generate other constructors
+
+    size_type size() const {
+        return m_sz;
+    }
+
+private:
+    size_type m_sz;
+};
+
+}
+
+/*
+ Implement struct `lesson_3_ns::has_resize` such that `has_resize::has` property
+ is equal to `true` when an object has a `void T::resize(T::size_type)` method, 
+ otherwise `has_resize::has` should equal `false`.
+ */
+TEST(lesson_3, extra_credit) {
+    using namespace lesson_3_ns;
+
+    {
+        auto is_same = std::is_same<
+            detail::has_resize<std::vector<int>>,
+            std::true_type>::value;
+        EXPECT_TRUE(is_same);
+    }
+
+    {
+
+        auto is_same = std::is_same<
+            detail::has_resize<std::list<int>>,
+            std::true_type>::value;
+        EXPECT_TRUE(is_same);
+    }
+
+    {
+        auto is_same = std::is_same<
+            detail::has_resize<no_resize<int>>,
+            std::false_type>::value;
+        EXPECT_TRUE(is_same);
+    }
+
+    {
+        std::vector<int> v(5);
+        EXPECT_EQ(5, sca::size(v));
+        resize(v, 500);
+        EXPECT_EQ(500, sca::size(v));
+    }
+
+    {
+        std::list<std::string> l(5);
+        EXPECT_EQ(5, sca::size(l));
+        resize(l, 50);
+        EXPECT_EQ(50, sca::size(l));
+    }
+
+    {
+        no_resize<double> nr(5);
+        EXPECT_EQ(5, sca::size(nr));
+        resize(nr, 5000);
+        EXPECT_EQ(5000, sca::size(nr));
+    }
+}
+#endif

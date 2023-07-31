@@ -271,9 +271,9 @@ struct worker_thread {
     // guaranteed to be executed before the object is destroyed.
     worker_thread() : 
         // Lambda can use default by-reference capture because 
-        // m_system_thread's lifetime is guaranteed to be tied to the 
+        // m_thread's lifetime is guaranteed to be tied to the 
         // worker_thread's destructor 
-        m_system_thread([&]{
+        m_thread([&]{
             // reads of worker_thread members require a critical section 
             std::unique_lock<std::mutex> lk(m_mtx);
 
@@ -307,16 +307,16 @@ struct worker_thread {
     { }
 
     // virtual destructor ensures anyone who inherits this class will properly 
-    // shutdown m_system_thread
+    // shutdown m_thread
     virtual ~worker_thread() {
         {
             std::lock_guard<std::mutex> lk(m_mtx);
-            // inform m_system_thread to shutdown
+            // inform m_thread to shutdown
             m_running = false;
         }
         
         // wait until underlying system thread ends
-        m_system_thread.join();
+        m_thread.join();
     }
     
     // Schedule an allocated job to ensure that job copies are only deep 
@@ -346,7 +346,7 @@ private:
     bool m_running = true; 
     std::condition_variable m_cv;
     std::deque<std::unique_ptr<job>> m_jobs; 
-    std::thread m_system_thread;
+    std::thread m_thread;
 };
 
 };

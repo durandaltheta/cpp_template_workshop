@@ -65,11 +65,11 @@ $(function() {
 <div class="title">Variadic Templates </div>  </div>
 </div><!--header-->
 <div class="contents">
-<div class="textblock"><h1><a class="anchor" id="autotoc_md43"></a>
+<div class="textblock"><h1><a class="anchor" id="autotoc_md44"></a>
 What does variadic mean?</h1>
 <p>In classic <code>c</code> a <a href="https://en.cppreference.com/w/cpp/utility/variadic">variadic function</a> is a function which takes a variable number of arguments.</p>
 <p>Classic <code>c</code> variadic functions have several limitations. The first is that they aren't templated, but hard-coded, limiting their flexibility when dealing with arbitrary types. The second is that variadic functions operate on raw pointers, which is less ideal than references. The third is that they are evaluated at runtime rather than compile time, preventing the compiler from inlining operations.</p>
-<h1><a class="anchor" id="autotoc_md44"></a>
+<h1><a class="anchor" id="autotoc_md45"></a>
 Parameter packs</h1>
 <p><code>c++11</code> expanded upon the concept of classic variadic functions by introducing a <em>very</em> powerful feature called <a href="https://en.cppreference.com/w/cpp/language/parameter_pack">parameter packs</a> which enable the writing of templates with variable number of arguments.</p>
 <p>A parameter pack uses 3 periods <code>...</code> to distinguish itself from standard template types. A template type can be defined which can represent a variable number of templated types by using the keyword <code>typename...</code>: </p><div class="fragment"><div class="line">template &lt;typename... As&gt;</div>
@@ -103,7 +103,7 @@ Parameter packs</h1>
 <div class="line">    // can use a and as... as normal</div>
 <div class="line">}</div>
 </div><!-- fragment --><p>To be specific, putting the <code>typename...</code> last is a requirement for class templates, but for function templates, parameter packs can appear anywhere.</p>
-<h1><a class="anchor" id="autotoc_md45"></a>
+<h1><a class="anchor" id="autotoc_md46"></a>
 Processing parameter pack elements with recursive templates</h1>
 <p>In the ideal case the developer will not have to process the individual elements of a parameter pack, because the <code>as...</code> variable will resolve to the actual arguments that the compiler can understand.</p>
 <p>However, sometimes you run into situations where the template itself needs to process through the arguments in a parameter pack. A common pattern to deal with parameter pack iteration is to write templates so they process one argument at a time in a recursive fashion. As a reminder, recursion is a programming technique where a function calls itself instead of using a loop construct: </p><div class="fragment"><div class="line">#include &lt;vector&gt;</div>
@@ -181,7 +181,7 @@ Processing parameter pack elements with recursive templates</h1>
 <div class="line">    std::cout &lt;&lt; endl;</div>
 <div class="line">    return 0;</div>
 <div class="line">}</div>
-</div><!-- fragment --><h1><a class="anchor" id="autotoc_md46"></a>
+</div><!-- fragment --><h1><a class="anchor" id="autotoc_md47"></a>
 Callables and parameter packs</h1>
 <p>Callables can be easily combined with parameter packs to pass arbitrary number of arguments to them: </p><div class="fragment"><div class="line">#include &lt;string&gt;</div>
 <div class="line">#include &lt;iostream&gt;</div>
@@ -218,7 +218,7 @@ Callables and parameter packs</h1>
 <div class="line">hello world</div>
 <div class="line">$</div>
 </div><!-- fragment --><p>The above pattern allows for very flexible algorithm construction.</p>
-<h1><a class="anchor" id="autotoc_md47"></a>
+<h1><a class="anchor" id="autotoc_md48"></a>
 Iterator group advancement</h1>
 <p>One pattern that is useful in advanced algorithms is the ability to iterate over multiple containers simultaneously. This can be done simply via parameter packs and recursive template calls (which will be trivially inlined): </p><div class="fragment"><div class="line">// explicitly accept iterators as references</div>
 <div class="line">template &lt;typename IT&gt;</div>
@@ -271,7 +271,7 @@ Iterator group advancement</h1>
 <div class="line">7</div>
 <div class="line">9</div>
 <div class="line">$</div>
-</div><!-- fragment --><h1><a class="anchor" id="autotoc_md48"></a>
+</div><!-- fragment --><h1><a class="anchor" id="autotoc_md49"></a>
 Callbacks, Thunks, and Variadics</h1>
 <p>One common usecase for template code is implementing callbacks. A callback is a Callable which is executed when an event occurs. The classic example of a callback is executing a function when a state machine processes an event and executes a some event "on entry" function. However the "event" which triggers a callback can be anything, even implicit events, like a Callable being at the front of queue of other callbacks waiting to execute on a worker thread. Another callback usecase is a timer, where a function is executed after a certain amount of time has elapsed.</p>
 <p>But how do we write callback functions? Classically this was done with function pointers and an associated <code>void*</code> data pointer. To keep things simple, lets look at a theoretical worker thread queue which can have functions and data registered for execution on it. In some worker queue header: </p><div class="fragment"><div class="line">struct worker_thread_t { </div>

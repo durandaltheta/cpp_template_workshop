@@ -1,4 +1,4 @@
 var searchData=
 [
-  ['has_5fsize_12',['has_size',['../structsca_1_1detail_1_1has__size.html',1,'sca::detail']]]
+  ['has_5fsize_5fstruct_12',['has_size_struct',['../structsca_1_1detail_1_1has__size__struct.html',1,'sca::detail']]]
 ];

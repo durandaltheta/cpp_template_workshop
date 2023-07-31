@@ -88,11 +88,11 @@ using callable_return_t = typename std::result_of<std::decay_t<F>(Ts...)>::type;
 
 template <typename T>
 struct has_size_struct {
-    typedef typename std::decay_t<T> DT; // remove any references from T
+    typedef typename std::decay_t<T> BT; // remove any references from T
     template<typename U, typename U::size_type (U::*)() const> struct SFINAE {};
     template<typename U> static char test(SFINAE<U, &U::size>*);
     template<typename U> static int test(...);
-    static const bool has = sizeof(test<DT>(0)) == sizeof(char);
+    static const bool has = sizeof(test<BT>(0)) == sizeof(char);
 };
 
 template <typename T>

@@ -14,10 +14,11 @@ namespace detail {
 
 template<typename T>
 struct has_size {
+    typedef typename std::decay_t<T> BT; 
     template<typename U, typename U::size_type (U::*)() const> struct SFINAE {};
     template<typename U> static char test(SFINAE<U, &U::size>*);
     template<typename U> static int test(...);
-    static const bool has = sizeof(test<T>(0)) == sizeof(char);
+    static const bool has = sizeof(test<BT>(0)) == sizeof(char);
 };
 
 }
@@ -36,7 +37,13 @@ struct has_size {
 
 We are defining a placeholder struct named `has_size<T>`. We need this struct 
 because we need to use SFINAE to determine if type `T` has a method named 
-`size()` which returns an unsigned number.
+`size()` which returns an unsigned number. 
+
+```
+    typedef typename std::decay_t<T> BT; 
+```
+
+`std::decay<>` removes any reference types or constness from the given type `T`. IE, `std::decay<T&>`, `std::decay<T&&>`, `std::decay<const T&>`, and `std::decay<const T&&>` are automatically converted to the base type `T`. This is necessary because the compiler techniques used below only work with base types, not with reference types. We are defining the base type of `T` as `BT`, or "base T".
 
 ```
     template<typename U, typename U::size_type (U::*)() const> struct SFINAE {};
@@ -65,7 +72,7 @@ This `SFINAE` object must be able to declare a function pointer to a method `U::
 This is a forward declaration of a template method as a fallback in case the previous test template cannot produce valid code (in which case `T` does *NOT* have a `size()` method!). 
 
 ```
-    static const bool has = sizeof(test<T>(0)) == sizeof(char);
+    static const bool has = sizeof(test<BT>(0)) == sizeof(char);
 ```
 
 `has` is created by comparing *theoretical* return value type sizes. Essentially *IF* the method `test<T>` was called (remember, `T` is the type of `has_size`, the object we checking for a `size()` method), then `sizeof()` can determine the byte size of `test<T>`'s return value. 

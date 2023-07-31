@@ -270,9 +270,10 @@ struct worker_thread {
     // Launch a worker thread. All work successfully scheduled on it is
     // guaranteed to be executed before the object is destroyed.
     worker_thread() : 
-        // Lambda can use default by-reference capture because 
-        // m_thread's lifetime is guaranteed to be tied to the 
-        // worker_thread's destructor 
+        m_running(true), 
+        // Lambda can use default by-reference capture because m_thread's 
+        // lifetime is guaranteed to be tied to the worker_thread's destructor. 
+        // m_thread is initialized last to ensure other members are initialized.
         m_thread([&]{
             // reads of worker_thread members require a critical section 
             std::unique_lock<std::mutex> lk(m_mtx);
@@ -343,7 +344,7 @@ struct worker_thread {
 
 private:
     std::mutex m_mtx;
-    bool m_running = true; 
+    bool m_running; 
     std::condition_variable m_cv;
     std::deque<std::unique_ptr<job>> m_jobs; 
     std::thread m_thread;

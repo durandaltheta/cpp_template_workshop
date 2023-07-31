@@ -434,7 +434,7 @@ Implement the following constructors so that
 - rvalue_allowed(T2&&): m_t is initialized via perfect forwarding 
 - forward_construct so that type A is perfect forwarded to new construct T
  */
-TEST(lesson_2, extra_credit) {
+TEST(lesson_2, extra_credit_value_categories) {
     using namespace lesson_2_ns;
 
     {
@@ -464,6 +464,5 @@ TEST(lesson_2, extra_credit) {
        EXPECT_FALSE(rvalue_allowed<value_category_aware>(rvalue_allowed<value_category_aware>()).value().lvalue_constructed);
        EXPECT_TRUE(rvalue_allowed<value_category_aware>(rvalue_allowed<value_category_aware>(value_category_aware::rvalue_override())).value().rvalue_constructed);
     }
-
 }
 #endif

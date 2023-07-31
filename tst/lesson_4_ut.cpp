@@ -335,7 +335,7 @@ private:
  is equal to `true` when an object has a `void T::resize(T::size_type)` method, 
  otherwise `has_resize::has` should equal `false`.
  */
-TEST(lesson_4, extra_credit) {
+TEST(lesson_4, extra_credit_resize_sfinae_detection) {
     using namespace lesson_4_ns;
 
     {

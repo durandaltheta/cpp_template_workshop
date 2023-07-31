@@ -194,3 +194,12 @@ TEST(lesson_5, filter) {
         EXPECT_EQ(expect, out);
     }
 }
+
+#ifdef COMPILE_EXTRA_CREDIT
+namespace lesson_5_ns {
+
+}
+
+TEST(lesson_5, extra_credit) {
+}
+#endif

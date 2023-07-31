@@ -180,23 +180,29 @@ C++ Templated Type Erasure</h1>
 <div class="line">lhs type code matches rhs type code</div>
 <div class="line">$</div>
 </div><!-- fragment --><p>It should be noted that the above technique is only safe when used on values that are part of the same program, you cannot safely use this technique when sending values via inter-process mechanims.</p>
-<p>With templates we can improve this process, it is possible to write an object which "wraps" a value of any type using template functions and then can use further templates to unwrap it at runtime: </p><div class="fragment"><div class="line">#include &lt;iostream&gt;</div>
+<h2><a class="anchor" id="autotoc_md34"></a>
+type_info mysteries</h2>
+<p>Some things about <code>std::type_info</code> are mysterious. For one, I would expect <code>std::type_info::hash_code()</code> to return a unique value, but it does not, it only returns a value that is guaranteed to be the same as another <code>std::type_info</code> which represents the same type.</p>
+<p>As such it appear that the expected way to compare types are the same is with the <code>==</code> operator (<code>std::type_info::operator==(const type_info&amp; rhs)</code>). However, we cannot take a copy of the <code>std::type_info</code> object all construction and assignment of the type are explicitly deleted, so we can only get a reference to it via <code>typeid()</code>.</p>
+<p>However, another related standard library type utility, <code>std::type_index</code>, takes a const reference to a <code>std::type_info</code> in its constructor. The <a href="https://en.cppreference.com/w/cpp/types/type_index">std::type_index documentation on cppreference</a> explicitly mentions that its constructor takes a <em>pointer</em> to a given <code>type_info</code> object. With this we can step out in faith we can do the same, because, wherever the <code>type_info</code> object lives, it's a const value and is therefore safe to read at all times (assuming the <code>type_info</code> object isn't created as a <code>thread_local</code> or some nonsense, though this seems unlikely because it is unnecessary).</p>
+<h1><a class="anchor" id="autotoc_md35"></a>
+Using type_info in templates</h1>
+<p>With templates we can improve the process of type erasure, because is possible to write an object which "wraps" a value of any type using template functions and then can use further templates to unwrap it at runtime: </p><div class="fragment"><div class="line">#include &lt;iostream&gt;</div>
 <div class="line">#include &lt;string&gt;</div>
 <div class="line"> </div>
 <div class="line">// A struct which can hold a pointer to any value</div>
 <div class="line">struct wrapped_value {</div>
 <div class="line">    // assign a value to this value wrapper</div>
 <div class="line">    template &lt;typename T&gt;</div>
-<div class="line">    void assign(T&amp; t) {</div>
+<div class="line">    void set(T&amp; t) {</div>
 <div class="line">        ptr = &amp;t;</div>
-<div class="line">        // std::decay&lt;&gt; removes const and references from a type</div>
-<div class="line">        code = typeid(typename std::decay&lt;T&gt;).hash_code();</div>
+<div class="line">        tip = &amp;typeid(typename std::decay&lt;T&gt;);</div>
 <div class="line">    }</div>
 <div class="line"> </div>
 <div class="line">    // return `true` if a value is assigned and the value type matches `T`, else return `false`</div>
 <div class="line">    template &lt;typename T&gt;</div>
 <div class="line">    bool is() {</div>
-<div class="line">        return ptr != std::nullptr &amp;&amp; code == typeid(typename std::decay&lt;T&gt;).hash_code();</div>
+<div class="line">        return ptr != nullptr &amp;&amp; *tip == typeid(typename std::decay&lt;T&gt;);</div>
 <div class="line">    }</div>
 <div class="line"> </div>
 <div class="line">    // return a reference to the assigned value</div>
@@ -206,8 +212,8 @@ C++ Templated Type Erasure</h1>
 <div class="line">    }</div>
 <div class="line"> </div>
 <div class="line">private:</div>
-<div class="line">    void* ptr = std::nullptr; // default point to nothing</div>
-<div class="line">    size_t code = 0;</div>
+<div class="line">    void* ptr = nullptr;</div>
+<div class="line">    const std::type_info* tip;</div>
 <div class="line">};</div>
 <div class="line"> </div>
 <div class="line">void print_wrapped_value(wrapped_value wv) {</div>

@@ -275,7 +275,7 @@ struct worker_thread {
         // lifetime is guaranteed to be tied to the worker_thread's destructor. 
         // m_thread is initialized last to ensure other members are initialized.
         m_thread([&]{
-            // access to worker_thread members require a critical section 
+            // access to worker_thread members requires a critical section 
             std::unique_lock<std::mutex> lk(m_mtx);
 
             // always finish any remaining work

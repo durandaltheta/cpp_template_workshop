@@ -179,6 +179,30 @@ int high_level_func() {
 }
 ```
 
+## Capture Initializers
+A feature added to `c++14` is the ability to initialize a capture with a value. This might be useful if the user needs to capture an incremented number:
+```
+void some_func() {
+    //...
+    int i = 14;
+    //...
+    auto l = [i = i + 1]{ return i; }; // captured i == 15
+    //... 
+}
+```
+
+This feature may seem trivial but it allows rvalue `std::move()` assignment and perfect forwarding using `std::forward<T>`:
+```
+template <typename T>
+void some_func(T&& t) { // t is a universal reference 
+    //...
+    auto l = [t = std::forward<T>(t)]{ // captured t is moved or copied as required
+        // do something with t
+    }; 
+    //... 
+}
+```
+
 ## Returning Lambdas
 Lambdas can also be returned. Functions that take *other* functions as arguments or return *other* functions are called "higher order functions":
 

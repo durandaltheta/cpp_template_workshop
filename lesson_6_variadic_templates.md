@@ -384,9 +384,9 @@ The output of such a function would be similar to the previous. Both of these te
 typedef std::function<void()> thunk;
 ```
 
-A [thunk](https://stackoverflow.com/questions/2641489/what-is-a-thunk) is conceptually just a function (or Functor) that when called does something, although its purpose is abstracted from the calling code. They typically don't return anything (unless the user is implementing a [trampoline](https://en.wikipedia.org/wiki/Trampoline_(computing))). `std::function<void()>` is capable of holding any callable and therefore is an excellent replacement for both function pointer/void* data pairs and Functor inheritance. 
+A [thunk](https://stackoverflow.com/questions/2641489/what-is-a-thunk) is conceptually just a function (or Functor) that when called does something, although its purpose is abstracted from the calling code. They typically don't return anything (unless the user is implementing a [trampoline](https://en.wikipedia.org/wiki/Trampoline_(computing))). `std::function<void()>` is capable of holding any Callable and therefore is an excellent replacement for both function pointer/void* data pairs and Functor inheritance. 
 
-However, with templates we can do even better, we can convert *any* Callable into a thunk using templated lambda captures:
+However, with templates we can do even better, we can *convert* almost any Callable into a thunk using templated lambda captures:
 ```
 template <typename F, typename... As>
 thunk to_thunk(F&& f, As&&... as) {

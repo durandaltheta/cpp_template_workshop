@@ -212,10 +212,10 @@ TEST(lesson_3, wrapped_value) {
 #ifdef COMPILE_EXTRA_CREDIT
 namespace lesson_3_ns {
 
-struct safe_wrapped_value : public wrapped_value {
+struct safe_wrapped_value {
     template <typename T>
     void set(T& t) {
-        wrapped_value::set(t);
+        wv.set(t);
     }
 
     template <typename T>
@@ -224,7 +224,7 @@ struct safe_wrapped_value : public wrapped_value {
             t = wv.to<T>();
             return true;
         } else {
-            return false
+            return false;
         }
     }
 
@@ -235,19 +235,19 @@ private:
 // overload expect functions 
 bool expect_bool(safe_wrapped_value swv, bool expected) {
     bool actual = false;
-    bool success = swf.get(actual);
+    bool success = swv.get(actual);
     return success && expected == actual;
 };
 
-bool expect_int(safe_wrapped_value wv, int expected) {
+bool expect_int(safe_wrapped_value swv, int expected) {
     int actual = 0;
-    bool success = swf.get(actual);
+    bool success = swv.get(actual);
     return success && expected == actual;
 };
 
-bool expect_string(safe_wrapped_value wv, std::string expected) {
+bool expect_string(safe_wrapped_value swv, std::string expected) {
     std::string actual;
-    bool success = swf.get(actual);
+    bool success = swv.get(actual);
     return success && expected == actual;
 };
 

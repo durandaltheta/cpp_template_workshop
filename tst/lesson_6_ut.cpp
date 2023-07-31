@@ -2,6 +2,11 @@
 #include <vector>
 #include <list>
 #include <sstream>
+#include <thread>
+#include <mutex>
+#include <memory>
+#include <deque>
+#include <condition_variable>
 #include "scalgorithm"
 #include <gtest/gtest.h> 
 
@@ -248,3 +253,107 @@ TEST(lesson_6, detail_fold) {
         EXPECT_EQ(21, out);
     }
 }
+
+#ifdef COMPILE_EXTRA_CREDIT
+namespace lesson_6_ns {
+
+/*
+This worker thread implementation has more efficiency optimizations than are 
+required to showcase the behavior of scheduling arbitrary thunks. These 
+optimizations are provided because we are nearing the end of the workshop and 
+applications to real code are more relevant.
+ */
+struct worker_thread { 
+    // the generic Callable thunk wrapper for work to execute on this thread
+    typedef std::function<void()> job;
+
+    // Launch a worker thread. All work successfully scheduled on it is
+    // guaranteed to be executed before the object is destroyed.
+    worker_thread() : 
+        // Lambda can use default by-reference capture because 
+        // m_system_thread's lifetime is guaranteed to be tied to the 
+        // worker_thread's destructor 
+        m_system_thread([&]{
+            // reads of worker_thread members require a critical section 
+            std::unique_lock<std::mutex> lk(m_mtx);
+
+            // always finish any remaining work
+            while(m_jobs.size()) {
+                do {
+                    {
+                        // remove a job from the queue
+                        auto cur_job = std::move(m_jobs.front());
+                        m_jobs.pop_front();
+
+                        // allow more work to be scheduled during work execution
+                        lk.unlock(); 
+
+                        // execute the scheduled job
+                        (*cur_job)(); 
+                    } // current job memory is freed
+
+                    lk.lock(); // re-enter critical section
+                } while(m_jobs.size());
+
+                // Only process this statement when we are out of work. Wait 
+                // until the thread is shutdown or more work arrives. 
+                while(m_running || !m_jobs.size()) {
+                    // While wait() blocks lk is unlocked allowing more work to be scheduled
+                    m_cv.wait(lk);
+                }
+            }
+
+        }) 
+    { }
+
+    // virtual destructor ensures anyone who inherits this class will properly 
+    // shutdown m_system_thread
+    virtual ~worker_thread() {
+        {
+            std::lock_guard<std::mutex> lk(m_mtx);
+            // inform m_system_thread to shutdown
+            m_running = false;
+        }
+        
+        // wait until underlying system thread ends
+        m_system_thread.join();
+    }
+    
+    // Schedule an allocated job to ensure that job copies are only deep 
+    // copied once, queue pushes and pops trigger minimal overhead in the case 
+    // that the wrapped Callable is large. 
+    void schedule(std::unique_ptr<job>&& j) {
+        std::lock_guard<std::mutex> lk(m_mtx);
+        m_jobs.push_back(std::move(j));
+    }
+  
+    // do not wrap callable if it is directly convertable to a job
+    void schedule(job j) {
+        schedule(std::unique_ptr<job>(new job(std::move(j))));
+    }
+
+    // wrap non-thunk Callables as a job via lambda capture
+    template <typename F, typename... As>
+    void schedule(F&& f, As&&... as) {
+        // lambda capture could potentially use perfect forwarding in c++14 via capture initializers
+        schedule(std::unique_ptr<job>(new job([=]() mutable { 
+            f(std::forward<As>(as)...); 
+        })));
+    }
+
+private:
+    std::mutex m_mtx;
+    bool m_running = true; 
+    std::condition_variable m_cv;
+    std::deque<std::unique_ptr<job>> m_jobs; 
+    std::thread m_system_thread;
+};
+
+};
+
+TEST(lesson_6, worker_thread_callbacks) {
+    using namespace lesson_6_ns;
+
+    //TODO
+}
+#endif

@@ -1,375 +1,250 @@
 #include <string>
 #include <vector>
 #include <list>
-#include <forward_list>
-#include <mutex>
-#include <condition_variable>
-#include <thread>
+#include <sstream>
 #include "scalgorithm"
 #include <gtest/gtest.h> 
 
-TEST(lesson_6, map) {
-    const std::vector<int> v{1,2,3};
-    const std::list<int> l{4,5,6};
-    const std::forward_list<int> fl{7,8,9};
-
-    {
-        auto out = sca::map([](int a, int b, int c) { return a+b+c; }, v, l, fl);
-        auto is_same = std::is_same<std::vector<int>,decltype(out)>::value;
-        EXPECT_TRUE(is_same);
-        EXPECT_EQ(12, out[0]);
-        EXPECT_EQ(15, out[1]);
-        EXPECT_EQ(18, out[2]);
-
-        auto pv = sca::pointers(v);
-        auto get_pointer = [](const int& e) { return &e; };
-        auto gen_pv = sca::map(get_pointer, v);
-        EXPECT_EQ(pv, gen_pv);
-    }
-
-    {
-        // copies
-        auto cpv = v;
-        auto cpl = l;
-        auto cpfl = fl;
-
-        // mapped Callables can accept references 
-        auto add_and_reset = [](int& a, int& b, int& c) {
-            auto sum = a+b+c;
-            a = 0;
-            b = 1;
-            c = 2;
-            return sum;
-        };
-
-        auto out = sca::map(add_and_reset, cpv, cpl, cpfl);
-
-        EXPECT_EQ(12, out[0]);
-        EXPECT_EQ(15, out[1]);
-        EXPECT_EQ(18, out[2]);
-
-        EXPECT_EQ(3, sca::size(cpv));
-
-        for(auto& e : cpv) {
-            EXPECT_EQ(0, e);
-        }
-
-        EXPECT_EQ(3, sca::size(cpl));
-
-        for(auto& e : cpl) {
-            EXPECT_EQ(1, e);
-        }
-
-        EXPECT_EQ(3, sca::size(cpfl));
-
-        for(auto& e : cpfl) {
-            EXPECT_EQ(2, e);
-        }
-    }
-}
-
-TEST(lesson_6, fold) {
-    {
-        const std::vector<int> v{1,2,3};
-        const std::list<int> l{4,5,6};
-        const std::forward_list<int> fl{7,8,9};
-
-        auto sum = [](int cur, int a, int b, int c) {
-            return cur + a + b + c;
-        };
-
-        auto out = sca::fold(sum, 0, v, l, fl);
-        auto is_same = std::is_same<int,decltype(out)>::value;
-        EXPECT_TRUE(is_same);
-        EXPECT_EQ(45, out);
-    }
-
-    {
-        const std::vector<std::string> v{"I", "am", "a", "stick"};
-        const std::forward_list<std::string> fl{" ", " ", " ", "!"};
-
-        auto concatenate = [](std::string cur, const std::string& ve, const std::string& fle) {
-            return cur + ve + fle;
-        };
-
-        auto out = sca::fold(concatenate, std::string(""), v, fl);
-        auto is_same = std::is_same<std::string,decltype(out)>::value;
-        EXPECT_TRUE(is_same);
-        EXPECT_EQ(std::string("I am a stick!"), out);
-    }
-}
-
-TEST(lesson_6, all) {
-    {
-        const std::vector<int> v{1,2,3,4,5,6};
-        const std::vector<int> v2{2,4,6};
-        const std::vector<int> v3{1,3,5};
-        const std::vector<int> v4{};
-
-        auto is_even = [](int i) { return i % 2 == 0; };
-        auto is_odd = [](int i) { return i % 2 != 0; };
-
-        auto out = sca::all(is_even, v);
-        auto is_same = std::is_same<bool,decltype(out)>::value;
-        EXPECT_TRUE(is_same);
-        EXPECT_FALSE(out);
-
-        out = sca::all(is_even, v2);
-        EXPECT_TRUE(out);
-
-        out = sca::all(is_even, v3);
-        EXPECT_FALSE(out);
-
-        out = sca::all(is_even, v4);
-        EXPECT_TRUE(out);
-        
-        out = sca::all(is_odd, v);
-        EXPECT_FALSE(out);
-
-        out = sca::all(is_odd, v2);
-        EXPECT_FALSE(out);
-
-        out = sca::all(is_odd, v3);
-        EXPECT_TRUE(out);
-
-        out = sca::all(is_odd, v4);
-        EXPECT_TRUE(out);
-    }
-
-    {
-        const std::forward_list<std::string> fl{"I", " ", "am", " ", "a", " ", "stick!"};
-        const std::list<std::string> l{"I", " ", "am", "groot", ""};
-        const std::vector<std::string> v{"","",""};
-        const std::vector<std::string> ve{};
-
-        auto not_empty = [](const std::string& e) { return e != std::string(""); };
-
-        auto out = sca::all(not_empty, fl);
-        EXPECT_TRUE(out);
-
-        out = sca::all(not_empty, l);
-        EXPECT_FALSE(out);
-        
-        out = sca::all(not_empty, v);
-        EXPECT_FALSE(out);
-        
-        out = sca::all(not_empty, ve);
-        EXPECT_TRUE(out);
-    }
-}
-
-TEST(lesson_6, some) {
-    {
-        const std::vector<int> v{1,2,3,4,5,6};
-        const std::vector<int> v2{2,4,6};
-        const std::vector<int> v3{1,3,5};
-        const std::vector<int> v4{};
-
-        auto is_even = [](int i) { return i % 2 == 0; };
-        auto is_odd = [](int i) { return i % 2 != 0; };
-
-        auto out = sca::some(is_even, v);
-        auto is_same = std::is_same<bool,decltype(out)>::value;
-        EXPECT_TRUE(is_same);
-        EXPECT_TRUE(out);
-
-        out = sca::some(is_even, v2);
-        EXPECT_TRUE(out);
-
-        out = sca::some(is_even, v3);
-        EXPECT_FALSE(out);
-
-        out = sca::some(is_even, v4);
-        EXPECT_FALSE(out);
-        
-        out = sca::some(is_odd, v);
-        EXPECT_TRUE(out);
-
-        out = sca::some(is_odd, v2);
-        EXPECT_FALSE(out);
-
-        out = sca::some(is_odd, v3);
-        EXPECT_TRUE(out);
-
-        out = sca::some(is_odd, v4);
-        EXPECT_FALSE(out);
-    }
-
-    {
-        const std::forward_list<std::string> fl{"I", " ", "am", " ", "a", " ", "stick!"};
-        const std::list<std::string> l{"I", " ", "am", "groot", ""};
-        const std::vector<std::string> v{"","",""};
-        const std::vector<std::string> ve{};
-
-        auto not_empty = [](const std::string& e) { return e != std::string(""); };
-
-        auto out = sca::some(not_empty, fl);
-        EXPECT_TRUE(out);
-
-        out = sca::some(not_empty, l);
-        EXPECT_TRUE(out);
-        
-        out = sca::some(not_empty, v);
-        EXPECT_FALSE(out);
-
-        out = sca::some(not_empty, ve);
-        EXPECT_FALSE(out);
-    }
-}
-
 namespace lesson_6_ns {
 
-template <typename InitFunction, typename Function, typename... OptionalArgs>
-std::thread init_thread(InitFunction&& init_f, Function&& f, OptionalArgs&&... args) {
-    // figure out the scary synchronization once
-    std::mutex mtx;
-    std::condition_variable cv;
-    bool flag = false;
+namespace detail {
 
-    std::thread thd([=, &mtx, &cv, &flag]() mutable {
-        // do thread initialization
-        init_f();
-
-        // notify parent thread initialization is complete
-        {
-            std::lock_guard<std::mutex> lk(mtx);
-            flag = true;
-        }
-        
-        cv.notify_one();
-
-        // proceed with regular thread operation
-        f(std::forward<OptionalArgs>(args)...);
-    });
-
-    // wait for thread initialization
-    {
-        std::unique_lock<std::mutex> lk(mtx);
-
-        while(!flag) {
-            cv.wait(lk);
-        }
-    }
-
-    // don't need to move local variable, compiler will use copy elision 
-    // https://en.cppreference.com/w/cpp/language/copy_elision
-    return thd; 
+// handle conversion of non-strings to `std::string`
+template <typename T>
+std::string convert_to_string(T&& t) {
+    return std::to_string(std::forward<T>(t));
 }
 
-template <typename T, typename MUTEX = std::mutex>
-struct value_guard {
-    // extend `std::unique_lock`
-    struct unique_lock : public std::unique_lock<MUTEX> {
-        unique_lock(std::unique_lock<MUTEX>&& lk, T& t) : 
-            std::unique_lock<MUTEX>(std::move(lk)), // call parent std::unique_lock<MUTEX> constructor
-            value(t) // assign reference to value T
-        { }
-
-        T& value; // reference to value T
-    };
-
-    // intialize value T during constructor
-    template <typename... As>
-    value_guard(As&&... as) : 
-        m_t(std::forward<As>(as)...)
-    { }
-
-    // Acquire a locked unique_lock containing a reference to stored value T.
-    inline value_guard::unique_lock acquire() {
-        return unique_lock{std::unique_lock<MUTEX>(m_mtx), m_t};
-    }
-
-private:
-    T m_t;
-    MUTEX m_mtx;
-};
-
-// simplify init_thread() by using value_guard<T>
-template <typename InitFunction, typename Function, typename... OptionalArgs>
-std::thread init_thread2(InitFunction&& init_f, Function&& f, OptionalArgs&&... args) {
-    value_guard<bool> vg(false);
-    std::condition_variable cv;
-
-    std::thread thd([=, &vg, &cv]() mutable {
-        init_f();
-        vg.acquire().value = true;
-        cv.notify_one();
-        f(std::forward<OptionalArgs>(args)...);
-    });
-
-    {
-        auto lk = vg.acquire();
-
-        while(!lk.value) {
-            cv.wait(lk);
-        }
-    }
-
-    return thd;
+// overload to forward mutable c strings
+std::string convert_to_string(char* s) {
+    return std::string(s);
 }
 
-};
+// overload to forward const c strings
+std::string convert_to_string(const char* s) {
+    return std::string(s);
+}
 
-#ifdef COMPILE_EXTRA_CREDIT
-TEST(lesson_6, extra_credit_init_thread) {
+// overload to forward `std::string`s without converting
+std::string convert_to_string(std::string&& s) {
+    return std::move(s);
+}
+
+// lvalue overloads explicitly return a reference to avoid copying
+std::string& convert_to_string(std::string& s) {
+    return s;
+}
+
+const std::string& convert_to_string(const std::string& s) {
+    return s;
+}
+
+// Final invocation when no more arguments to concatenate. 
+std::string concatenate(std::stringstream& ss) { 
+    return ss.str();
+}
+
+// handle concatenating an element at a time
+template <typename A, typename... As>
+std::string concatenate(std::stringstream& ss, A&& a, As&&... as) {
+    ss << convert_to_string(std::forward<A>(a));
+    return concatenate(ss, std::forward<As>(as)...); // pass the rest to further calls
+}
+
+}
+
+template <typename... As>
+std::string concatenate(As&&... as) {
+    std::stringstream ss; // create a stringstream to be used in detail calls
+    return detail::concatenate(ss, std::forward<As>(as)...);
+}
+
+}
+
+TEST(lesson_6, concatenate) {
     using namespace lesson_6_ns;
-    
-    auto do_nothing = []{};
-    auto assign_string = [](std::string s){ std::string s2 = s; };
-    auto iterate_count = [](unsigned int ui){ for(unsigned int cnt = ui; cnt; --cnt) { } };
 
-    auto iterate_and_assign = [=](unsigned int ui, std::string s) {
-        for(unsigned int cnt = ui; cnt; --cnt) { 
-            std::string s2 = s;
-        }
-    };
-
-    for(size_t cnt = 10000; cnt; --cnt) {
-        bool flag = false;
-        auto init = [&]{ flag = true; };
-
-        auto thd = init_thread(init, do_nothing);
-        EXPECT_TRUE(flag);
-        thd.join();
-
-        flag = false;
-        thd = init_thread(init, assign_string, "hello world");
-        EXPECT_TRUE(flag);
-        thd.join();
-
-        flag = false;
-        thd = init_thread(init, iterate_count, 1000);
-        EXPECT_TRUE(flag);
-        thd.join();
-
-        flag = false;
-        thd = init_thread(init, iterate_and_assign, 1000, "the saints go marching on");
-        EXPECT_TRUE(flag);
-        thd.join();
+    // concatenate 3 rvalue `std::string`s
+    {
+        auto s = concatenate(std::string("foo"), std::string(" "), std::string("faa"));
+        EXPECT_EQ(std::string("foo faa"), s);
     }
     
-    for(size_t cnt = 10000; cnt; --cnt) {
-        bool flag = false;
-        auto init = [&]{ flag = true; };
-        auto do_nothing = []{};
-        auto thd = init_thread2(init, do_nothing);
-        EXPECT_TRUE(flag);
-        thd.join();
+    // concatenate 2 rvalue `std::string`s and an lvalue `std::string`
+    {
+        std::string third("faa");
+        auto s = concatenate(std::string("foo"), std::string(" "), third);
+        EXPECT_EQ(std::string("foo faa"), s);
+    }
+    
+    // concatenate 1 rvalue `std::string`s, an lvalue `std::string`, and
+    // a const lvalue `std::string`
+    {
+        const std::string first("foo");
+        std::string third("faa");
+        auto s = concatenate(first, std::string(" "), third);
+        EXPECT_EQ(std::string("foo faa"), s);
+    }
 
-        flag = false;
-        thd = init_thread2(init, assign_string, "hello world");
-        EXPECT_TRUE(flag);
-        thd.join();
+    // concatenate 2 `std::string`s and a c-string 
+    {
+        auto s = concatenate(std::string("foo"), std::string(" "), "faa");
+        EXPECT_EQ(std::string("foo faa"), s);
+    }
+    
+    // concatenate 1 `std::string`s and 2 c-string
+    {
+        auto s = concatenate("foo", std::string(" "), "faa");
+        EXPECT_EQ(std::string("foo faa"), s);
+    }
 
-        flag = false;
-        thd = init_thread2(init, iterate_count, 1000);
-        EXPECT_TRUE(flag);
-        thd.join();
+    // concatenate 3 c-strings
+    {
+        auto s = concatenate("foo", " ", "faa");
+        EXPECT_EQ(std::string("foo faa"), s);
+    }
 
-        flag = false;
-        thd = init_thread2(init, iterate_and_assign, 1000, "the saints go marching on");
-        EXPECT_TRUE(flag);
-        thd.join();
+    // concatenate a mutable c string and a const c string
+    {
+        char mutable_c_str[10];
+        memset(mutable_c_str, 0, sizeof(mutable_c_str));
+        strncpy(mutable_c_str, "hello", sizeof(mutable_c_str) - 1);
+        auto s = concatenate(mutable_c_str, " world");
+        EXPECT_EQ(std::string("hello world"), s);
+    }
+
+    // concatenate an std::string and a number
+    {
+        auto s = concatenate(std::string("number "), 3);
+        EXPECT_EQ(std::string("number 3"), s);
+    }
+
+    // concatenate a number and std::string
+    {
+        auto s = concatenate(3, std::string(" is a number"));
+        EXPECT_EQ(std::string("3 is a number"), s);
     }
 }
-#endif
+
+TEST(lesson_6, detail_advance_group) {
+    std::vector<int> v1{1,2,3};
+    std::vector<int> v2{4,5,6};
+    std::vector<int> v3{7,8,9};
+
+    auto cur_v1 = v1.begin();
+    auto cur_v2 = v2.begin();
+    auto cur_v3 = v3.begin();
+
+    EXPECT_EQ(1, *cur_v1);
+    EXPECT_EQ(4, *cur_v2);
+    EXPECT_EQ(7, *cur_v3);
+
+    sca::detail::advance_group(cur_v1, cur_v2, cur_v3);
+
+    EXPECT_EQ(2, *cur_v1);
+    EXPECT_EQ(5, *cur_v2);
+    EXPECT_EQ(8, *cur_v3);
+
+    sca::detail::advance_group(cur_v1, cur_v2, cur_v3);
+
+    EXPECT_EQ(3, *cur_v1);
+    EXPECT_EQ(6, *cur_v2);
+    EXPECT_EQ(9, *cur_v3);
+
+    sca::detail::advance_group(cur_v1, cur_v2, cur_v3);
+
+    EXPECT_EQ(v1.end(), cur_v1);
+    EXPECT_EQ(v2.end(), cur_v2);
+    EXPECT_EQ(v3.end(), cur_v3);
+}
+
+TEST(lesson_6, each) {
+    std::vector<int> v1{1,2,3};
+    std::vector<int> v2{4,5,6};
+    
+    const std::vector<int> expect{5,7,9};
+    std::vector<int> out(sca::size(v1));
+    auto out_it = out.begin();
+
+    auto add = [&out_it](int a, int b) { 
+        *out_it = a + b; 
+        ++out_it;
+    };
+
+    sca::detail::each(add, v1.begin(), v1.end(), v2.begin());
+    EXPECT_EQ(expect, out);
+
+    out = std::vector<int>(sca::size(v1)); // reset our out vector
+    out_it = out.begin(); // reset our iterator
+    
+    // completed algorithm `sca::each()` abstracts the argument iterators
+    sca::each(add, v1, v2);
+    EXPECT_EQ(expect, out);
+    
+    out = std::vector<int>(); // reset and resize our out vector
+   
+    // don't use iterator in this case
+    auto add_v2 = [&out](int a, int b) { 
+        out.push_back(a + b); 
+    };
+    
+    sca::each(add_v2, v1, v2);
+    EXPECT_EQ(expect, out);
+}
+
+TEST(lesson_6, detail_map) {
+    std::vector<int> v1{1,2,3};
+    std::vector<int> v2{4,5,6};
+
+    {
+        std::vector<int> out(sca::size(v1));
+        auto add = [](int a, int b) { return a + b; };
+
+        // internal algorithm `sca::detail::map` is similar to 
+        // `std::transform()` except that it can accept iterators to more than 1 
+        // container
+        sca::detail::map(add, out.begin(), v1.begin(), v1.end(), v2.begin());
+
+        std::vector<int> expect{5,7,9};
+        EXPECT_EQ(expect, out);
+    }
+
+    {
+        std::vector<std::string> out(sca::size(v1));
+        auto add_and_stringify = [](int a, int b) { return std::to_string(a + b); };
+
+        // internal algorithm `sca::detail::map` is similar to 
+        // `std::transform()` except that it can accept iterators to more than 1 
+        // container
+        sca::detail::map(add_and_stringify, out.begin(), v1.begin(), v1.end(), v2.begin());
+
+        std::vector<std::string> expect{"5","7","9"};
+        EXPECT_EQ(expect, out);
+    }
+}
+
+TEST(lesson_6, detail_fold) {
+    std::vector<int> v1{1,2,3};
+    std::vector<int> v2{4,5,6};
+
+    {
+        // sum 1 vector at a time
+        auto sum = [](int cur_sum, int new_value) { 
+            return cur_sum + new_value; 
+        };
+        
+        auto out = sca::detail::fold(sum, 0, v1.begin(), v1.end());
+        out = sca::detail::fold(sum, out, v2.begin(), v2.end());
+        EXPECT_EQ(21, out);
+    }
+
+    {
+        // sum 2 vectors simultaneously
+        auto sum = [](int cur_sum, int new_value_1, int new_value_2) { 
+            return cur_sum + new_value_1 + new_value_2; 
+        };
+
+        auto out = sca::detail::fold(sum, 0, v1.begin(), v1.end(), v2.begin());
+        EXPECT_EQ(21, out);
+    }
+}

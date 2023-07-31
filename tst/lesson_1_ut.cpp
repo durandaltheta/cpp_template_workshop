@@ -95,6 +95,7 @@ TEST(lesson_1, default_type_assignment) {
     }
 }
 
+#ifdef COMPILE_EXTRA_CREDIT
 namespace lesson_1_ns {
 
 template <typename C, typename C2>
@@ -109,14 +110,13 @@ bool compare_container_elements(C c, C2 c2) {
 
 }
 
-#ifdef COMPILE_EXTRA_CREDIT
 /*
  * Implement the body of template `lesson_1_ns::compare_container_elements` such 
  * that it returns `true` if both containers are the same size, and elements of 
  * the first container are equivalent to the other container at each index. 
  * Otherwise, `compare_container_elements` should return `false`.
  */
-TEST(lesson_1, extra_credit) {
+TEST(lesson_1, extra_credit_container_comparison) {
     using namespace lesson_1_ns;
 
     {

@@ -206,8 +206,9 @@ Here are the links to all the lesson notes. We will meet regularly (probably eve
 
 - [Lesson 1: Basic Templates Part 1](lesson_1_basic_templates_part_1.md) -- [unit tests](tst/lesson_1_ut.cpp)
 - [Lesson 2: Basic Templates Part 2](lesson_2_basic_templates_part_2.md) -- [unit tests](tst/lesson_2_ut.cpp)
-- [Lesson 3: Substitution Failure Is Not An Error](lesson_3_substitution_failure_is_not_an_error.md) --
-  [unit tests](tst/lesson_3_ut.cpp)
-- [Lesson 4: Callables](lesson_4_callables.md) -- [unit tests](tst/lesson_4_ut.cpp)
-- [Lesson 5: Variadic Templates](lesson_5_variadic_templates.md) -- [unit tests](tst/lesson_5_ut.cpp)
-- [Lesson 6: Putting it All Together](lesson_6_putting_it_all_together.md) -- [unit tests](tst/lesson_6_ut.cpp)
+- [Lesson 3: Type Erasure](lesson_3_type_erasure.md) --
+- [Lesson 4: Substitution Failure Is Not An Error](lesson_3_substitution_failure_is_not_an_error.md) --
+  [unit tests](tst/lesson_4_ut.cpp)
+- [Lesson 5: Callables](lesson_5_callables.md) -- [unit tests](tst/lesson_5_ut.cpp)
+- [Lesson 6: Variadic Templates](lesson_6_variadic_templates.md) -- [unit tests](tst/lesson_6_ut.cpp)
+- [Lesson 7: Putting it All Together](lesson_7_putting_it_all_together.md) -- [unit tests](tst/lesson_7_ut.cpp)

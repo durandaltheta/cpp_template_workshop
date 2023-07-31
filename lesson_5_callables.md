@@ -153,7 +153,7 @@ $
 ```
 
 ## Wrapping Callables as finalized types
-When a defined type is needed, user Callables can be wrapped inside the [std::function polymorphic function wrapper](https://en.cppreference.com/w/cpp/utility/functional/function). `std::function` instances use a templating technique called [type erasure](https://en.wikipedia.org/wiki/Type_erasure) to remove the *actual* type from being visible to the holder of an `std::function` so that only the `std::function` itself knows what it truly contains.
+When a defined type is needed, user Callables can be wrapped inside the [std::function polymorphic function wrapper](https://en.cppreference.com/w/cpp/utility/functional/function) `std::function` instances using type erasure (see lesson 1).
 
 `std::function`s are defined with the return value and argument types inside of the template `<>` brackets following the pattern `std::function<ReturnType(Arg1Type, Arg2Type, ..., ArgNType)>`:
 ```
@@ -194,7 +194,9 @@ $
 A wrapper like `std::function` is often necessary when writing parts of code which *need* to be precompiled (IE, code which is not header only). Combining the concepts of template Callables with `std::function` allows for all kinds of interesting code.
 
 ## Examining lambdas 
-Lambdas are a type of callable introduced in `c++11` that I've found both extremely useful and often ill-understood by developers generally. To address this deficit of knowledge I have written this optional [lambda primer](lambda_primer.md) as an educational aid for anyone who wants to know more about them.
+Lambdas are a type of callable introduced in `c++11` that I've found both extremely useful and often ill-understood by developers generally. To address this deficit of knowledge I have written this optional [lambda primer](lambda_primer.md) as an educational aid for anyone who wants to know more about them. 
+
+Be warned, I will not hold back from using lambdas in future examples, so refer to this primer as necessary.
 
 ## Algorithms and Callables 
 It is possible to write data processing algorithms which incorporate user provided Callables to provide a portion of the implementation. An example of this in the standard library is [std::transform](https://en.cppreference.com/w/cpp/algorithm/transform), which accepts a start `cur` iterator, an `end` iterator, an output `out` iterator, and a Callable. `std::transform` will iterate from `cur` to `end`, callng the Callable with the value pointed to by `cur` and storing the result in the `out` iterator. An implemenation of said algorithm might look like:

@@ -15,6 +15,7 @@ add_executable(cpp_template_workshop_ut
     lesson_4_ut.cpp 
     lesson_5_ut.cpp 
     lesson_6_ut.cpp 
+    lesson_7_ut.cpp 
 )
 
 target_compile_features(cpp_template_workshop_ut PRIVATE cxx_std_11)

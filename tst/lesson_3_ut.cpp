@@ -1,384 +1,299 @@
 #include <string>
-#include <iostream>
-#include <vector>
-#include <list>
-#include <forward_list>
-#include <algorithm>
-#include "scalgorithm"
 #include <gtest/gtest.h> 
 
-struct lesson_3_f : public ::testing::Test {
-protected:
-    void SetUp() override {
-        for(auto& e : counts()) {
-            e = false;
-        }
-    }
+namespace lesson_3_ns {
 
-public:
-    static std::vector<int>& counts() {
-        static std::vector<int> cnts(4);
-        return cnts;
-    }
+const int INT_3 = 3;
+const char* STR_FOO = "foo";
+size_t g_function_hit = 0;
 
-    template <typename T, typename T2>
-    static auto add(T t1, T2 t2) {
-        ++lesson_3_f::counts()[0];
-        return t1 + t2;
-    }
-
-    template <typename T>
-    static std::string add(std::string s, T t) {
-        ++lesson_3_f::counts()[1];
-        return s + std::to_string(t);
-    }
-
-    template <typename T>
-    static std::string add(T t, std::string s) {
-        ++lesson_3_f::counts()[2];
-        return std::to_string(t) + s;
-    }
-
-    static std::string add(std::string s, std::string s2) { 
-        ++lesson_3_f::counts()[3];
-        return s + s2;
-    }
+struct packaged_void_pointer {
+    void (*handler)(void*) = nullptr;
+    void* data = nullptr;
 };
 
-
-TEST_F(lesson_3_f, sfinae) {
-    for(auto& e : lesson_3_f::counts()) {
-        EXPECT_EQ(0, e);
-    }
-
-    EXPECT_EQ(5, lesson_3_f::add(2,3));
-    EXPECT_EQ(1, lesson_3_f::counts()[0]);
-    EXPECT_EQ(0, lesson_3_f::counts()[1]);
-    EXPECT_EQ(0, lesson_3_f::counts()[2]);
-    EXPECT_EQ(0, lesson_3_f::counts()[3]);
-
-    EXPECT_EQ(
-        std::string("hello world"), 
-        lesson_3_f::add(
-            std::string("hello"), 
-            std::string(" world")));
-    EXPECT_EQ(1, lesson_3_f::counts()[0]);
-    EXPECT_EQ(0, lesson_3_f::counts()[1]);
-    EXPECT_EQ(0, lesson_3_f::counts()[2]);
-    EXPECT_EQ(1, lesson_3_f::counts()[3]);
-
-    EXPECT_EQ(
-        std::string("3 world"), 
-        lesson_3_f::add(
-            3, 
-            std::string(" world")));
-    EXPECT_EQ(1, lesson_3_f::counts()[0]);
-    EXPECT_EQ(0, lesson_3_f::counts()[1]);
-    EXPECT_EQ(1, lesson_3_f::counts()[2]);
-    EXPECT_EQ(1, lesson_3_f::counts()[3]);
-
-    EXPECT_EQ(
-        std::string("world 3"), 
-        lesson_3_f::add(
-            std::string("world "),
-            3));
-    EXPECT_EQ(1, lesson_3_f::counts()[0]);
-    EXPECT_EQ(1, lesson_3_f::counts()[1]);
-    EXPECT_EQ(1, lesson_3_f::counts()[2]);
-    EXPECT_EQ(1, lesson_3_f::counts()[3]);
+// agnostically handle data
+void execute_packaged_void_pointer_handler(packaged_void_pointer pvp) {
+    pvp.handler(pvp.data);
 }
 
-TEST(lesson_3, size) {
-    std::vector<int> v{1,2,3,4,5,6,7,8};
-    std::list<std::string> l{"one", "two", "three"};
-    std::forward_list<double> fl{1.0,2.0,3.0,4.0,5.0};
+void expect_int_3(void* v) {
+    EXPECT_EQ(0, g_function_hit);
+    g_function_hit = 1;
+    EXPECT_EQ((void*)&INT_3, v); // pointer comparison
+    EXPECT_EQ(INT_3, *((const int*)v)); // value comparison
+}
 
-    {
-        auto is_same = std::is_same<
-            sca::detail::has_size<std::vector<int>>,
-            std::true_type>::value;
-        EXPECT_TRUE(is_same);
+void expect_string_foo(void* v) {
+    EXPECT_EQ(0, g_function_hit);
+    g_function_hit = 2;
+    EXPECT_EQ((void*)STR_FOO, v); // pointer comparison
+    EXPECT_EQ(std::string(STR_FOO), std::string((const char*)v)); // value comparison
+}
+
+}
+
+TEST(lesson_3, packaged_void_pointer) {
+    using namespace lesson_3_ns;
+
+    const int* i = &INT_3;
+    const char* s = STR_FOO;
+    packaged_void_pointer pvp;
+
+    EXPECT_EQ(nullptr, pvp.handler);
+    EXPECT_EQ(nullptr, pvp.data);
+    EXPECT_EQ(0, g_function_hit);
+    g_function_hit = 0;
+
+    pvp.handler = expect_int_3;
+    pvp.data = (void*)i;
+    execute_packaged_void_pointer_handler(pvp);
+    EXPECT_EQ(1, g_function_hit);
+    g_function_hit = 0;
+
+    pvp.handler = expect_string_foo;
+    pvp.data = (void*)s;
+    execute_packaged_void_pointer_handler(pvp);
+    EXPECT_EQ(2, g_function_hit);
+    g_function_hit = 0;
+}
+
+namespace lesson_3_ns {
+
+enum types {
+    is_unknown,
+    is_int,
+    is_string
+};
+
+struct void_pointer_with_id {
+    size_t id = types::is_unknown;
+    void* data = nullptr;
+};
+
+size_t g_switch_hit = 0;
+
+void unwrap_void_pointer_with_id(void_pointer_with_id vpwi) {
+    EXPECT_EQ(0, g_switch_hit);
+
+    switch(vpwi.id) {
+        case types::is_int:
+            g_switch_hit = 1;
+            EXPECT_EQ((void*)&INT_3, vpwi.data); // pointer comparison
+            EXPECT_EQ(INT_3, *((const int*)(vpwi.data))); // value comparison 
+            break;
+        case types::is_string:
+            g_switch_hit = 2;
+            EXPECT_EQ((void*)STR_FOO, vpwi.data); // pointer comparison
+            EXPECT_EQ(std::string(STR_FOO), std::string((const char*)(vpwi.data))); // value comparison
+            break;
+        case types::is_unknown:
+        default:
+            g_switch_hit = 3;
+            EXPECT_EQ(nullptr, vpwi.data);
+            break;
     }
+}
+
+}
+
+TEST(lesson_3, void_pointer_with_id) {
+    using namespace lesson_3_ns;
+
+    const int* i = &INT_3;
+    const char* s = STR_FOO;
+    void_pointer_with_id vpwi;
+
+    unwrap_void_pointer_with_id(vpwi);
+    EXPECT_EQ(3, g_switch_hit);
+    g_switch_hit = 0;
+
+    vpwi.id = types::is_int;
+    vpwi.data = (void*)i;
+    unwrap_void_pointer_with_id(vpwi);
+    EXPECT_EQ(1, g_switch_hit);
+    g_switch_hit = 0;
+
+    vpwi.id = types::is_string;
+    vpwi.data = (void*)s;
+    unwrap_void_pointer_with_id(vpwi);
+    EXPECT_EQ(2, g_switch_hit);
+    g_switch_hit = 0;
+
+    vpwi.id = types::is_string+1;
+    vpwi.data = nullptr;
+    unwrap_void_pointer_with_id(vpwi);
+    EXPECT_EQ(3, g_switch_hit);
+    g_switch_hit = 0;
+}
+
+namespace lesson_3_ns {
+
+// A struct which can hold a pointer to any value
+struct wrapped_value {
+    // assign a value to this value wrapper
+    template <typename T>
+    void set(T& t) {
+        ptr = &t;
+        code = typeid(typename std::decay<T>).hash_code();
+    }
+
+    // return `true` if a value is assigned and the value type matches `T`, else return `false`
+    template <typename T>
+    bool is() {
+        return ptr != nullptr && code == typeid(typename std::decay<T>).hash_code();
+    }
+
+    // return a reference to the assigned value
+    template <typename T>
+    T& to() {
+        return *(static_cast<T*>(ptr));
+    }
+
+private:
+    void* ptr = nullptr;
+    size_t code = 0;
+};
+
+bool expect_bool(wrapped_value wv, bool expected) {
+    return wv.is<bool>() && expected == wv.to<bool>();
+};
+
+bool expect_int(wrapped_value wv, int expected) {
+    return wv.is<int>() && expected == wv.to<int>();
+};
+
+bool expect_string(wrapped_value wv, std::string expected) {
+    return wv.is<std::string>() && expected == wv.to<std::string>();
+};
+
+}
+
+TEST(lesson_3, wrapped_value) {
+    using namespace lesson_3_ns;
+
+    wrapped_value wv;
+    bool b = true;
+    int i = 31;
+    std::string s("foo");
     
-    {
-        auto is_same = std::is_same<
-            sca::detail::has_size<std::list<int>>,
-            std::true_type>::value;
-        EXPECT_TRUE(is_same);
-    }
+    EXPECT_FALSE(expect_bool(wv, false));
+    EXPECT_FALSE(expect_bool(wv, true));
+    EXPECT_FALSE(expect_int(wv, 0));
+    EXPECT_FALSE(expect_int(wv, 31));
+    EXPECT_FALSE(expect_string(wv, std::string("faa")));
+    EXPECT_FALSE(expect_string(wv, std::string("foo")));
 
-    {
-        auto is_same = std::is_same<
-            sca::detail::has_size<std::forward_list<int>>,
-            std::false_type>::value;
-        EXPECT_TRUE(is_same);
-    }
+    wv.set(b);
+    EXPECT_FALSE(expect_bool(wv, false));
+    EXPECT_TRUE(expect_bool(wv, true));
+    EXPECT_FALSE(expect_int(wv, 0));
+    EXPECT_FALSE(expect_int(wv, 31));
+    EXPECT_FALSE(expect_string(wv, std::string("faa")));
+    EXPECT_FALSE(expect_string(wv, std::string("foo")));
 
-    EXPECT_EQ(8, sca::size(v));
-    EXPECT_EQ(3, sca::size(l));
-    EXPECT_EQ(5, sca::size(fl));
-}
+    wv.set(i);
+    EXPECT_FALSE(expect_bool(wv, false));
+    EXPECT_FALSE(expect_bool(wv, true));
+    EXPECT_FALSE(expect_int(wv, 0));
+    EXPECT_TRUE(expect_int(wv, 31));
+    EXPECT_FALSE(expect_string(wv, std::string("faa")));
+    EXPECT_FALSE(expect_string(wv, std::string("foo")));
 
-TEST(lesson_3, const_lvalue_slice) {
-    const std::vector<int> v_base{1,13,5,78132,7,8};
-
-    {
-        auto v = v_base;
-        auto out = sca::slice(v, 0, 2);
-        auto is_same = std::is_same<sca::const_slice_of<std::vector<int>>,decltype(out)>::value;
-        EXPECT_TRUE(is_same);
-    }
-
-    {
-        auto v = v_base;
-        auto begin = v.begin();
-        auto end = std::next(begin, 2);
-        EXPECT_TRUE(std::equal(begin, end, sca::slice(v, 0, 2).begin()));
-    }
-
-    {
-        auto v = v_base;
-        auto begin = std::next(v.begin(), 2);
-        auto end = std::next(begin, 3);
-        EXPECT_TRUE(std::equal(begin, end, sca::slice(v, 2, 3).begin()));
-    }
-
-    {
-        auto v = v_base;
-        auto begin = std::next(v.begin(), 2);
-        auto end = std::next(begin, 3);
-        EXPECT_FALSE(std::equal(begin, end, sca::slice(v, 3, 3).begin()));
-    }
-    
-    {
-        auto v = v_base;
-        auto csl = sca::slice(v, 2, 3);
-
-        EXPECT_EQ(3, sca::size(csl));
-
-        auto it = csl.begin();
-        EXPECT_EQ(5, *it);
-        ++it;
-        EXPECT_EQ(78132, *it);
-        ++it;
-        EXPECT_EQ(7,*it);
-        ++it;
-        EXPECT_EQ(csl.end(), it);
-    }
-}
-
-TEST(lesson_3, rvalue_slice) {
-    const std::vector<int> v_base{1,13,5,78132,7,8};
-
-    {
-        auto v = v_base;
-        auto out = sca::slice(std::move(v), 0, 2);
-        auto is_same = std::is_same<sca::slice_of<std::vector<int>>,decltype(out)>::value;
-        EXPECT_TRUE(is_same);
-    }
-
-    {
-        auto v = v_base;
-        auto begin = v.begin();
-        auto end = std::next(begin, 2);
-
-        // must ensure a copy of the slice exists because slice holds rvalue
-        // moved memory of its source container
-        auto sl = sca::slice(std::move(v), 0, 2); 
-        EXPECT_TRUE(std::equal(begin, end, sl.begin()));
-    }
-
-    {
-        auto v = v_base;
-        auto begin = std::next(v.begin(), 2);
-        auto end = std::next(begin, 3);
-        auto sl = sca::slice(std::move(v), 2, 3);
-        EXPECT_TRUE(std::equal(begin, end, sl.begin()));
-    }
-
-    {
-        auto v = v_base;
-        auto begin = std::next(v.begin(), 2);
-        auto end = std::next(begin, 3);
-        auto sl = sca::slice(std::move(v), 3, 3);
-        EXPECT_FALSE(std::equal(begin, end, sl.begin()));
-    }
-    
-    {
-        auto v = v_base;
-        auto sl = sca::slice(std::move(v), 2, 3);
-
-        for(auto& e : sl) {
-            e = e + 1;
-        }
-
-        EXPECT_EQ(3, sca::size(sl));
-
-        auto it = sl.begin();
-        EXPECT_EQ(6, *it);
-        ++it;
-        EXPECT_EQ(78133, *it);
-        ++it;
-        EXPECT_EQ(8,*it);
-        ++it;
-        EXPECT_EQ(sl.end(), it);
-    }
-}
-
-TEST(lesson_3, mutable_slice) {
-    const std::vector<int> v_base{1,13,5,78132,7,8};
-
-    {
-        auto v = v_base;
-        auto out = sca::mslice(v, 0, 2);
-        auto is_same = std::is_same<sca::slice_of<std::vector<int>>,decltype(out)>::value;
-        EXPECT_TRUE(is_same);
-    }
-
-    {
-        auto v = v_base;
-        auto begin = v.begin();
-        auto end = std::next(begin, 2);
-        EXPECT_TRUE(std::equal(begin, end, sca::mslice(v, 0, 2).begin()));
-    }
-
-    {
-        auto v = v_base;
-        auto begin = std::next(v.begin(), 2);
-        auto end = std::next(begin, 3);
-        EXPECT_TRUE(std::equal(begin, end, sca::mslice(v, 2, 3).begin()));
-    }
-
-    {
-        auto v = v_base;
-        auto begin = std::next(v.begin(), 2);
-        auto end = std::next(begin, 3);
-        EXPECT_FALSE(std::equal(begin, end, sca::mslice(v, 3, 3).begin()));
-    }
-
-    {
-        auto v = v_base;
-        auto sl = sca::mslice(v, 2, 3);
-
-        for(auto& e : sl) {
-            e = e + 1;
-        }
-
-        EXPECT_EQ(3, sca::size(sl));
-
-        auto it = sl.begin();
-        EXPECT_EQ(6, *it);
-        ++it;
-        EXPECT_EQ(78133, *it);
-        ++it;
-        EXPECT_EQ(8, *it);
-        ++it;
-        EXPECT_EQ(sl.end(), it);
-    }
+    wv.set(s);
+    EXPECT_FALSE(expect_bool(wv, false));
+    EXPECT_FALSE(expect_bool(wv, true));
+    EXPECT_FALSE(expect_int(wv, 0));
+    EXPECT_FALSE(expect_int(wv, 31));
+    EXPECT_FALSE(expect_string(wv, std::string("faa")));
+    EXPECT_TRUE(expect_string(wv, std::string("foo")));
 }
 
 #ifdef COMPILE_EXTRA_CREDIT
 namespace lesson_3_ns {
-namespace detail {
 
-template<typename T>
-struct has_resize_struct {
-    typedef typename std::decay_t<T> DT; // remove any references from T
-    template<typename U, void (U::*)(typename U::size_type)> struct SFINAE {};
-    template<typename U> static char test(SFINAE<U, &U::resize>*);
-    template<typename U> static int test(...);
-    static const bool has = sizeof(test<T>(0)) == sizeof(char);
-};
+struct safe_wrapped_value : public wrapped_value {
+    template <typename T>
+    void set(T& t) {
+        wrapped_value::set(t);
+    }
 
-template <typename T>
-using has_resize = std::integral_constant<bool, detail::has_resize_struct<T>::has>;
-
-// Resize the container via C::resize() method
-template <typename C>
-void resize(C& c, size_t new_size, std::true_type) { 
-    c.resize(new_size);
-}
-
-// Resize the container via C(size) construction
-template <typename C>
-void resize(C& c, size_t new_size, std::false_type) {
-    c = C(new_size);
-}
-
-}
-
-template <typename C>
-void resize(C& c, size_t new_size) {
-    detail::resize(c, new_size, detail::has_resize<C>()); 
-}
-
-template <typename T>
-struct no_resize {
-    typedef size_t size_type;
-
-    no_resize(size_type sz) : m_sz(sz) { }
-
-    // let compiler generate other constructors
-
-    size_type size() const {
-        return m_sz;
+    template <typename T>
+    bool get(T& t) {
+        if(wv.is<T>()) {
+            t = wv.to<T>();
+            return true;
+        } else {
+            return false
+        }
     }
 
 private:
-    size_type m_sz;
+    wrapped_value wv;
 };
 
-}
+// overload expect functions 
+bool expect_bool(safe_wrapped_value swv, bool expected) {
+    bool actual = false;
+    bool success = swf.get(actual);
+    return success && expected == actual;
+};
+
+bool expect_int(safe_wrapped_value wv, int expected) {
+    int actual = 0;
+    bool success = swf.get(actual);
+    return success && expected == actual;
+};
+
+bool expect_string(safe_wrapped_value wv, std::string expected) {
+    std::string actual;
+    bool success = swf.get(actual);
+    return success && expected == actual;
+};
+
+};
 
 /*
- Implement struct `lesson_3_ns::has_resize` such that `has_resize::has` property
- is equal to `true` when an object has a `void T::resize(T::size_type)` method, 
- otherwise `has_resize::has` should equal `false`.
+Implement the bodies of the given lesson_3_ns::safe_wrapped_value functions such that:
+bool safe_wrapped_value::get(T&): if type T matches stored value assign stored value to argument reference and return `true`, else returns `false`
  */
-TEST(lesson_3, extra_credit) {
+TEST(lesson_3, extra_credit_safe_wrapped_value) {
     using namespace lesson_3_ns;
 
-    {
-        auto is_same = std::is_same<
-            detail::has_resize<std::vector<int>>,
-            std::true_type>::value;
-        EXPECT_TRUE(is_same);
-    }
+    safe_wrapped_value swv;
+    bool b = true;
+    int i = 31;
+    std::string s("foo");
+    
+    EXPECT_FALSE(expect_bool(swv, false));
+    EXPECT_FALSE(expect_bool(swv, true));
+    EXPECT_FALSE(expect_int(swv, 0));
+    EXPECT_FALSE(expect_int(swv, 31));
+    EXPECT_FALSE(expect_string(swv, std::string("faa")));
+    EXPECT_FALSE(expect_string(swv, std::string("foo")));
 
-    {
+    swv.set(b);
+    EXPECT_FALSE(expect_bool(swv, false));
+    EXPECT_TRUE(expect_bool(swv, true));
+    EXPECT_FALSE(expect_int(swv, 0));
+    EXPECT_FALSE(expect_int(swv, 31));
+    EXPECT_FALSE(expect_string(swv, std::string("faa")));
+    EXPECT_FALSE(expect_string(swv, std::string("foo")));
 
-        auto is_same = std::is_same<
-            detail::has_resize<std::list<int>>,
-            std::true_type>::value;
-        EXPECT_TRUE(is_same);
-    }
+    swv.set(i);
+    EXPECT_FALSE(expect_bool(swv, false));
+    EXPECT_FALSE(expect_bool(swv, true));
+    EXPECT_FALSE(expect_int(swv, 0));
+    EXPECT_TRUE(expect_int(swv, 31));
+    EXPECT_FALSE(expect_string(swv, std::string("faa")));
+    EXPECT_FALSE(expect_string(swv, std::string("foo")));
 
-    {
-        auto is_same = std::is_same<
-            detail::has_resize<no_resize<int>>,
-            std::false_type>::value;
-        EXPECT_TRUE(is_same);
-    }
-
-    {
-        std::vector<int> v(5);
-        EXPECT_EQ(5, sca::size(v));
-        resize(v, 500);
-        EXPECT_EQ(500, sca::size(v));
-    }
-
-    {
-        std::list<std::string> l(5);
-        EXPECT_EQ(5, sca::size(l));
-        resize(l, 50);
-        EXPECT_EQ(50, sca::size(l));
-    }
-
-    {
-        no_resize<double> nr(5);
-        EXPECT_EQ(5, sca::size(nr));
-        resize(nr, 5000);
-        EXPECT_EQ(5000, sca::size(nr));
-    }
+    swv.set(s);
+    EXPECT_FALSE(expect_bool(swv, false));
+    EXPECT_FALSE(expect_bool(swv, true));
+    EXPECT_FALSE(expect_int(swv, 0));
+    EXPECT_FALSE(expect_int(swv, 31));
+    EXPECT_FALSE(expect_string(swv, std::string("faa")));
+    EXPECT_TRUE(expect_string(swv, std::string("foo")));
 }
 #endif

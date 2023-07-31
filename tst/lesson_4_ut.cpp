@@ -1,196 +1,384 @@
 #include <string>
 #include <iostream>
 #include <vector>
+#include <list>
+#include <forward_list>
 #include <algorithm>
-#include <functional>
 #include "scalgorithm"
 #include <gtest/gtest.h> 
 
-namespace lesson_4_ns {
+struct lesson_4_f : public ::testing::Test {
+protected:
+    void SetUp() override {
+        for(auto& e : counts()) {
+            e = false;
+        }
+    }
 
-int function_1() {
-    return 1;
-}
+public:
+    static std::vector<int>& counts() {
+        static std::vector<int> cnts(4);
+        return cnts;
+    }
 
-struct Functor_1 { 
-    int operator()() {
-        return 2;
+    template <typename T, typename T2>
+    static auto add(T t1, T2 t2) {
+        ++lesson_4_f::counts()[0];
+        return t1 + t2;
+    }
+
+    template <typename T>
+    static std::string add(std::string s, T t) {
+        ++lesson_4_f::counts()[1];
+        return s + std::to_string(t);
+    }
+
+    template <typename T>
+    static std::string add(T t, std::string s) {
+        ++lesson_4_f::counts()[2];
+        return std::to_string(t) + s;
+    }
+
+    static std::string add(std::string s, std::string s2) { 
+        ++lesson_4_f::counts()[3];
+        return s + s2;
     }
 };
 
-template <typename F>
-auto
-execute_callable(F&& f) {
-    return f();
+
+TEST_F(lesson_4_f, sfinae) {
+    for(auto& e : lesson_4_f::counts()) {
+        EXPECT_EQ(0, e);
+    }
+
+    EXPECT_EQ(5, lesson_4_f::add(2,3));
+    EXPECT_EQ(1, lesson_4_f::counts()[0]);
+    EXPECT_EQ(0, lesson_4_f::counts()[1]);
+    EXPECT_EQ(0, lesson_4_f::counts()[2]);
+    EXPECT_EQ(0, lesson_4_f::counts()[3]);
+
+    EXPECT_EQ(
+        std::string("hello world"), 
+        lesson_4_f::add(
+            std::string("hello"), 
+            std::string(" world")));
+    EXPECT_EQ(1, lesson_4_f::counts()[0]);
+    EXPECT_EQ(0, lesson_4_f::counts()[1]);
+    EXPECT_EQ(0, lesson_4_f::counts()[2]);
+    EXPECT_EQ(1, lesson_4_f::counts()[3]);
+
+    EXPECT_EQ(
+        std::string("3 world"), 
+        lesson_4_f::add(
+            3, 
+            std::string(" world")));
+    EXPECT_EQ(1, lesson_4_f::counts()[0]);
+    EXPECT_EQ(0, lesson_4_f::counts()[1]);
+    EXPECT_EQ(1, lesson_4_f::counts()[2]);
+    EXPECT_EQ(1, lesson_4_f::counts()[3]);
+
+    EXPECT_EQ(
+        std::string("world 3"), 
+        lesson_4_f::add(
+            std::string("world "),
+            3));
+    EXPECT_EQ(1, lesson_4_f::counts()[0]);
+    EXPECT_EQ(1, lesson_4_f::counts()[1]);
+    EXPECT_EQ(1, lesson_4_f::counts()[2]);
+    EXPECT_EQ(1, lesson_4_f::counts()[3]);
 }
 
+TEST(lesson_4, size) {
+    std::vector<int> v{1,2,3,4,5,6,7,8};
+    std::list<std::string> l{"one", "two", "three"};
+    std::forward_list<double> fl{1.0,2.0,3.0,4.0,5.0};
+
+    {
+        auto is_same = std::is_same<
+            sca::detail::has_size<std::vector<int>>,
+            std::true_type>::value;
+        EXPECT_TRUE(is_same);
+    }
+    
+    {
+        auto is_same = std::is_same<
+            sca::detail::has_size<std::list<int>>,
+            std::true_type>::value;
+        EXPECT_TRUE(is_same);
+    }
+
+    {
+        auto is_same = std::is_same<
+            sca::detail::has_size<std::forward_list<int>>,
+            std::false_type>::value;
+        EXPECT_TRUE(is_same);
+    }
+
+    EXPECT_EQ(8, sca::size(v));
+    EXPECT_EQ(3, sca::size(l));
+    EXPECT_EQ(5, sca::size(fl));
+}
+
+TEST(lesson_4, const_lvalue_slice) {
+    const std::vector<int> v_base{1,13,5,78132,7,8};
+
+    {
+        auto v = v_base;
+        auto out = sca::slice(v, 0, 2);
+        auto is_same = std::is_same<sca::const_slice_of<std::vector<int>>,decltype(out)>::value;
+        EXPECT_TRUE(is_same);
+    }
+
+    {
+        auto v = v_base;
+        auto begin = v.begin();
+        auto end = std::next(begin, 2);
+        EXPECT_TRUE(std::equal(begin, end, sca::slice(v, 0, 2).begin()));
+    }
+
+    {
+        auto v = v_base;
+        auto begin = std::next(v.begin(), 2);
+        auto end = std::next(begin, 3);
+        EXPECT_TRUE(std::equal(begin, end, sca::slice(v, 2, 3).begin()));
+    }
+
+    {
+        auto v = v_base;
+        auto begin = std::next(v.begin(), 2);
+        auto end = std::next(begin, 3);
+        EXPECT_FALSE(std::equal(begin, end, sca::slice(v, 3, 3).begin()));
+    }
+    
+    {
+        auto v = v_base;
+        auto csl = sca::slice(v, 2, 3);
+
+        EXPECT_EQ(3, sca::size(csl));
+
+        auto it = csl.begin();
+        EXPECT_EQ(5, *it);
+        ++it;
+        EXPECT_EQ(78132, *it);
+        ++it;
+        EXPECT_EQ(7,*it);
+        ++it;
+        EXPECT_EQ(csl.end(), it);
+    }
+}
+
+TEST(lesson_4, rvalue_slice) {
+    const std::vector<int> v_base{1,13,5,78132,7,8};
+
+    {
+        auto v = v_base;
+        auto out = sca::slice(std::move(v), 0, 2);
+        auto is_same = std::is_same<sca::slice_of<std::vector<int>>,decltype(out)>::value;
+        EXPECT_TRUE(is_same);
+    }
+
+    {
+        auto v = v_base;
+        auto begin = v.begin();
+        auto end = std::next(begin, 2);
+
+        // must ensure a copy of the slice exists because slice holds rvalue
+        // moved memory of its source container
+        auto sl = sca::slice(std::move(v), 0, 2); 
+        EXPECT_TRUE(std::equal(begin, end, sl.begin()));
+    }
+
+    {
+        auto v = v_base;
+        auto begin = std::next(v.begin(), 2);
+        auto end = std::next(begin, 3);
+        auto sl = sca::slice(std::move(v), 2, 3);
+        EXPECT_TRUE(std::equal(begin, end, sl.begin()));
+    }
+
+    {
+        auto v = v_base;
+        auto begin = std::next(v.begin(), 2);
+        auto end = std::next(begin, 3);
+        auto sl = sca::slice(std::move(v), 3, 3);
+        EXPECT_FALSE(std::equal(begin, end, sl.begin()));
+    }
+    
+    {
+        auto v = v_base;
+        auto sl = sca::slice(std::move(v), 2, 3);
+
+        for(auto& e : sl) {
+            e = e + 1;
+        }
+
+        EXPECT_EQ(3, sca::size(sl));
+
+        auto it = sl.begin();
+        EXPECT_EQ(6, *it);
+        ++it;
+        EXPECT_EQ(78133, *it);
+        ++it;
+        EXPECT_EQ(8,*it);
+        ++it;
+        EXPECT_EQ(sl.end(), it);
+    }
+}
+
+TEST(lesson_4, mutable_slice) {
+    const std::vector<int> v_base{1,13,5,78132,7,8};
+
+    {
+        auto v = v_base;
+        auto out = sca::mslice(v, 0, 2);
+        auto is_same = std::is_same<sca::slice_of<std::vector<int>>,decltype(out)>::value;
+        EXPECT_TRUE(is_same);
+    }
+
+    {
+        auto v = v_base;
+        auto begin = v.begin();
+        auto end = std::next(begin, 2);
+        EXPECT_TRUE(std::equal(begin, end, sca::mslice(v, 0, 2).begin()));
+    }
+
+    {
+        auto v = v_base;
+        auto begin = std::next(v.begin(), 2);
+        auto end = std::next(begin, 3);
+        EXPECT_TRUE(std::equal(begin, end, sca::mslice(v, 2, 3).begin()));
+    }
+
+    {
+        auto v = v_base;
+        auto begin = std::next(v.begin(), 2);
+        auto end = std::next(begin, 3);
+        EXPECT_FALSE(std::equal(begin, end, sca::mslice(v, 3, 3).begin()));
+    }
+
+    {
+        auto v = v_base;
+        auto sl = sca::mslice(v, 2, 3);
+
+        for(auto& e : sl) {
+            e = e + 1;
+        }
+
+        EXPECT_EQ(3, sca::size(sl));
+
+        auto it = sl.begin();
+        EXPECT_EQ(6, *it);
+        ++it;
+        EXPECT_EQ(78133, *it);
+        ++it;
+        EXPECT_EQ(8, *it);
+        ++it;
+        EXPECT_EQ(sl.end(), it);
+    }
+}
+
+#ifdef COMPILE_EXTRA_CREDIT
+namespace lesson_4_ns {
+namespace detail {
+
+template<typename T>
+struct has_resize_struct {
+    typedef typename std::decay_t<T> DT; // remove any references from T
+    template<typename U, void (U::*)(typename U::size_type)> struct SFINAE {};
+    template<typename U> static char test(SFINAE<U, &U::resize>*);
+    template<typename U> static int test(...);
+    static const bool has = sizeof(test<T>(0)) == sizeof(char);
 };
 
-TEST(lesson_4, callable) {
+template <typename T>
+using has_resize = std::integral_constant<bool, detail::has_resize_struct<T>::has>;
+
+// Resize the container via C::resize() method
+template <typename C>
+void resize(C& c, size_t new_size, std::true_type) { 
+    c.resize(new_size);
+}
+
+// Resize the container via C(size) construction
+template <typename C>
+void resize(C& c, size_t new_size, std::false_type) {
+    c = C(new_size);
+}
+
+}
+
+template <typename C>
+void resize(C& c, size_t new_size) {
+    detail::resize(c, new_size, detail::has_resize<C>()); 
+}
+
+template <typename T>
+struct no_resize {
+    typedef size_t size_type;
+
+    no_resize(size_type sz) : m_sz(sz) { }
+
+    // let compiler generate other constructors
+
+    size_type size() const {
+        return m_sz;
+    }
+
+private:
+    size_type m_sz;
+};
+
+}
+
+/*
+ Implement struct `lesson_4_ns::has_resize` such that `has_resize::has` property
+ is equal to `true` when an object has a `void T::resize(T::size_type)` method, 
+ otherwise `has_resize::has` should equal `false`.
+ */
+TEST(lesson_4, extra_credit) {
     using namespace lesson_4_ns;
 
-    int (*function_ptr_1)() = function_1;
-    auto lambda_1 = []{ return 3; };
-    std::function<int()> wrapper_1(lambda_1);
-
-    EXPECT_EQ(1, function_1());
-    EXPECT_EQ(1, function_ptr_1());
-    EXPECT_EQ(2, Functor_1()());
-    EXPECT_EQ(3, lambda_1());
-    EXPECT_EQ(3, wrapper_1());
-
-    EXPECT_EQ(1, execute_callable(function_1));
-    EXPECT_EQ(1, execute_callable(function_ptr_1));
-    EXPECT_EQ(2, execute_callable(Functor_1()));
-    EXPECT_EQ(3, execute_callable(lambda_1));
-    EXPECT_EQ(3, execute_callable(wrapper_1));
-}
-
-namespace lesson_4_ns {
-
-int function_2(int i) {
-    return i + 1;
-}
-
-struct Functor_2 { 
-    std::string operator()(std::string s) {
-        return std::string("Functor_2") + s;
-    }
-};
-
-template <typename F, typename T>
-auto
-execute_unary_callable(F&& f, T&& t) {
-    return f(std::forward<T>(t));
-}
-
-};
-
-TEST(lesson_4, callable_with_argument) {
-    using namespace lesson_4_ns;
-
-    int (*function_ptr_2)(int) = function_2;
-    auto lambda_2 = [](int i){ return i + 3; };
-    std::function<int(int)> wrapper_2(lambda_2);
-
-    EXPECT_EQ(2, function_2(1));
-    EXPECT_EQ(3, function_ptr_2(2));
-    EXPECT_EQ(std::string("Functor_2 hello"), Functor_2()(std::string(" hello")));
-    EXPECT_EQ(5, lambda_2(2));
-    EXPECT_EQ(5, wrapper_2(2));
-
-    EXPECT_EQ(2, execute_unary_callable(function_2,1));
-    EXPECT_EQ(3, execute_unary_callable(function_ptr_2,2));
-    EXPECT_EQ(std::string("Functor_2 hello"), execute_unary_callable(Functor_2(),std::string(" hello")));
-    EXPECT_EQ(5, execute_unary_callable(lambda_2,2));
-    EXPECT_EQ(5, execute_unary_callable(wrapper_2,2));
-}
-
-namespace lesson_4_ns {
-
-std::string function_3(int i) {
-    return std::to_string(i);
-}
-
-template <typename InputIt, typename OutputIt, typename UnaryOperation>
-void transform(InputIt cur, InputIt end, OutputIt out, UnaryOperation f) {
-    while(cur != end) {
-        *out = f(*cur);
-        ++cur;
-        ++out;
-    }
-}
-
-}
-
-TEST(lesson_4, algorithms_and_callables) {
-    const std::vector<int> v{1,2,3,4,5,6,7,8,9,10};
-
-    // transform int via increment
     {
-        std::vector<int> out(sca::size(v));
-        lesson_4_ns::transform(v.begin(), v.end(), out.begin(), [](int i){ return i + 2; });
-        std::vector<int> expect{3,4,5,6,7,8,9,10,11,12};
-        EXPECT_EQ(expect, out);
-    }
-
-    // transform int to strings
-    {
-        std::vector<std::string> out(sca::size(v));
-        lesson_4_ns::transform(v.begin(), v.end(), out.begin(), lesson_4_ns::function_3);
-        std::vector<std::string> expect{
-                std::to_string(1),
-                std::to_string(2),
-                std::to_string(3),
-                std::to_string(4),
-                std::to_string(5),
-                std::to_string(6),
-                std::to_string(7),
-                std::to_string(8),
-                std::to_string(9),
-                std::to_string(10)};
-        EXPECT_EQ(expect, out);
-    }
-}
-
-TEST(lesson_4, filter) {
-    const std::vector<int> v{1,2,3,4,5,6,7,8,9,10};
-
-    // simple filter
-    {
-        auto out = sca::filter([](int i) { return i % 2 == 0; }, v);
-        auto is_same = std::is_same<std::vector<int>,decltype(out)>::value;
-        std::vector<int> expect{2,4,6,8,10};
+        auto is_same = std::is_same<
+            detail::has_resize<std::vector<int>>,
+            std::true_type>::value;
         EXPECT_TRUE(is_same);
-        EXPECT_EQ(expect, out);
-    }
-   
-    // inline lambda filter
-    {
-        std::vector<int> expect{1,3,5,7,9};
-        EXPECT_EQ(expect, sca::filter([](int i) { return i % 2 != 0; }, v));
     }
 
-    // multiline filter function
     {
-        int cnt = 0;
-        auto skip_every_2 = [&cnt](int i) {
-            if(cnt < 2) {
-                ++cnt;
-                return false;
-            } else {
-                cnt = 0;
-                return true;
-            }
-        };
 
-        std::vector<int> expect{3,6,9};
-        EXPECT_EQ(expect, sca::filter(skip_every_2, v));
-    }
-
-    // filter slice
-    {
-        auto sl = sca::slice(v,4,4);
-        auto out = sca::filter([](int i) { return i % 2 == 0; }, sl);
-        std::vector<int> expect{6,8};
-        EXPECT_EQ(expect, out);
-    }
-
-    // complex string filter
-    {
-        std::vector<std::string> s{"hello", "1", " my", "2", " name", "3", " is", "4", " regret", ""};
-
-        auto ascii_filter_non_alphabet_or_space = [](std::string& s) {
-            auto is_space = [](const char c){ return c == 32; };
-            auto upper_case = [](const char c){ return 64 < c && c < 91; };
-            auto lower_case = [](const char c){ return 96 < c && c < 123; };
-            return s.size() && (is_space(s[0]) || upper_case(s[0]) || lower_case(s[0]));
-        };
-
-        auto out = sca::filter(ascii_filter_non_alphabet_or_space, s);
-        auto is_same = std::is_same<std::vector<std::string>,decltype(out)>::value;
-        std::vector<std::string> expect{"hello", " my", " name", " is", " regret"};
+        auto is_same = std::is_same<
+            detail::has_resize<std::list<int>>,
+            std::true_type>::value;
         EXPECT_TRUE(is_same);
-        EXPECT_EQ(expect, out);
+    }
+
+    {
+        auto is_same = std::is_same<
+            detail::has_resize<no_resize<int>>,
+            std::false_type>::value;
+        EXPECT_TRUE(is_same);
+    }
+
+    {
+        std::vector<int> v(5);
+        EXPECT_EQ(5, sca::size(v));
+        resize(v, 500);
+        EXPECT_EQ(500, sca::size(v));
+    }
+
+    {
+        std::list<std::string> l(5);
+        EXPECT_EQ(5, sca::size(l));
+        resize(l, 50);
+        EXPECT_EQ(50, sca::size(l));
+    }
+
+    {
+        no_resize<double> nr(5);
+        EXPECT_EQ(5, sca::size(nr));
+        resize(nr, 5000);
+        EXPECT_EQ(5000, sca::size(nr));
     }
 }
+#endif

@@ -1,6 +1,51 @@
 # Basic Templates Part 2
+## Template References and Pointers
+Templates can be written to accept references `&` and pointers `*` in the same way as normal functions:
+```
+#include <string>
+#include <iostream>
+
+template <typename T>
+void modify_by_reference(T& t, T new_value) {
+    t = new_value;
+}
+
+template <typename T>
+void modify_by_pointer(T* t, T new_value) {
+    *t = new_value;
+}
+
+print_vals(int& i, std::string& s) {
+    std::cout << "i: " << i << ", s: " << s << std::endl;
+}
+
+int main() {
+    int i = 3;
+    std::string s("foo");
+
+    print_vals(i, s);
+    modify_by_reference(i, 4);
+    modify_by_reference(s, "faa");
+    print_vals(i, s);
+    modify_by_pointere(&i, 5);
+    modify_by_pointer(&s, "goodbye!");
+    print_vals(i, s);
+    return 0;
+}
+```
+
+Executing this program:
+```
+$ ./a.out
+i: 3, s: foo
+i: 4, s: faa
+i: 5, s: goodbye! 
+$
+``` 
+
 ## Lvalues and Rvalues
-### What are they?
+In `c++` there is actually more than one kind of reference, there are `lvalue` and `rvalue` references.
+
 `lvalue`s and `rvalue`s are a concept in `c++` called [value categories](https://en.cppreference.com/w/cpp/language/value_category). However, that hyperlinked list is *extremely* confusing and contains many sub-categories which are commonly also called `lvalue`s or `rvalue`s but are in fact some other value type (`prvalue`, `xvalue`, etc.).
 
 Historically, an `lvalue` might be described as the value on the left side of a statement, whereas an rvalue is on the right side. The classic example is an assignment:
@@ -23,7 +68,7 @@ Here is a quote about the difference between lvalues and rvalues from computer s
 
 To further simplify what Scott described you can generalize the two value categories as such:
 
-#### rvalue
+### rvalue
 Any variable or object  which is going to go out of existence after the current statement. Examples:
 ```
 int a_variable = 3; // 3 is an rvalue
@@ -41,7 +86,7 @@ int add_1(int&& i) { // double ampersand reference to i is an rvalue
 }
 ```
 
-#### lvalue
+### lvalue
 Every other kind of variable or object:
 ```
 int a_variable; // lvalue
@@ -63,7 +108,7 @@ int sub_2(const int& i) { // const reference to i is an lvalue
 
 This doesn't capture the *exact* meaning, you may need to refer to the [value categories](https://en.cppreference.com/w/cpp/language/value_category) page for greater detail, but in my experience this is a useful mental model, because the utility this concept brings to `c++` programming is tied to the idea of something "about to go out of existence" which in turn enables something called "rvalue move semantics".
 
-### Why are lvalues and rvalues important?
+## Why are lvalues and rvalues important?
 In `c` there are two ways to store data, by-value (variables) and by-reference (pointers). Variables exist at a memory address, while pointers hold the value of *another* value's memory address.
 
 Assigning values to variables is called a "deep copy", while assigning a variable to a pointer is a "shallow copy". All this means is that, if the variable is large (some kind of struct or array), deep copying to it is a more expensive operation than shallow copying, which only needs to assign a single value (the memory address).
@@ -100,7 +145,7 @@ void swap(void* a, void* b) {
 }
 ```
 
-### Lvalue and Rvalue References
+## Lvalue and Rvalue References
 Most objects can be assigned or constructed using rvalues (operations which compiler may write for you if you don't explicitly write them for your objects). But how can we write code which recognizes an argument as an `rvalue`?
 
 In *non-templates* the solution is to denote an `rvalue` reference by a double ampersand `&&`, instead of a single ampersand `&` used in normal (lvalue!) references. In *templates* the double ampersand `&&` has special meaning, which we will address later.

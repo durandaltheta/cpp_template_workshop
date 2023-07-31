@@ -212,7 +212,7 @@ $
 ```
 
 ## Templates and Iterators 
-Templates are very useful for writing code that utilize iterators because the compiler will deduce the iterator types:
+Templates are very useful for writing code that utilize iterators because the compiler can deduce the iterator types instead of requiring the types to be manually specified by the user:
 ```
 #include <vector>
 #include <list>
@@ -247,4 +247,4 @@ $ ./a.out
 123
 hello world!
 $
-```
+``` 

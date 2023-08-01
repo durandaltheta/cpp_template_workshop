@@ -18,10 +18,10 @@
  *
  * The algorithms defined in the c++ standard library typically deal with 
  * iterators rather than containers. Instead, this library's data processing 
- * algorithms accept containers as arguments and return containers. This leaves 
- * the smallest amount of work for the user and reduces risk of exception 
- * throwing bugs. This also helps the user avoid making trivial efficiency 
- * mistakes when writing algorithm code.
+ * algorithms accept iterable objects/containers as arguments and return 
+ * iterable containers. This leaves the smallest amount of work for the user and 
+ * reduces risk of exception throwing bugs. This also helps the user avoid 
+ * making trivial efficiency mistakes when writing algorithm code.
  *
  * In c++, vectors typically outperform other container types, so algorithms in 
  * this library convert to them internally and return them as the result. 
@@ -37,8 +37,10 @@
  * - size() - return an iterable container's size, regardless if it implements a `::size()` method
  * - pointers() - return container of the addresses of elements in another container
  * - values() - return a container of deep value copies (never pointers) from a container of values or pointers 
- * - slice() - return a (potentially const) object capable of iterating a subset of a container
- * - mslice() - return an object capable of iterating a mutable subset of a container
+ * - slice_of<T> - object capable of iterating a subset of a container
+ * - const_slice_of<T> - const object capable of iterating a subset of a container
+ * - slice() - return a slice_of<T> (potentially const_slice_of<T>) capable of iterating a subset of a container
+ * - mslice() - return an mutable slice_of<T> capable of iterating a mutable subset of a container
  * - group() - return a container composed of all elements of all argument containers
  * - reverse() - return a container whose elements are in reverse order of input container 
  * - sort() = return a container whose elements are sorted based on a comparison Callable

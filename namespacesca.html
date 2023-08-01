@@ -154,7 +154,7 @@ template&lt;typename C &gt; </td></tr>
 <tr class="separator:addcfb883c20eadaed8da521efdac6d34"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
-<div class="textblock"><p>A NOTE ON API DESIGN As a note, much of the complexity of these templates is caused by more effort being put into usability for the user, rather than implementing minimalist algorithms.</p>
+<div class="textblock"><p>A NOTE ON API DESIGN As a note, much of the complexity of these templates is caused by more effort being put into usability, rather than implementing minimalist algorithms.</p>
 <p>The algorithms defined in the c++ standard library typically deal with iterators rather than the containers themselves. Instead, this library's data processing algorithms accept containers as arguments and return containers, because this leaves the smallest amount of work for the user and reduces risk of exception throwing bugs. This also helps the user avoid making trivial efficiency mistakes when writing algorithm code.</p>
 <p>In c++, vectors typically outperform other container types, so algorithms in this library convert to them internally and return them as the result.</p>
 <p>PROVIDED ALGORITHMS The algorithms in this header library are intended for general usecases and composability (the results of one algorithm can often be used as an argument in another). They are not exhaustive, but should cover the majority of simple data processing usecases.</p>

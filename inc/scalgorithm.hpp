@@ -684,16 +684,18 @@ map(F&& f, C&& c, Cs&&... cs) {
 /**
  * @brief perform a calculation on the elements of containers grouped by index
  *
- * Evaluation ends when traversible element in container c has been iterated. 
+ * Evaluation ends when every traversible element in container c has been 
+ * iterated. 
  *
- * The argument function must accept the current value as its first argument, 
- * and the elements of the argument containers stored in the current index. The 
- * value returned by the function becomes the new current value. When all 
- * indices have been processed `fold()` will return the final return value of 
- * the function.
+ * The argument function must accept the current calculated value as its first 
+ * argument, and the elements of the argument containers stored in the current 
+ * iteration. The value returned by the function becomes the new current 
+ * calculated value, which be subsequently passed as an argument to the 
+ * calculation function in the next iteration. When iteration completes 
+ * `fold()` will return the final return value of the calculation function.
  *
  * Each container can contain a different value type as long as the value type 
- * can be passed to the function.
+ * can be passed to the calculation function.
  *
  * @param f the calculation function 
  * @param init the initial value of the calculation being performed 

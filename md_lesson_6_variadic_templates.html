@@ -364,12 +364,21 @@ Callbacks, Thunks, and Variadics</h1>
 <div class="line">    worker_thread();</div>
 <div class="line">    void launch();</div>
 <div class="line">    void shutdown();</div>
-<div class="line">    void schedule_work(thunk);</div>
 <div class="line"> </div>
-<div class="line">    // wrap non-thunks as a thunk</div>
-<div class="line">    template &lt;typename F, typename... As&gt;</div>
-<div class="line">    void schedule_work(F&amp;&amp; f, As&amp;&amp;... as) {</div>
-<div class="line">        schedule_work(thunk([=]() mutable { f(std::forward&lt;As&gt;(as)...); }));</div>
+<div class="line">    // Where applicable prevent double wrapping if given callable takes no </div>
+<div class="line">    // arguments by directly constructing Callable as a thunk</div>
+<div class="line">    template &lt;typename F&gt;</div>
+<div class="line">    void schedule_work(F&amp;&amp; f) {</div>
+<div class="line">        thunk t(std::forward&lt;F&gt;(f));</div>
+<div class="line">        // ... schedule thunk for execution in some queue</div>
+<div class="line">    }</div>
+<div class="line"> </div>
+<div class="line">    // wrap non-thunks as a lambda with automatic copy captures and convert to a thunk</div>
+<div class="line">    template &lt;typename F, typename A, typename... As&gt;</div>
+<div class="line">    void schedule_work(F&amp;&amp; f, A&amp;&amp; a, As&amp;&amp;... as) {</div>
+<div class="line">        schedule_work([=]() mutable { </div>
+<div class="line">            f(std::forward&lt;A&gt;(a), std::forward&lt;As&gt;(as)...); </div>
+<div class="line">        });</div>
 <div class="line">    }</div>
 <div class="line">    // ...</div>
 <div class="line">};</div>

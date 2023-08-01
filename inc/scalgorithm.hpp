@@ -11,41 +11,43 @@
 
 /**
  * A NOTE ON API DESIGN
+ *
  * As a note, much of the complexity of these templates is caused by more
  * effort being put into usability, rather than implementing minimalist 
  * algorithms. 
  *
  * The algorithms defined in the c++ standard library typically deal with 
- * iterators rather than the containers themselves. Instead, this library's 
- * data processing algorithms accept containers as arguments and return 
- * containers, because this leaves the smallest amount of work for the user and 
- * reduces risk of exception throwing bugs. This also helps the user avoid 
- * making trivial efficiency mistakes when writing algorithm code.
+ * iterators rather than containers. Instead, this library's data processing 
+ * algorithms accept containers as arguments and return containers. This leaves 
+ * the smallest amount of work for the user and reduces risk of exception 
+ * throwing bugs. This also helps the user avoid making trivial efficiency 
+ * mistakes when writing algorithm code.
  *
  * In c++, vectors typically outperform other container types, so algorithms in 
  * this library convert to them internally and return them as the result. 
  *
  * PROVIDED ALGORITHMS 
+ *
  * The algorithms in this header library are intended for general usecases and 
  * composability (the results of one algorithm can often be used as an argument 
  * in another). They are not exhaustive, but should cover the majority of
  * simple data processing usecases.
  *
  * Algorithms and Objects provided by this header:
- * size() - return an iterable container's size, regardless if it implements a `::size()` method
- * pointers() - return container of the addresses of elements in another container
- * values() - return a container of deep value copies (never pointers) from a container of values or pointers 
- * slice() - return a (potentially const) object capable of iterating a subset of a container
- * mslice() - return an object capable of iterating a mutable subset of a container
- * group() - return a container composed of all elements of all argument containers
- * reverse() - return a container whose elements are in reverse order of input container 
- * sort() = return a container whose elements are sorted based on a comparison Callable
- * filter() - return a container filled with only elements which return true when applied to a Callable
- * map() - return the results of applying all elements of argument containers to a Callable
- * fold() - calculate a result after iterating through all elements of argument containers
- * each() - apply a Callable to every element of a container
- * all() - return true if all elements return true when applied to a Callable
- * some() - return true if at least one element returns true when applied to a Callable
+ * - size() - return an iterable container's size, regardless if it implements a `::size()` method
+ * - pointers() - return container of the addresses of elements in another container
+ * - values() - return a container of deep value copies (never pointers) from a container of values or pointers 
+ * - slice() - return a (potentially const) object capable of iterating a subset of a container
+ * - mslice() - return an object capable of iterating a mutable subset of a container
+ * - group() - return a container composed of all elements of all argument containers
+ * - reverse() - return a container whose elements are in reverse order of input container 
+ * - sort() = return a container whose elements are sorted based on a comparison Callable
+ * - filter() - return a container filled with only elements which return true when applied to a Callable
+ * - map() - return the results of applying all elements of argument containers to a Callable
+ * - fold() - calculate a result after iterating through all elements of argument containers
+ * - each() - apply a Callable to every element of a container
+ * - all() - return true if all elements return true when applied to a Callable
+ * - some() - return true if at least one element returns true when applied to a Callable
  */
 
 namespace sca { // simple cpp algorithm

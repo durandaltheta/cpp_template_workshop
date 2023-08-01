@@ -149,6 +149,23 @@ TEST(lesson_4, const_lvalue_slice) {
         auto end = std::next(begin, 3);
         EXPECT_FALSE(std::equal(begin, end, sca::slice(v, 3, 3).begin()));
     }
+
+    // const_slice_of iterator intialization 
+    {
+        auto v = v_base;
+        auto begin = std::next(v.begin(), 2);
+        auto end = std::next(begin, 3);
+        EXPECT_TRUE(std::equal(begin, end, sca::const_slice_of<std::vector<int>>(begin, end).begin()));
+    }
+
+    {
+        auto v = v_base;
+        auto begin = std::next(v.begin(), 2);
+        auto end = std::next(begin, 3);
+        auto begin2 = std::next(begin, 1);
+        auto slice = sca::const_slice_of<std::vector<int>>(begin2, end);
+        EXPECT_FALSE(std::equal(begin, end, slice.begin()));
+    }
     
     {
         auto v = v_base;
@@ -203,6 +220,24 @@ TEST(lesson_4, rvalue_slice) {
         auto sl = sca::slice(std::move(v), 3, 3);
         EXPECT_FALSE(std::equal(begin, end, sl.begin()));
     }
+
+    // slice_of iterator intialization 
+    {
+        auto v = v_base;
+        auto begin = std::next(v.begin(), 2);
+        auto end = std::next(begin, 3);
+        auto sl = sca::slice_of<std::vector<int>>(begin, end);
+        EXPECT_TRUE(std::equal(begin, end, sl.begin()));
+    }
+
+    {
+        auto v = v_base;
+        auto begin = std::next(v.begin(), 2);
+        auto end = std::next(begin, 3);
+        auto begin2 = std::next(begin, 1);
+        auto sl = sca::slice_of<std::vector<int>>(begin2, end);
+        EXPECT_FALSE(std::equal(begin, end, sl.begin()));
+    }
     
     {
         auto v = v_base;
@@ -254,6 +289,21 @@ TEST(lesson_4, mutable_slice) {
         auto begin = std::next(v.begin(), 2);
         auto end = std::next(begin, 3);
         EXPECT_FALSE(std::equal(begin, end, sca::mslice(v, 3, 3).begin()));
+    }
+
+    {
+        auto v = v_base;
+        auto begin = std::next(v.begin(), 2);
+        auto end = std::next(begin, 3);
+        EXPECT_TRUE(std::equal(begin, end, sca::slice_of<std::vector<int>>(begin, end).begin()));
+    }
+
+    {
+        auto v = v_base;
+        auto begin = std::next(v.begin(), 2);
+        auto end = std::next(begin, 3);
+        auto begin2 = std::next(begin, 1);
+        EXPECT_FALSE(std::equal(begin, end, sca::slice_of<std::vector<int>>(begin2, end).begin()));
     }
 
     {

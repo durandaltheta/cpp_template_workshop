@@ -402,6 +402,14 @@ public:
         m_end(std::next(m_begin, len))
     { }
 
+    // iterator constructor
+    template <typename IT>
+    slice_of(IT begin, IT end) : 
+        m_size(std::distance(begin, end)),
+        m_begin(std::move(begin)),
+        m_end(std::move(end))
+    { }
+
     /// return the iterable length of the slice
     inline size_t size() const {
         return m_size;
@@ -441,6 +449,14 @@ public:
         m_size(len),
         m_cbegin(std::next(c.cbegin(), idx)),
         m_cend(std::next(m_cbegin, len))
+    { }
+
+    // iterator constructor
+    template <typename IT>
+    const_slice_of(IT begin, IT end) : 
+        m_size(std::distance(begin, end)),
+        m_cbegin(std::move(begin)),
+        m_cend(std::move(end))
     { }
 
     /// return the iterable length of the slice
@@ -493,13 +509,24 @@ slice(C&& c, size_t idx, size_t len) {
     return slice_of<C>(std::forward<C>(c), idx, len);
 }
 
+/**
+ * @brief create a `const_slice_of` object from a container which allows iteration over a subset of another container
+ *
+ * This is the const lvalue reference implementation.
+ */
 template <typename C>
 auto
 slice(const C& c, size_t idx, size_t len) {
     return const_slice_of<C>(c, idx, len);
 }
 
-// explicitly catch mutable lvalue reference so compiler doesn't convert to `const C&`
+/**
+ * @brief create a `const_slice_of` object from a container which allows iteration over a subset of another container
+ *
+ * This is the lvalue reference implementation. Must return a `const_slice_of` 
+ * in order to prevent inline uses of the slice from treating the object as an 
+ * rvalue. If a mutable `slice_of` object is required, call `mslice()` instead.
+ */
 template <typename C>
 auto
 slice(C& c, size_t idx, size_t len) {

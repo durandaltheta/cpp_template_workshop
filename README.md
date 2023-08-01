@@ -73,7 +73,7 @@ This repository's `main` branch implements a set of high level algorithms which 
 The header [scalgorithm.hpp](inc/scalgorithm.hpp) and convenience header [scalgorithm](inc/scalgorithm) can be included in a project as-is. They can also be installed on your machine with:
 ```
 cmake .
-make install
+sudo make install 
 ```
 
 One of the targets of this course is to imbue students with the knowledge required to make `template` code of a high enough quality it can be used in real projects. Aside from the unit tests and extra credit work, which test the templates, students can easily experiment with the provided algorithms at their leasure to prove to themselves that what they are learning is, in fact, the real deal.

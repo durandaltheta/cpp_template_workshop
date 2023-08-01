@@ -483,7 +483,7 @@ private:
  * ```
  *
  * @param idx starting index of the range of values 
- * @param len ending index of the range of values
+ * @param len length of range represented by slice
  * @param c container to take slice of
  * @return a slice object capable of iterating a given container
  */
@@ -519,7 +519,7 @@ slice(C& c, size_t idx, size_t len) {
  * ```
  *
  * @param idx starting index of the range of values 
- * @param len ending index of the range of values
+ * @param len length of range represented by slice
  * @param c container to take slice of
  * @return a slice object capable of iterating a given container
  */

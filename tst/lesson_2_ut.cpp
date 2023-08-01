@@ -426,12 +426,13 @@ private:
 
 #ifdef COMPILE_EXTRA_CREDIT
 /*
-Implement the following constructors so that
-- lvalue_allowed(const lvalue_allowed&): m_t is initialized via deep copy
-- lvalue_allowed(lvalue_allowed&): m_t is initialized via deep copy
-- lvalue_allowed(T2&&): m_t is initialized via perfect forwarding
-- rvalue_allowed(rvalue_allowed&&): m_t is initialized via move copy
-- rvalue_allowed(T2&&): m_t is initialized via perfect forwarding 
+EXTRA CREDIT
+Implement the following constructors 
+- lesson_2_ns::lvalue_allowed(const lvalue_allowed&): m_t is initialized via deep copy
+- lesson_2_ns::lvalue_allowed(lvalue_allowed&): m_t is initialized via deep copy
+- lesson_2_ns::lvalue_allowed(T2&&): m_t is initialized via perfect forwarding
+- lesson_2_ns::rvalue_allowed(rvalue_allowed&&): m_t is initialized via move copy
+- lesson_2_ns::rvalue_allowed(T2&&): m_t is initialized via perfect forwarding 
 - forward_construct so that type A is perfect forwarded to new construct T
  */
 TEST(lesson_2, extra_credit_value_categories) {

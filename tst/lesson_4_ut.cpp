@@ -331,9 +331,14 @@ private:
 }
 
 /*
- Implement struct `lesson_4_ns::has_resize` such that `has_resize::has` property
- is equal to `true` when an object has a `void T::resize(T::size_type)` method, 
- otherwise `has_resize::has` should equal `false`.
+EXTRA CREDIT
+Implement struct `lesson_4_ns::has_resize_struct` such that 
+`has_resize_struct::has` property is equal to `true` when an object has a 
+`void T::resize(T::size_type)` method, otherwise `has_resize::has` should equal 
+`false`.
+
+Implement stub `lesson_4_ns::has_resize` type alias to return a compile time 
+`std::integral_constant` similar to `sca::detail::has_size`.
  */
 TEST(lesson_4, extra_credit_resize_sfinae_detection) {
     using namespace lesson_4_ns;

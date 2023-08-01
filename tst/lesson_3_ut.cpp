@@ -254,8 +254,10 @@ bool expect_string(safe_wrapped_value swv, std::string expected) {
 };
 
 /*
-Implement the bodies of the given lesson_3_ns::safe_wrapped_value functions such that:
-bool safe_wrapped_value::get(T&): if type T matches stored value assign stored value to argument reference and return `true`, else returns `false`
+EXTRA CREDIT
+Implement the bodies of the given lesson_3_ns::safe_wrapped_value functions such that: 
+void lesson_3_ns::safe_wrapped_value::set(T&): assign argument reference to the internal wrapped_value
+bool lesson_3_ns::safe_wrapped_value::get(T&): if type T matches stored value assign stored value to argument reference and return `true`, else returns `false`
  */
 TEST(lesson_3, extra_credit_safe_wrapped_value) {
     using namespace lesson_3_ns;

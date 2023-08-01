@@ -284,7 +284,6 @@ private:
     MUTEX m_mtx;
 };
 
-// simplify init_thread() by using value_guard<T>
 template <typename InitFunction, typename Function, typename... OptionalArgs>
 std::thread init_thread2(InitFunction&& init_f, Function&& f, OptionalArgs&&... args) {
     value_guard<bool> vg(false);
@@ -310,7 +309,14 @@ std::thread init_thread2(InitFunction&& init_f, Function&& f, OptionalArgs&&... 
 
 };
 
-#ifdef COMPILE_EXTRA_CREDIT
+#ifdef COMPILE_EXTRA_CREDIT 
+/*
+EXTRA CREDIT 
+Implement the body of `lesson_7_ns::init_thread2()` such that it applies the 
+same business logic as `lesson_7_ns::init_thread()` but replaces all usage of 
+`std::mutex` and `bool` flag variables with usages of 
+`lesson_7_ns::value_guard<bool>`.
+ */
 TEST(lesson_7, extra_credit_init_thread) {
     using namespace lesson_7_ns;
     

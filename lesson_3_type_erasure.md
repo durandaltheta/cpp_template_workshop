@@ -112,16 +112,16 @@ $
 ```
 
 ## C++ Templated Type Erasure
-Clever combination of templates with `void*` allows for safer and easier type erasure. For instance, [std::type_info](https://en.cppreference.com/w/cpp/types/type_info) is a convenient standard library utility type which allows us to acquire a unique unsigned integer value associated by the compiler with a given type at compile time returned by the function `std::type_info::hash_code()`, allowing for compiler enforced type safety. An `std::type_info` object for a given type can be acquired with the `c++` expression `typeid(my_type_or_variable_here)`:
+Clever combination of templates with `void*` allows for safer and easier type erasure. For instance, [std::type_info](https://en.cppreference.com/w/cpp/types/type_info) is a convenient standard library utility type which allows us to compare types, allowing for compiler enforced type safety. An `std::type_info` object for a given type can be acquired with the `c++` expression `typeid(my_type_or_variable_here)`:
 ```
 #include <iostream>
 
-void compare_hash_codes(std::type_info lhs, std::type_info rhs) {
-    if(lhs.hash_code() == rhs.hash_code()) {
-        std::cout << "lhs type code matches rhs type code" << std::endl;
+void compare_type_info(const std::type_info& lhs, const std::type_info& rhs) {
+    if(lhs == rhs) {
+        std::cout << "lhs type matches rhs type" << std::endl;
 
     } else {
-        std::cout << "lhs type code does not match rhs type code" << std::endl;
+        std::cout << "lhs type does not match rhs type" << std::endl;
     }
 }
 
@@ -129,9 +129,9 @@ int main() {
     int i = 0;
     const char* s = "foo";
 
-    compare_hash_codes(typeid(i), typeid(int));
-    compare_hash_codes(typeid(i), typeid(s));
-    compare_hash_codes(typeid(s), typeid("faa"));
+    compare_type_info(typeid(i), typeid(int));
+    compare_type_info(typeid(i), typeid(s));
+    compare_type_info(typeid(s), typeid("faa"));
     return 0;
 }
 ```
@@ -139,23 +139,24 @@ int main() {
 Executing this program:
 ```
 $ ./a.out
-lhs type code matches rhs type code
-lhs type code does not match rhs type code
-lhs type code matches rhs type code
+lhs type matches rhs type
+lhs type does not match rhs type
+lhs type matches rhs type
 $
 ```
 
 It should be noted that the above technique is only safe when used on values that are part of the same program, you cannot safely use this technique when sending values via inter-process mechanims.
 
-### type_info mysteries
-Some things about `std::type_info` are mysterious. For one, I would expect `std::type_info::hash_code()` to return a unique value, but it does not, it only returns a value that is guaranteed to be the same as another `std::type_info` which represents the same type. 
+### std::type_info particularities
+Some things about `std::type_info` are unusual. For one, the function `std::type_info::hash_code()` sounds like it to return a unique value, but it does not, it only returns a value that is guaranteed to be the same as another `std::type_info` which represents the same type. Instead, direct comparison of `std::type_info` objects via `==` is required to determine if types are identical.
 
-As such it appear that the expected way to compare types are the same is with the `==` operator (`std::type_info::operator==(const type_info& rhs)`). However, we cannot take a copy of the `std::type_info` object all construction and assignment of the type are explicitly deleted, so we can only get a reference to it via `typeid()`. 
+In addition to this, we cannot take a copy of the `std::type_info` object because construction and assignment operations are explicitly deleted, so we can only get a reference to it via `typeid()`. According to [cppreference](https://en.cppreference.com/w/cpp/language/typeid):
+> The typeid expression is an lvalue expression which refers to an object with static storage duration, of const-qualified version of the polymorphic type std::type_info or some type derived from it.
 
-However, another related standard library type utility, `std::type_index`, takes a const reference to a `std::type_info` in its constructor. The [std::type_index documentation on cppreference](https://en.cppreference.com/w/cpp/types/type_index) explicitly mentions that its constructor takes a *pointer* to a given `type_info` object. With this we can step out in faith we can do the same, because, wherever the `type_info` object lives, it's a const value and is therefore safe to read at all times (assuming the `type_info` object isn't created as a `thread_local` or some nonsense, though this seems unlikely because it is unnecessary).
+This means that we can take a `const std::type_info*` pointer of the result of a `typeid()` expression and use that pointer at some arbitrary time and place in the future. As an example, another related standard library type utility, [std::type_index](https://en.cppreference.com/w/cpp/types/type_index), whose documentation here explicitly mentions that its constructor maintains a *pointer* to a given `type_info` object. 
 
-## Using type_info in templates
-With templates we can improve the process of type erasure, because is possible to write an object which "wraps" a value of any type using template functions and then can use further templates to unwrap it at runtime:
+## Using std::type_info in templates
+With templates and `std::type_info` we can improve the process of type erasure, because is possible to write an object which "wraps" a value of any type using template functions and then can use further templates to unwrap it at runtime:
 ```
 #include <iostream>
 #include <string>
@@ -169,13 +170,13 @@ struct wrapped_value {
         tip = &typeid(typename std::decay<T>);
     }
 
-    // return `true` if a value is assigned and the value type matches `T`, else return `false`
+    // if a value is assigned and the value type matches `T` return `true`, else return `false`
     template <typename T>
     bool is() {
         return ptr != nullptr && *tip == typeid(typename std::decay<T>);
     }
 
-    // return a reference to the assigned value
+    // return a reference to the assigned value by casting and dereferencing the void*
     template <typename T>
     T& to() {
         return *(static_cast<T*>(ptr));
@@ -222,4 +223,5 @@ wrapped value is a std::string: foo
 $
 ```
 
-[std::any](https://en.cppreference.com/w/cpp/utility/any) is a `c++17` object which can store any type using type erasure. Some of the techniques show above are possibly how the `c++17` object `std::any` internally encapsulates its data. However, `std::any` extends the above functionality by implementing enforced type checking via `std::bad_any_cast` exception throws. `std::any` can also store an actual value (not just a pointer to a value) and properly destroy said value when the `std::any` goes out of scope, as necessary. I will leave it to the reader to guess at or research how this is done (hint: function pointers to destructors are involved).
+## std::any
+[std::any](https://en.cppreference.com/w/cpp/utility/any) is a `c++17` object which can store any type using type erasure. Some of the techniques shown above are possibly how the `c++17` object `std::any` internally encapsulates its data. However, `std::any` extends the above functionality by implementing enforced type checking via `std::bad_any_cast` exception throws. `std::any` can also store an actual value (not just a pointer to a value) and properly destroy said value when the `std::any` goes out of scope, as necessary. I will leave it to the reader to guess at or research how this is done (hint: function pointers to destructors are involved, and potentially heap allocation but not always).

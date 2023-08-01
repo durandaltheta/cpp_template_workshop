@@ -7,6 +7,7 @@
 #include <memory>
 #include <deque>
 #include <condition_variable>
+#include <chrono>
 #include "scalgorithm"
 #include <gtest/gtest.h> 
 
@@ -348,6 +349,13 @@ private:
     std::condition_variable m_cv;
     std::deque<std::unique_ptr<job>> m_jobs; 
     std::thread m_thread;
+};
+
+template <typename F, typename... As>
+auto expect_millisecond_duration(F&& f, As&&... as) {
+    auto start = std::chrono::system_clock::now();
+    f(std::forward<As>(as)...);
+    auto end = std::chrono::system_clock::now();
 };
 
 };

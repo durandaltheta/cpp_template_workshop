@@ -12,8 +12,8 @@
 /**
  * A NOTE ON API DESIGN
  * As a note, much of the complexity of these templates is caused by more
- * effort being put into usability for the user, rather than implementing 
- * minimalist algorithms. 
+ * effort being put into usability, rather than implementing minimalist 
+ * algorithms. 
  *
  * The algorithms defined in the c++ standard library typically deal with 
  * iterators rather than the containers themselves. Instead, this library's 

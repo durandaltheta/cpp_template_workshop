@@ -698,7 +698,7 @@ map(F&& f, C&& c, Cs&&... cs) {
  * @param f the calculation function 
  * @param init the initial value of the calculation being performed 
  * @param c the first container whose elements will be calculated 
- * @param cs optional additional containers whose elements will also be calculated one
+ * @param cs optional additional containers whose elements will also be calculated
  * @return the final calculated value returned from function f
  */
 template <typename F, typename Result, typename C, typename... Cs>

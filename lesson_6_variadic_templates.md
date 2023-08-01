@@ -403,12 +403,21 @@ struct worker_thread {
     worker_thread();
     void launch();
     void shutdown();
-    void schedule_work(thunk);
 
-    // wrap non-thunks as a thunk
-    template <typename F, typename... As>
-    void schedule_work(F&& f, As&&... as) {
-        schedule_work(thunk([=]() mutable { f(std::forward<As>(as)...); }));
+    // Where applicable prevent double wrapping if given callable takes no 
+    // arguments by directly constructing Callable as a thunk
+    template <typename F>
+    void schedule_work(F&& f) {
+        thunk t(std::forward<F>(f));
+        // ... schedule thunk for execution in some queue
+    }
+
+    // wrap non-thunks as a lambda with automatic copy captures and convert to a thunk
+    template <typename F, typename A, typename... As>
+    void schedule_work(F&& f, A&& a, As&&... as) {
+        schedule_work([=]() mutable { 
+            f(std::forward<A>(a), std::forward<As>(as)...); 
+        });
     }
     // ...
 };

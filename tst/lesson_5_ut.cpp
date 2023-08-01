@@ -254,7 +254,7 @@ Using standard library algorithms `std::sort`, `std::equal`, `std::all_of`,
 - https://en.cppreference.com/w/cpp/algorithm/equal
 - https://en.cppreference.com/w/cpp/algorithm/all_any_none_of
  */
-TEST(lesson_5, extra_credit) {
+TEST(lesson_5, extra_credit_algorithms_and_callables) {
     const std::vector<int> cv{1,2,3,4,5};
     const std::list<int> cl{1,3,5};
     const std::forward_list<int> cfl{2,4};

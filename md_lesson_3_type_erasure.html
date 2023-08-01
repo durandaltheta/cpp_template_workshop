@@ -154,14 +154,14 @@ C Type Erasure</h1>
 <div class="line">$</div>
 </div><!-- fragment --><h1><a class="anchor" id="autotoc_md34"></a>
 C++ Templated Type Erasure</h1>
-<p>Clever combination of templates with <code>void*</code> allows for safer and easier type erasure. For instance, <a href="https://en.cppreference.com/w/cpp/types/type_info">std::type_info</a> is a convenient standard library utility type which allows us to acquire a unique unsigned integer value associated by the compiler with a given type at compile time returned by the function <code>std::type_info::hash_code()</code>, allowing for compiler enforced type safety. An <code>std::type_info</code> object for a given type can be acquired with the <code>c++</code> expression <code>typeid(my_type_or_variable_here)</code>: </p><div class="fragment"><div class="line">#include &lt;iostream&gt;</div>
+<p>Clever combination of templates with <code>void*</code> allows for safer and easier type erasure. For instance, <a href="https://en.cppreference.com/w/cpp/types/type_info">std::type_info</a> is a convenient standard library utility type which allows us to compare types, allowing for compiler enforced type safety. An <code>std::type_info</code> object for a given type can be acquired with the <code>c++</code> expression <code>typeid(my_type_or_variable_here)</code>: </p><div class="fragment"><div class="line">#include &lt;iostream&gt;</div>
 <div class="line"> </div>
-<div class="line">void compare_hash_codes(std::type_info lhs, std::type_info rhs) {</div>
-<div class="line">    if(lhs.hash_code() == rhs.hash_code()) {</div>
-<div class="line">        std::cout &lt;&lt; &quot;lhs type code matches rhs type code&quot; &lt;&lt; std::endl;</div>
+<div class="line">void compare_type_info(const std::type_info&amp; lhs, const std::type_info&amp; rhs) {</div>
+<div class="line">    if(lhs == rhs) {</div>
+<div class="line">        std::cout &lt;&lt; &quot;lhs type matches rhs type&quot; &lt;&lt; std::endl;</div>
 <div class="line"> </div>
 <div class="line">    } else {</div>
-<div class="line">        std::cout &lt;&lt; &quot;lhs type code does not match rhs type code&quot; &lt;&lt; std::endl;</div>
+<div class="line">        std::cout &lt;&lt; &quot;lhs type does not match rhs type&quot; &lt;&lt; std::endl;</div>
 <div class="line">    }</div>
 <div class="line">}</div>
 <div class="line"> </div>
@@ -169,25 +169,27 @@ C++ Templated Type Erasure</h1>
 <div class="line">    int i = 0;</div>
 <div class="line">    const char* s = &quot;foo&quot;;</div>
 <div class="line"> </div>
-<div class="line">    compare_hash_codes(typeid(i), typeid(int));</div>
-<div class="line">    compare_hash_codes(typeid(i), typeid(s));</div>
-<div class="line">    compare_hash_codes(typeid(s), typeid(&quot;faa&quot;));</div>
+<div class="line">    compare_type_info(typeid(i), typeid(int));</div>
+<div class="line">    compare_type_info(typeid(i), typeid(s));</div>
+<div class="line">    compare_type_info(typeid(s), typeid(&quot;faa&quot;));</div>
 <div class="line">    return 0;</div>
 <div class="line">}</div>
 </div><!-- fragment --><p>Executing this program: </p><div class="fragment"><div class="line">$ ./a.out</div>
-<div class="line">lhs type code matches rhs type code</div>
-<div class="line">lhs type code does not match rhs type code</div>
-<div class="line">lhs type code matches rhs type code</div>
+<div class="line">lhs type matches rhs type</div>
+<div class="line">lhs type does not match rhs type</div>
+<div class="line">lhs type matches rhs type</div>
 <div class="line">$</div>
 </div><!-- fragment --><p>It should be noted that the above technique is only safe when used on values that are part of the same program, you cannot safely use this technique when sending values via inter-process mechanims.</p>
 <h2><a class="anchor" id="autotoc_md35"></a>
-type_info mysteries</h2>
-<p>Some things about <code>std::type_info</code> are mysterious. For one, I would expect <code>std::type_info::hash_code()</code> to return a unique value, but it does not, it only returns a value that is guaranteed to be the same as another <code>std::type_info</code> which represents the same type.</p>
-<p>As such it appear that the expected way to compare types are the same is with the <code>==</code> operator (<code>std::type_info::operator==(const type_info&amp; rhs)</code>). However, we cannot take a copy of the <code>std::type_info</code> object all construction and assignment of the type are explicitly deleted, so we can only get a reference to it via <code>typeid()</code>.</p>
-<p>However, another related standard library type utility, <code>std::type_index</code>, takes a const reference to a <code>std::type_info</code> in its constructor. The <a href="https://en.cppreference.com/w/cpp/types/type_index">std::type_index documentation on cppreference</a> explicitly mentions that its constructor takes a <em>pointer</em> to a given <code>type_info</code> object. With this we can step out in faith we can do the same, because, wherever the <code>type_info</code> object lives, it's a const value and is therefore safe to read at all times (assuming the <code>type_info</code> object isn't created as a <code>thread_local</code> or some nonsense, though this seems unlikely because it is unnecessary).</p>
+std::type_info particularities</h2>
+<p>Some things about <code>std::type_info</code> are unusual. For one, the function <code>std::type_info::hash_code()</code> sounds like it to return a unique value, but it does not, it only returns a value that is guaranteed to be the same as another <code>std::type_info</code> which represents the same type. Instead, direct comparison of <code>std::type_info</code> objects via <code>==</code> is required to determine if types are identical.</p>
+<p>In addition to this, we cannot take a copy of the <code>std::type_info</code> object because construction and assignment operations are explicitly deleted, so we can only get a reference to it via <code>typeid()</code>. According to <a href="https://en.cppreference.com/w/cpp/language/typeid">cppreference</a>: </p><blockquote class="doxtable">
+<p>The typeid expression is an lvalue expression which refers to an object with static storage duration, of const-qualified version of the polymorphic type std::type_info or some type derived from it. </p>
+</blockquote>
+<p>This means that we can take a <code>const std::type_info*</code> pointer of the result of a <code>typeid()</code> expression and use that pointer at some arbitrary time and place in the future. As an example, another related standard library type utility, <a href="https://en.cppreference.com/w/cpp/types/type_index">std::type_index</a>, whose documentation here explicitly mentions that its constructor maintains a <em>pointer</em> to a given <code>type_info</code> object.</p>
 <h1><a class="anchor" id="autotoc_md36"></a>
-Using type_info in templates</h1>
-<p>With templates we can improve the process of type erasure, because is possible to write an object which "wraps" a value of any type using template functions and then can use further templates to unwrap it at runtime: </p><div class="fragment"><div class="line">#include &lt;iostream&gt;</div>
+Using std::type_info in templates</h1>
+<p>With templates and <code>std::type_info</code> we can improve the process of type erasure, because is possible to write an object which "wraps" a value of any type using template functions and then can use further templates to unwrap it at runtime: </p><div class="fragment"><div class="line">#include &lt;iostream&gt;</div>
 <div class="line">#include &lt;string&gt;</div>
 <div class="line"> </div>
 <div class="line">// A struct which can hold a pointer to any value</div>
@@ -199,13 +201,13 @@ Using type_info in templates</h1>
 <div class="line">        tip = &amp;typeid(typename std::decay&lt;T&gt;);</div>
 <div class="line">    }</div>
 <div class="line"> </div>
-<div class="line">    // return `true` if a value is assigned and the value type matches `T`, else return `false`</div>
+<div class="line">    // if a value is assigned and the value type matches `T` return `true`, else return `false`</div>
 <div class="line">    template &lt;typename T&gt;</div>
 <div class="line">    bool is() {</div>
 <div class="line">        return ptr != nullptr &amp;&amp; *tip == typeid(typename std::decay&lt;T&gt;);</div>
 <div class="line">    }</div>
 <div class="line"> </div>
-<div class="line">    // return a reference to the assigned value</div>
+<div class="line">    // return a reference to the assigned value by casting and dereferencing the void*</div>
 <div class="line">    template &lt;typename T&gt;</div>
 <div class="line">    T&amp; to() {</div>
 <div class="line">        return *(static_cast&lt;T*&gt;(ptr));</div>
@@ -246,7 +248,9 @@ Using type_info in templates</h1>
 <div class="line">wrapped value is an int: 3</div>
 <div class="line">wrapped value is a std::string: foo</div>
 <div class="line">$</div>
-</div><!-- fragment --><p><a href="https://en.cppreference.com/w/cpp/utility/any">std::any</a> is a <code>c++17</code> object which can store any type using type erasure. Some of the techniques show above are possibly how the <code>c++17</code> object <code>std::any</code> internally encapsulates its data. However, <code>std::any</code> extends the above functionality by implementing enforced type checking via <code>std::bad_any_cast</code> exception throws. <code>std::any</code> can also store an actual value (not just a pointer to a value) and properly destroy said value when the <code>std::any</code> goes out of scope, as necessary. I will leave it to the reader to guess at or research how this is done (hint: function pointers to destructors are involved). </p>
+</div><!-- fragment --><h1><a class="anchor" id="autotoc_md37"></a>
+std::any</h1>
+<p><a href="https://en.cppreference.com/w/cpp/utility/any">std::any</a> is a <code>c++17</code> object which can store any type using type erasure. Some of the techniques shown above are possibly how the <code>c++17</code> object <code>std::any</code> internally encapsulates its data. However, <code>std::any</code> extends the above functionality by implementing enforced type checking via <code>std::bad_any_cast</code> exception throws. <code>std::any</code> can also store an actual value (not just a pointer to a value) and properly destroy said value when the <code>std::any</code> goes out of scope, as necessary. I will leave it to the reader to guess at or research how this is done (hint: function pointers to destructors are involved, and potentially heap allocation but not always). </p>
 </div></div><!-- contents -->
 </div><!-- PageDoc -->
 <!-- start footer part -->

@@ -79,7 +79,7 @@ sudo make install
 One of the targets of this course is to imbue students with the knowledge required to make `template` code of a high enough quality it can be used in real projects. Aside from the unit tests and extra credit work, which test the templates, students can easily experiment with the provided algorithms at their leasure to prove to themselves that what they are learning is, in fact, the real deal.
 
 ### Grading
-Grading for this workshop reflects Elektrobit's employee yearly performance goals scale of 1-5 (1 is bad, 3 is you did your job, 5 is perfect). As such, your score, if used by your manager to influence any of your yearly goals, can easily reason about how well you did and how they should adjust your end of year scores.
+Grading for this workshop reflects employee yearly performance goals scale of 1-5 (1 is bad, 3 is you did your job, 5 is perfect). As such, your score, if used by your manager to influence any of your yearly goals, can easily reason about how well you did and how they should adjust your end of year scores.
 
 - a branch checkout in their user name exists at end of workshop: 1 point
     - if no branch checkout in their user name exists at the end of the workshop I will assume the user has not participated. This means no score, good or bad, will be forwarded to any line manager

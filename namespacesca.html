@@ -358,9 +358,9 @@ template&lt;typename F , typename Result , typename C , typename... Cs&gt; </div
 </div><div class="memdoc">
 
 <p>perform a calculation on the elements of containers grouped by index </p>
-<p>Evaluation ends when traversible element in container c has been iterated.</p>
-<p>The argument function must accept the current value as its first argument, and the elements of the argument containers stored in the current index. The value returned by the function becomes the new current value. When all indices have been processed <code><a class="el" href="namespacesca.html#a437e669af61265f87419693670bee063" title="perform a calculation on the elements of containers grouped by index">fold()</a></code> will return the final return value of the function.</p>
-<p>Each container can contain a different value type as long as the value type can be passed to the function.</p>
+<p>Evaluation ends when every traversible element in container c has been iterated.</p>
+<p>The argument function must accept the current calculated value as its first argument, and the elements of the argument containers stored in the current iteration. The value returned by the function becomes the new current calculated value, which be subsequently passed as an argument to the calculation function in the next iteration. When iteration completes <code><a class="el" href="namespacesca.html#a437e669af61265f87419693670bee063" title="perform a calculation on the elements of containers grouped by index">fold()</a></code> will return the final return value of the calculation function.</p>
+<p>Each container can contain a different value type as long as the value type can be passed to the calculation function.</p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramname">f</td><td>the calculation function </td></tr>

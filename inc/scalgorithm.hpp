@@ -526,8 +526,9 @@ slice(const C& c, size_t idx, size_t len) {
  * @brief create a `const_slice_of` object from a container which allows iteration over a subset of another container
  *
  * This is the lvalue reference implementation. Must return a `const_slice_of` 
- * in order to prevent inline uses of the slice from treating the object as an 
- * rvalue. If a mutable `slice_of` object is required, call `mslice()` instead.
+ * in order to prevent inline uses of the slice() from treating the returned 
+ * object as an rvalue. If a mutable `slice_of` object is required, call 
+ * `mslice()` instead.
  */
 template <typename C>
 auto

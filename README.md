@@ -18,7 +18,7 @@ It's true the intended audience of this workshop is not c++ beginners. However, 
 > but it’s actually not. It’s only the “hard” way because it’s the way people used to teach things. With the help of this
 > book, you will do the incredibly simple things that all programmers need to do to learn a language:
 > 
-> 1. Go through each unit test (written using [googletest](https://google.github.io/googletest/primer.html))
+> 1. Go through each exercise.
 > 2. Type in each sample exactly.
 > 3. Make it run.
 > 
@@ -28,8 +28,10 @@ It's true the intended audience of this workshop is not c++ beginners. However, 
 > This book’s job is to teach you the three most essential skills that a beginning programmer needs to know: Reading
 > and Writing, Attention to Detail, Spotting Differences.
 
+It should be noted the "exercises" in this workshop are `c++` unit tests written using [googletest](https://google.github.io/googletest/primer.html).
+
 ### What is expected of participants 
-Each participant will be expected to get a series of unit tests passing on a (remote) branch. The `main` branch of this code repository contains *the complete working algorithm code and implemented unit tests*. There is a secondary branch named `student` with much of the algorithm and unit test code either absent or commented out, create your branch from that branch with: 
+Each participant will be expected to get a series of unit tests passing on a (remote) branch. The `main` branch of this code repository contains *the complete working algorithm code and implemented unit tests*. There is a secondary branch named `student` with much of the algorithm and unit test code either absent or commented out, create your branch from that branch. Example:
 ```
 git clone --recurse-submodules git@github.com:durandaltheta/cpp_template_workshop.git && git checkout student && git checkout -b your_branch_name && git push --set-upstream origin your_branch_name
 ```
@@ -41,7 +43,7 @@ This repository has github actions setup to automatically build and run unit tes
 I have provided the solutions for all code in the `main` branch. It is *intended* that you use this branch as reference. I do not want you to write your own solutions (though I have no problem if you do that on your own time). I literally expect participants to do the following:
 - open `main` branch in their browser on right side of your screen (or other monitor)
 - open your branch in your code editor on the left side of your screen (or other monitor)
-- type *BY HAND* each unit test solution (and relevant algorithm implementation in `inc/algorithm.hpp` or `inc/detail/algorithm.hpp`), into your branch
+- type *BY HAND* each unit test solution (and relevant algorithm implementation in `inc/algorithm.hpp` or `inc/detail/algorithm.hpp` when necessary), into your branch
     - *NO COPY PASTE*. The point of this unit test is to force all parts of your brain to engage with the learning process
 - optionally, compile and run the unit tests locally with `cmake . && make cpp_template_workshop_ut && tst/cpp_template_workshop_ut`
     - a single unit test can be run with `tst/cpp_template_workshop_ut unit_test_name`
@@ -49,7 +51,7 @@ I have provided the solutions for all code in the `main` branch. It is *intended
 - see if the github action succeeds in compiling and the relevant unit tests pass
 
 
-unit tests can be run an built locally assuming you have `cmake` and a `c++` compiler installed which supports `c++17`. To configure build:
+unit tests can be run an built locally assuming you have `cmake` and a `c++` compiler installed which supports `c++11`. To configure build:
 ```
 cd /path/to/checkout/directory
 cmake .

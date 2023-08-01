@@ -76,7 +76,7 @@ cmake .
 sudo make install 
 ```
 
-One of the targets of this course is to imbue students with the knowledge required to make `template` code of a high enough quality it can be used in real projects. Aside from the unit tests and extra credit work, which test the templates, students can easily experiment with the provided algorithms at their leasure to prove to themselves that what they are learning is, in fact, the real deal.
+One of the targets of this course is to imbue students with the knowledge required to make `template` code of a high enough quality it can be used in real projects. Aside from the unit tests and extra credit work, which test the templates, students can easily experiment with the provided algorithms at their leasure to prove to themselves that what they are learning is, in fact, the real deal. Of course, if you find any bugs, please contribute a pull request :).
 
 ### Grading
 Grading for this workshop is a scale of 1-5 (1 is bad, 3 is you completed the workshop, 5 is perfect). 

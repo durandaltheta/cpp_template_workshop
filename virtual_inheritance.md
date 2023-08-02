@@ -105,7 +105,6 @@ Combining all of the above with `void*` type erasure and templating allows for s
 struct any_interface {
     virtual void* data() = 0;
     virtual const std::type_info* type() = 0;
-    friend cast_interface;
 };
 
 // templated implementation of the interface class

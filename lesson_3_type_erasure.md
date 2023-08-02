@@ -158,7 +158,7 @@ In addition to this, we cannot take a copy of the `std::type_info` object becaus
 
 This means that we can take a `const std::type_info*` pointer of the result of a `typeid()` expression and use that pointer at some arbitrary time and place in the future. As an example, another related standard library type utility, [std::type_index](https://en.cppreference.com/w/cpp/types/type_index), whose documentation here explicitly mentions that its constructor maintains a *pointer* to a given `type_info` object. 
 
-## Using std::type_info in templates
+### Using std::type_info in templates
 With templates and `std::type_info` we can improve the process of type erasure, because is possible to write an object which "wraps" a value of any type using template functions and then can use further templates to unwrap it at runtime:
 ```
 #include <iostream>
@@ -226,5 +226,7 @@ wrapped value is a std::string: foo
 $
 ```
 
-## std::any
-[std::any](https://en.cppreference.com/w/cpp/utility/any) is a `c++17` object which can store any type using type erasure. Some of the techniques shown above are possibly how the `c++17` object `std::any` internally encapsulates its data. However, `std::any` extends the above functionality by implementing enforced type checking via `std::bad_any_cast` exception throws. `std::any` can also store an actual value (not just a pointer to a value) and properly destroy said value when the `std::any` goes out of scope, as necessary. I will leave it to the reader to guess at or research how this is done (hint: function pointers to destructors are involved, and potentially heap allocation but not always).
+### std::any
+[std::any](https://en.cppreference.com/w/cpp/utility/any) is a `c++17` object which can store any type using type erasure. Some of the techniques shown above are possibly how the `c++17` object `std::any` internally encapsulates its data. However, `std::any` extends the above functionality by implementing enforced type checking via `std::bad_any_cast` exception throws when a `T` value or reference is extracted via an `std::any_cast<T>()`. As in the virtual inheritance example, `std::any` can also store an actual value (not just a pointer to a value) and properly destroy said value when the `std::any` goes out of scope, as necessary. 
+
+I have provided some notes on the basics of how `std::any` *might* be implemented using [virtual inheritance](virtual_inheritance.md). Said notes are not required to proceed but might be interesting to the curious.

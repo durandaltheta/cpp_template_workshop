@@ -124,7 +124,7 @@ private:
 
 // exception to throw when user casts to an invalid type
 struct bad_any_cast : public std::exception {
-    const char* what() const {
+    const char* what() const noexcept {
         return "the cast type is incorrect you dummy!";
     }
 };

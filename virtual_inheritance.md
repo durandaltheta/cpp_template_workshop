@@ -132,7 +132,7 @@ struct bad_any_cast : public std::exception {
 
 // wrapper object which can be constructed with any type
 struct any {
-    // select specific constructors when assigning from another any object
+    // create specific constructors when assigning from another any object
     any(const any& rhs) : m_any_int(rhs.m_any_int) { }
     any(any& rhs) : m_any_int(rhs.m_any_int) { }
     any(any&& rhs) : m_any_int(rhs.m_any_int) { }

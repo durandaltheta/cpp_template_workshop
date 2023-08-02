@@ -10,7 +10,7 @@ Be warned, this is *not* a templates basics course. This course will cover advan
 ### A note on course design 
 I modeled this course after my favorite programming book [Learn Python the Hard Way](https://www.webpages.uidaho.edu/~stevel/504/LearnPythonTheHardWay.pdf). Said book is for very inexperienced students looking to learn the Python programming language. However, I was so impressed by how *successful* the book was at educating readers that I decided to steal his ideas :).
 
-It's true the intended audience of this workshop is not c++ beginners. However, many (or all) will be beginners when it comes to c++ templating, which is a very niche skill :). Here's the opening paragraph from his book, which contains the core ideas I'm seeking to emulate:
+It's true the intended audience of this workshop is not c++ beginners. However, many (or all) will be beginners when it comes to c++ templating, which is a very niche skill. Here's the opening paragraph from his book, which contains the core ideas I'm seeking to emulate:
 
 > The Hard Way Is Easier
 > 
@@ -76,7 +76,7 @@ cmake .
 sudo make install 
 ```
 
-One of the targets of this course is to imbue students with the knowledge required to make `template` code of a high enough quality it can be used in real projects. Aside from the unit tests and extra credit work, which test the templates, students can easily experiment with the provided algorithms at their leasure to prove to themselves that what they are learning is, in fact, the real deal. Of course, if you find any bugs, please contribute a pull request :).
+One of the targets of this course is to imbue students with the knowledge required to make `template` code of a high enough quality it can be used in real projects. Aside from the unit tests and extra credit work, which test the templates, students can easily experiment with the provided algorithms at their leasure to prove to themselves that what they are learning is, in fact, the real deal. Of course, if you find any bugs, please contribute a pull request.
 
 ### Grading
 Grading for this workshop is a scale of 1-5 (1 is bad, 3 is you completed the workshop, 5 is perfect). 

@@ -87,7 +87,7 @@ $(function() {
 </div><!-- fragment --><p>Executing this program: </p><div class="fragment"><div class="line">$ ./a.out </div>
 <div class="line">faa</div>
 <div class="line">$</div>
-</div><!-- fragment --><p>Additionally, if a <code>virtual</code> method is declaration is post-pended with a <code>= 0;</code> then that method is called a "pure virtual" method. A pure virtual method makes the <code>class</code> "abstract". An abstract <code>class</code> is what is known as an "interface" in other programming languages, essentially a specification of required methods that an inheriting class can fulfill.</p>
+</div><!-- fragment --><p>Additionally, if a <code>virtual</code> method declaration is post-pended with a <code>= 0;</code> then that method is called a "pure virtual" method. A pure virtual method makes the <code>class</code> "abstract". An abstract <code>class</code> is what is known as an "interface" in other programming languages, essentially a specification of required methods that an inheriting class can implement. If a class does not implement every pure virtual method it inherits, the child class is <em>also</em> an abstract class.</p>
 <p>An abstract <code>class</code> cannot be created directly, but it <em>can</em> be inherited and if the child <code>class</code> fully implements the missing "pure virtual" methods of the abstract class then the child <code>class</code> <em>can</em> be constructed. </p><div class="fragment"><div class="line">#include &lt;iostream&gt;</div>
 <div class="line"> </div>
 <div class="line">struct interface {</div>
@@ -108,7 +108,7 @@ $(function() {
 </div><!-- fragment --><p>Executing this program: </p><div class="fragment"><div class="line">$ ./a.out </div>
 <div class="line">faa</div>
 <div class="line">$</div>
-</div><!-- fragment --><p>One of the advantages of <code>virtual</code> methods and interfaces is that references/pointers to a class which implements the base class/interface can be <code>dynamic_cast&lt;&gt;()</code> to a reference/pointer of the base class/interface. This casting process is often done implicitly by the compiler, although it can be explicitly when necessary. When the methods of the cast base class reference/pointer are called, the child classes methods will <em>actually</em> be called instead: </p><div class="fragment"><div class="line">#include &lt;iostream&gt;</div>
+</div><!-- fragment --><p>One of the advantages of <code>virtual</code> methods and interfaces is that references/pointers to a class which implements the base class/interface can be <a href="https://en.cppreference.com/w/cpp/language/dynamic_cast">dynamic_cast</a> to a reference/pointer of the base class/interface. This casting process is often done implicitly by the compiler, although it can be done explicitly when necessary. When the methods of the cast base class reference/pointer are called, the child classes methods will <em>actually</em> be called instead: </p><div class="fragment"><div class="line">#include &lt;iostream&gt;</div>
 <div class="line"> </div>
 <div class="line">struct interface {</div>
 <div class="line">    virtual void foo() = 0;</div>
@@ -134,21 +134,23 @@ $(function() {
 <div class="line">$</div>
 </div><!-- fragment --><h1><a class="anchor" id="autotoc_md73"></a>
 Combining virtual inheritance with type erasure</h1>
-<p>Here is an example on how type erasure could be implemented using virtual inheritance in an object which can accept any type by-value: </p><div class="fragment"><div class="line">#include &lt;type_info&gt;</div>
+<p>Combining all of the above with <code>void*</code> type erasure and templating allows for some very interesting code. Here is an example of how type erasure could be implemented using virtual inheritance in an object which can accept any type by-value: </p><div class="fragment"><div class="line">#include &lt;type_info&gt;</div>
 <div class="line">#include &lt;type_traits&gt;</div>
 <div class="line">#include &lt;memory&gt;</div>
 <div class="line">#include &lt;exception&gt;</div>
 <div class="line">#include &lt;iostream&gt;</div>
 <div class="line">#include &lt;string&gt;</div>
 <div class="line"> </div>
+<div class="line">// pure virtual interface class</div>
 <div class="line">struct any_interface {</div>
 <div class="line">    virtual void* data() = 0;</div>
 <div class="line">    virtual const std::type_info* type() = 0;</div>
 <div class="line">    friend cast_interface;</div>
 <div class="line">};</div>
 <div class="line"> </div>
+<div class="line">// templated implementation of the interface class</div>
 <div class="line">template &lt;typename T&gt;</div>
-<div class="line">struct any_impl : protected any_interface {</div>
+<div class="line">struct any_impl : public any_interface {</div>
 <div class="line">    template &lt;typename T&gt;</div>
 <div class="line">    any_impl(T&amp;&amp; t) : m_t(std::forward&lt;T&gt;(t)) { }</div>
 <div class="line"> </div>
@@ -161,12 +163,14 @@ Combining virtual inheritance with type erasure</h1>
 <div class="line">    const std::type_info* m_type = &amp;(typeid(T));</div>
 <div class="line">};</div>
 <div class="line"> </div>
+<div class="line">// exception to throw when user casts to an invalid type</div>
 <div class="line">struct bad_any_cast : public std::exception {</div>
 <div class="line">    const char* what() const {</div>
 <div class="line">        return &quot;the cast type is incorrect you dummy!&quot;;</div>
 <div class="line">    }</div>
 <div class="line">};</div>
 <div class="line"> </div>
+<div class="line">// wrapper object which can be constructed with any type</div>
 <div class="line">struct any {</div>
 <div class="line">    // select specific constructors when assigning from another any object</div>
 <div class="line">    any(const any&amp; rhs) : m_any_int(rhs.m_any_int) { }</div>
@@ -199,6 +203,7 @@ Combining virtual inheritance with type erasure</h1>
 <div class="line">    friend template &lt;typename T&gt; T any_cast(any&amp;);</div>
 <div class="line">};</div>
 <div class="line"> </div>
+<div class="line">// method to extract a value or reference of type T from an any object</div>
 <div class="line">template &lt;typename T&gt;</div>
 <div class="line">T any_cast(any&amp; a) {</div>
 <div class="line">    typedef std::decay_t&lt;T&gt; DT;</div>
@@ -212,7 +217,7 @@ Combining virtual inheritance with type erasure</h1>
 <div class="line"> </div>
 <div class="line">int main() {</div>
 <div class="line">    any a(std::string(&quot;faa&quot;));</div>
-<div class="line">    std::cout &lt;&lt; std::any_cast&lt;std::string&gt;(a) &lt;&lt; std::endl;</div>
+<div class="line">    std::cout &lt;&lt; any_cast&lt;std::string&gt;(a) &lt;&lt; std::endl;</div>
 <div class="line">    return 0;</div>
 <div class="line">}</div>
 </div><!-- fragment --><p>Executing this program: </p><div class="fragment"><div class="line">$ ./a.out </div>

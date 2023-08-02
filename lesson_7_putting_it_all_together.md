@@ -149,7 +149,7 @@ I'm a fan of the [scheme](https://www.scheme.com/tspl4/) functional programming 
 - closures (lambda captures)
 - coroutines (built from continuations)
 
-It should also be noted that `scheme` primarily operates on linked lists instead of arrays or vectors, and their algorithms are normally written against said lists. A short list of some of the most `scheme` important algorithms: 
+It should also be noted that `scheme` primarily operates on linked lists instead of arrays or vectors, and their algorithms are normally written against said lists. A short list of some of the most important `scheme` algorithms: 
 - [map](https://www.scheme.com/tspl4/control.html#./control:s30): apply a function to elements of one or more lists, returning the results in a list 
 - [for-each](https://www.scheme.com/tspl4/control.html#./control:s33): similar to `map` but does not return a list of values.
 - [fold-left](https://www.scheme.com/tspl4/control.html#./control:s38): perform a calculation on one or more lists by evaluating it with a function with an init value, evaluating from left to right 

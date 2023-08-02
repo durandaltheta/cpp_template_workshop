@@ -1,4 +1,4 @@
 var searchData=
 [
-  ['lambdas_56',['Lambdas',['../md_lambda_primer.html',1,'']]]
+  ['lambdas_57',['Lambdas',['../md_lambda_primer.html',1,'']]]
 ];

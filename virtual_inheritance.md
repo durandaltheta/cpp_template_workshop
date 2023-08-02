@@ -168,7 +168,7 @@ template <typename T>
 T any_cast(any& a) {
     typedef std::decay_t<T> DT;
 
-    if(a.m_any_int && *(a.m_any_int->type()) != typeid(DT)) {
+    if(a && *(a.m_any_int->type()) != typeid(DT)) {
         throw std::bad_any_cast();
     }
 

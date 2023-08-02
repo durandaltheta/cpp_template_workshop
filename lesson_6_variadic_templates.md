@@ -336,7 +336,7 @@ hello world!
 $
 ```
 
-You could do something similar with `c++` Functors which implement some base type that a worker object understands:
+You could do something similar with `c++` objects which implement some base interface type that a worker object understands:
 ```
 #include <iostream>
 #include "worker_thread.hpp"

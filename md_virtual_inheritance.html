@@ -172,7 +172,7 @@ Combining virtual inheritance with type erasure</h1>
 <div class="line"> </div>
 <div class="line">// wrapper object which can be constructed with any type</div>
 <div class="line">struct any {</div>
-<div class="line">    // select specific constructors when assigning from another any object</div>
+<div class="line">    // create specific constructors when assigning from another any object</div>
 <div class="line">    any(const any&amp; rhs) : m_any_int(rhs.m_any_int) { }</div>
 <div class="line">    any(any&amp; rhs) : m_any_int(rhs.m_any_int) { }</div>
 <div class="line">    any(any&amp;&amp; rhs) : m_any_int(rhs.m_any_int) { }</div>
@@ -208,7 +208,7 @@ Combining virtual inheritance with type erasure</h1>
 <div class="line">T any_cast(any&amp; a) {</div>
 <div class="line">    typedef std::decay_t&lt;T&gt; DT;</div>
 <div class="line"> </div>
-<div class="line">    if(a.m_any_int &amp;&amp; *(a.m_any_int-&gt;type()) != typeid(DT)) {</div>
+<div class="line">    if(a &amp;&amp; *(a.m_any_int-&gt;type()) != typeid(DT)) {</div>
 <div class="line">        throw std::bad_any_cast();</div>
 <div class="line">    }</div>
 <div class="line"> </div>

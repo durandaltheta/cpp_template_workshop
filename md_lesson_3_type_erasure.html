@@ -122,11 +122,14 @@ C Type Erasure</h1>
 <div class="line">    switch(avd.id) {</div>
 <div class="line">        case types::is_int:</div>
 <div class="line">            std::cout &lt;&lt; &quot;void pointer is an int: &quot; &lt;&lt; *((int*)(wv.data)) &lt;&lt; std::endl;</div>
+<div class="line">            break;</div>
 <div class="line">        case types::is_string:</div>
 <div class="line">            std::cout &lt;&lt; &quot;void pointer is a std::string: &quot; &lt;&lt; (const char*)(wv.data) &lt;&lt; std::endl;</div>
+<div class="line">            break;</div>
 <div class="line">        case types::is_unknown:</div>
 <div class="line">        default:</div>
 <div class="line">            std::cout &lt;&lt; &quot;void pointer is of an unknown type&quot; &lt;&lt; std::endl;</div>
+<div class="line">            break;</div>
 <div class="line">    }</div>
 <div class="line">}</div>
 <div class="line"> </div>

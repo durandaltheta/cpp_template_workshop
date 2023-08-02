@@ -164,7 +164,7 @@ Combining virtual inheritance with type erasure</h1>
 <div class="line"> </div>
 <div class="line">// exception to throw when user casts to an invalid type</div>
 <div class="line">struct bad_any_cast : public std::exception {</div>
-<div class="line">    const char* what() const {</div>
+<div class="line">    const char* what() const noexcept {</div>
 <div class="line">        return &quot;the cast type is incorrect you dummy!&quot;;</div>
 <div class="line">    }</div>
 <div class="line">};</div>

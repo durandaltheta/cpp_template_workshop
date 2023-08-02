@@ -75,11 +75,14 @@ void print_void_pointer_with_id(void_pointer_with_id avp) {
     switch(avd.id) {
         case types::is_int:
             std::cout << "void pointer is an int: " << *((int*)(wv.data)) << std::endl;
+            break;
         case types::is_string:
             std::cout << "void pointer is a std::string: " << (const char*)(wv.data) << std::endl;
+            break;
         case types::is_unknown:
         default:
             std::cout << "void pointer is of an unknown type" << std::endl;
+            break;
     }
 }
 

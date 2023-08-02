@@ -29,7 +29,7 @@ faa
 $
 ```
 
-Additionally, if a `virtual` method is declaration is post-pended with a ` = 0;` then that method is called a "pure virtual" method. A pure virtual method makes the `class` "abstract". An abstract `class` is what is known as an "interface" in other programming languages, essentially a specification of required methods that an inheriting class can fulfill. 
+Additionally, if a `virtual` method declaration is post-pended with a ` = 0;` then that method is called a "pure virtual" method. A pure virtual method makes the `class` "abstract". An abstract `class` is what is known as an "interface" in other programming languages, essentially a specification of required methods that an inheriting class can implement. If a class does not implement every pure virtual method it inherits, the child class is *also* an abstract class.
 
 An abstract `class` cannot be created directly, but it *can* be inherited and if the child `class` fully implements the missing "pure virtual" methods of the abstract class then the child `class` *can* be constructed. 
 ```
@@ -59,7 +59,7 @@ faa
 $
 ```
 
-One of the advantages of `virtual` methods and interfaces is that references/pointers to a class which implements the base class/interface can be `dynamic_cast<>()` to a reference/pointer of the base class/interface. This casting process is often done implicitly by the compiler, although it can be explicitly when necessary. When the methods of the cast base class reference/pointer are called, the child classes methods will *actually* be called instead:
+One of the advantages of `virtual` methods and interfaces is that references/pointers to a class which implements the base class/interface can be [dynamic_cast](https://en.cppreference.com/w/cpp/language/dynamic_cast) to a reference/pointer of the base class/interface. This casting process is often done implicitly by the compiler, although it can be done explicitly when necessary. When the methods of the cast base class reference/pointer are called, the child classes methods will *actually* be called instead:
 ```
 #include <iostream>
 
@@ -92,7 +92,7 @@ $
 ```
 
 ## Combining virtual inheritance with type erasure 
-Here is an example on how type erasure could be implemented using virtual inheritance in an object which can accept any type by-value:
+Combining all of the above with `void*` type erasure and templating allows for some very interesting code. Here is an example of how type erasure could be implemented using virtual inheritance in an object which can accept any type by-value:
 ```
 #include <type_info>
 #include <type_traits>
@@ -101,14 +101,16 @@ Here is an example on how type erasure could be implemented using virtual inheri
 #include <iostream>
 #include <string>
 
+// pure virtual interface class
 struct any_interface {
     virtual void* data() = 0;
     virtual const std::type_info* type() = 0;
     friend cast_interface;
 };
 
+// templated implementation of the interface class
 template <typename T>
-struct any_impl : protected any_interface {
+struct any_impl : public any_interface {
     template <typename T>
     any_impl(T&& t) : m_t(std::forward<T>(t)) { }
 
@@ -121,12 +123,14 @@ private:
     const std::type_info* m_type = &(typeid(T));
 };
 
+// exception to throw when user casts to an invalid type
 struct bad_any_cast : public std::exception {
     const char* what() const {
         return "the cast type is incorrect you dummy!";
     }
 };
 
+// wrapper object which can be constructed with any type
 struct any {
     // select specific constructors when assigning from another any object
     any(const any& rhs) : m_any_int(rhs.m_any_int) { }
@@ -159,6 +163,7 @@ private:
     friend template <typename T> T any_cast(any&);
 };
 
+// method to extract a value or reference of type T from an any object
 template <typename T>
 T any_cast(any& a) {
     typedef std::decay_t<T> DT;
@@ -172,7 +177,7 @@ T any_cast(any& a) {
 
 int main() {
     any a(std::string("faa"));
-    std::cout << std::any_cast<std::string>(a) << std::endl;
+    std::cout << any_cast<std::string>(a) << std::endl;
     return 0;
 }
 ```

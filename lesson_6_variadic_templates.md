@@ -79,7 +79,7 @@ However, sometimes you run into situations where the template itself needs to pr
 // sum_vector recursively calls itself
 int sum_vector(int cur, std::vector<int>::iterator it, std::vector<int>::iterator end) {
     if(it != end) {
-        return sum_vector(sum + *it, ++it, end);
+        return sum_vector(cur + *it, ++it, end);
     } else {
         return cur;
     }

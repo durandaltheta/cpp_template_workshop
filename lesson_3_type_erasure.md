@@ -229,4 +229,4 @@ $
 ### std::any
 [std::any](https://en.cppreference.com/w/cpp/utility/any) is a `c++17` object which can store any type using type erasure. Some of the techniques shown above are possibly how the `c++17` object `std::any` internally encapsulates its data. However, `std::any` extends the above functionality by implementing enforced type checking via `std::bad_any_cast` exception throws when a `T` value or reference is extracted via an `std::any_cast<T>()`. As in the virtual inheritance example, `std::any` can also store an actual value (not just a pointer to a value) and properly destroy said value when the `std::any` goes out of scope, as necessary. 
 
-I have provided some notes on the basics of how `std::any` *might* be implemented using [virtual inheritance](virtual_inheritance.md). Said notes are not required to proceed but might be interesting to the curious.
+I have provided some notes on the basics of how `std::any` *might* be implemented using [type erasure and virtual inheritance](type_erasure_and_virtual_inheritance.md). Said notes are not required to proceed but might be interesting to the curious.

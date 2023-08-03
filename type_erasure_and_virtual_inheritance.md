@@ -31,7 +31,7 @@ $
 
 Additionally, if a `virtual` method declaration is post-pended with a ` = 0;` then that method is called a "pure virtual" method. A pure virtual method makes the `class` "abstract". An abstract `class` is what is known as an "interface" in other programming languages, essentially a specification of required methods that an inheriting class can implement. If a class does not implement every pure virtual method it inherits, the child class is *also* an abstract class.
 
-An abstract `class` cannot be created directly, but it *can* be inherited and if the child `class` fully implements the missing "pure virtual" methods of the abstract class then the child `class` *can* be constructed. 
+An abstract `class` cannot be created directly, but it can be inherited. If the child `class` fully implements the missing "pure virtual" methods of the abstract class then the child `class` *can* be constructed. 
 ```
 #include <iostream>
 

@@ -112,7 +112,7 @@ Processing parameter pack elements with recursive templates</h1>
 <div class="line">// sum_vector recursively calls itself</div>
 <div class="line">int sum_vector(int cur, std::vector&lt;int&gt;::iterator it, std::vector&lt;int&gt;::iterator end) {</div>
 <div class="line">    if(it != end) {</div>
-<div class="line">        return sum_vector(sum + *it, ++it, end);</div>
+<div class="line">        return sum_vector(cur + *it, ++it, end);</div>
 <div class="line">    } else {</div>
 <div class="line">        return cur;</div>
 <div class="line">    }</div>

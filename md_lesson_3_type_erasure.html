@@ -254,7 +254,7 @@ Using std::type_info in templates</h2>
 </div><!-- fragment --><h2><a class="anchor" id="autotoc_md37"></a>
 std::any</h2>
 <p><a href="https://en.cppreference.com/w/cpp/utility/any">std::any</a> is a <code>c++17</code> object which can store any type using type erasure. Some of the techniques shown above are possibly how the <code>c++17</code> object <code>std::any</code> internally encapsulates its data. However, <code>std::any</code> extends the above functionality by implementing enforced type checking via <code>std::bad_any_cast</code> exception throws when a <code>T</code> value or reference is extracted via an <code>std::any_cast&lt;T&gt;()</code>. As in the virtual inheritance example, <code>std::any</code> can also store an actual value (not just a pointer to a value) and properly destroy said value when the <code>std::any</code> goes out of scope, as necessary.</p>
-<p>I have provided some notes on the basics of how <code>std::any</code> <em>might</em> be implemented using <a class="el" href="md_virtual_inheritance.html">virtual inheritance</a>. Said notes are not required to proceed but might be interesting to the curious. </p>
+<p>I have provided some notes on the basics of how <code>std::any</code> <em>might</em> be implemented using <a class="el" href="md_type_erasure_and_virtual_inheritance.html">type erasure and virtual inheritance</a>. Said notes are not required to proceed but might be interesting to the curious. </p>
 </div></div><!-- contents -->
 </div><!-- PageDoc -->
 <!-- start footer part -->

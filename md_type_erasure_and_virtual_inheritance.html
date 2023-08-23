@@ -65,7 +65,7 @@ $(function() {
 <div class="title">type erasure using virtual inheritance </div>  </div>
 </div><!--header-->
 <div class="contents">
-<div class="textblock"><p>Another mechanism to implement type erasure is through the usage of interface classes. The <code>virtual</code> keyword is used to denote a method in a <code>class</code> (or <code>struct</code>, which are also <code>class</code>es under the hood) which can be "overwritten" will at runtime by a child <code>class</code> which implements their own version of them. Under the hood, the compiler is using function pointers to determine what <em>actual</em> function to call: </p><div class="fragment"><div class="line">#include &lt;iostream&gt;</div>
+<div class="textblock"><p>Another mechanism to implement type erasure is through the usage of interface classes. The <code>virtual</code> keyword is used to denote a method in a <code>class</code> (or <code>struct</code>, which are also <code>class</code>es under the hood) which can be "overwritten" at runtime by a child <code>class</code> which implements their own version of them. Under the hood, the compiler is using function pointers to determine what <em>actual</em> function to call: </p><div class="fragment"><div class="line">#include &lt;iostream&gt;</div>
 <div class="line"> </div>
 <div class="line">struct interface {</div>
 <div class="line">    virtual void foo() {</div>

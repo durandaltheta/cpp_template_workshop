@@ -1,5 +1,5 @@
 # type erasure using virtual inheritance 
-Another mechanism to implement type erasure is through the usage of interface classes. The `virtual` keyword is used to denote a method in a `class` (or `struct`, which are also `class`es under the hood) which can be "overwritten" will at runtime by a child `class` which implements their own version of them. Under the hood, the compiler is using function pointers to determine what *actual* function to call: 
+Another mechanism to implement type erasure is through the usage of interface classes. The `virtual` keyword is used to denote a method in a `class` (or `struct`, which are also `class`es under the hood) which can be "overwritten" at runtime by a child `class` which implements their own version of them. Under the hood, the compiler is using function pointers to determine what *actual* function to call: 
 ```
 #include <iostream>
 

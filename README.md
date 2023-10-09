@@ -1,4 +1,4 @@
-# C++ template workshop
+# C++ template and algorithm workshop
 
 ## Introduction to templates - building a toolbox 
 Templates are a very powerful tool for writing code in c++. They allow you to do just about everything a C macro would allow (and more!), but with type safety and namespace awareness. My goal in this workshop is to give my knowledge of c++ templates away so that others might benefit and significantly advance their understanding of c++. 

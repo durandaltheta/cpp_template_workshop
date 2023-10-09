@@ -208,7 +208,7 @@ Combining virtual inheritance with type erasure</h1>
 <div class="line">    typedef std::decay_t&lt;T&gt; DT;</div>
 <div class="line"> </div>
 <div class="line">    if(a &amp;&amp; *(a.m_any_int-&gt;type()) != typeid(DT)) {</div>
-<div class="line">        throw std::bad_any_cast();</div>
+<div class="line">        throw bad_any_cast();</div>
 <div class="line">    }</div>
 <div class="line"> </div>
 <div class="line">    return *((DT*)(m_any_int-&gt;data()));</div>

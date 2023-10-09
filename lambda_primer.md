@@ -12,7 +12,7 @@ Lambdas can be stored as a variable using their real type (specified by the comp
 auto my_lambda = [capture0, ..., captureN](arg0, ..., argN){ statement0; ...; statmentN; };
 ```
 
-Lambdas can also be stored in a std::function object, which looks like this:
+Lambdas can also be stored in a `std::function` object, which looks like this:
 ```
 std::function<function_return_type(arg_0_type, ..., arg_N_type)> object_name;
 object_name = [capture0, ..., captureN](arg0, ..., argN){ statement0; ...; statmentN; };

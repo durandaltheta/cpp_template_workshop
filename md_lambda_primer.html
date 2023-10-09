@@ -120,7 +120,8 @@ Lambda Return Types</h1>
 <div class="line">#include &lt;string&gt;</div>
 <div class="line"> </div>
 <div class="line">int main() {</div>
-<div class="line">    std::cout &lt;&lt; []() -&gt; std::string { return &quot;hello world&quot;; } &lt;&lt; std::endl;</div>
+<div class="line">    auto l = []() -&gt; std::string { return &quot;hello world&quot;; };</div>
+<div class="line">    std::cout &lt;&lt; l() &lt;&lt; std::endl;</div>
 <div class="line">    return 0;</div>
 <div class="line">}</div>
 </div><!-- fragment --><h1><a class="anchor" id="autotoc_md6"></a>

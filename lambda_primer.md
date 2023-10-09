@@ -66,7 +66,8 @@ If no arguments are used by the lambda, then the parenthesis clause `()` after t
 #include <string>
 
 int main() {
-    std::cout << []{ return std::string("hello world"); } << std::endl;
+    auto l = []{ return std::string("hello world"); };
+    std::cout << l() << std::endl;
     return 0;
 }
 ```

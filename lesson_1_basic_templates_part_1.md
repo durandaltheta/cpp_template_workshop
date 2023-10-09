@@ -168,7 +168,7 @@ number: 3.0
 $
 ```
 
-The order that template specializations are written can be quite in important for selecting the proper case. This is a whole topic in and of itself, but it should be noted that the compiler likes to take the *most specialized* valid template it can use when it needs one (the template which can be used in the smallest subset of usecases).
+The order that template specializations are written may not be important for selecting the proper case. This is a whole topic in and of itself, but it should be noted that the compiler likes to take the *most specialized* valid template it can use when it needs one (the template which can be used in the smallest subset of usecases).
 
 ## Default Type Assignment 
 One final point is that templates types can have default values. This is often then case when a library template code supports a primary way of doing something in a template, but leaves the door open for custom overrides. When using a default type assignment the user does not have to specify the type in `<`/`>` brackets if a type is assigned via `=`. Such is the case with `std::vector`, whose template class declaration is as follows:

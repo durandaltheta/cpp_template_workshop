@@ -168,7 +168,7 @@ T any_cast(any& a) {
     typedef std::decay_t<T> DT;
 
     if(a && *(a.m_any_int->type()) != typeid(DT)) {
-        throw std::bad_any_cast();
+        throw bad_any_cast();
     }
 
     return *((DT*)(m_any_int->data()));

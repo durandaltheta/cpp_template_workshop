@@ -87,7 +87,7 @@ $(function() {
 </div><!-- fragment --><p>Executing this program: </p><div class="fragment"><div class="line">$ ./a.out </div>
 <div class="line">faa</div>
 <div class="line">$</div>
-</div><!-- fragment --><p>Additionally, if a <code>virtual</code> method declaration is post-pended with a <code>= 0;</code> then that method is called a "pure virtual" method. A pure virtual method makes the <code>class</code> "abstract". An abstract <code>class</code> is what is known as an "interface" in other programming languages, essentially a specification of required methods that an inheriting class can implement. If a class does not implement every pure virtual method it inherits, the child class is <em>also</em> an abstract class.</p>
+</div><!-- fragment --><p>Additionally, if a <code>virtual</code> method declaration is post-pended with a <code>= 0;</code> then that method is called a "pure virtual" method. A pure virtual method makes the <code>class</code> "abstract". An abstract <code>class</code> is what is known as an "interface" in other programming languages, essentially a specification of required methods that an inheriting class <em>must</em> implement. If a class does not implement every pure virtual method it inherits, the child class is <em>also</em> an abstract class.</p>
 <p>An abstract <code>class</code> cannot be created directly, but it can be inherited. If the child <code>class</code> fully implements the missing "pure virtual" methods of the abstract class then the child <code>class</code> <em>can</em> be constructed. </p><div class="fragment"><div class="line">#include &lt;iostream&gt;</div>
 <div class="line"> </div>
 <div class="line">struct interface {</div>

@@ -206,11 +206,11 @@ int main() {
     std::string s = "foo";
     wrapped_value wv;
 
-    wv.assign(b);
+    wv.set(b);
     print_wrapped_value(wv);
-    wv.assign(i);
+    wv.set(i);
     print_wrapped_value(wv);
-    wv.assign(s);
+    wv.set(s);
     print_wrapped_value(wv);
 
     return 0;

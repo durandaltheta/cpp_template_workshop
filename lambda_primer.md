@@ -84,7 +84,8 @@ Usage can look something like this:
 #include <string>
 
 int main() {
-    std::cout << []() -> std::string { return "hello world"; } << std::endl;
+    auto l = []() -> std::string { return "hello world"; };
+    std::cout << l() << std::endl;
     return 0;
 }
 ```

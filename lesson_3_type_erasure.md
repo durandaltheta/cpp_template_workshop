@@ -156,7 +156,7 @@ Some things about `std::type_info` are unusual. For one, the function `std::type
 In addition to this, we cannot take a copy of the `std::type_info` object because construction and assignment operations are explicitly deleted, so we can only get a reference to it via `typeid()`. According to [cppreference](https://en.cppreference.com/w/cpp/language/typeid):
 > The typeid expression is an lvalue expression which refers to an object with static storage duration, of const-qualified version of the polymorphic type std::type_info or some type derived from it.
 
-This means that we can take a `const std::type_info*` pointer of the result of a `typeid()` expression and use that pointer at some arbitrary time and place in the future. As an example, another related standard library type utility, [std::type_index](https://en.cppreference.com/w/cpp/types/type_index), whose documentation here explicitly mentions that its constructor maintains a *pointer* to a given `type_info` object. 
+This means that we can take a `const std::type_info*` pointer of the result of a `typeid()` expression and use that pointer at some arbitrary time and place in the future. As an example, another related standard library type utility, [std::type_index](https://en.cppreference.com/w/cpp/types/type_index), whose documentation explicitly mentions that its constructor maintains a *pointer* to a given `type_info` object. 
 
 ### Using std::type_info in templates
 With templates and `std::type_info` we can improve the process of type erasure, because is possible to write an object which "wraps" a value of any type using template functions and then can use further templates to unwrap it at runtime:

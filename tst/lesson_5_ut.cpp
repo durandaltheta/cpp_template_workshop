@@ -63,16 +63,16 @@ bool none(C&& c, UnaryPredicate&& pred) {
 
 }
 
-namespace sca {
+// namespace sca {
 
-//TODO: remove this algorithm implementation and implement real one in scalgorithm.hpp
-template <typename C>
-auto pointers(C&& c) {
-    typedef typename std::decay_t<C>::value_type CV;
-    return std::vector<CV*>(std::distance(c.begin(), c.end()));
-}
+// //TODO: remove this algorithm implementation and implement real one in scalgorithm.hpp
+// template <typename C>
+// auto pointers(C&& c) {
+//     typedef typename std::decay_t<C>::value_type CV;
+//     return std::vector<CV*>(std::distance(c.begin(), c.end()));
+// }
 
-}
+// }
 
 /*
 EXTRA CREDIT 

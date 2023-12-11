@@ -79,14 +79,14 @@ private:
 
 }
 
-namespace sca {
+// namespace sca {
 
-template <typename C> 
-size_t size(C&& c) { //TODO: remove this implementation and implement real one in scalgorithm.hpp
-    return 0;
-}
+// template <typename C> 
+// size_t size(C&& c) { //TODO: remove this implementation and implement real one in scalgorithm.hpp
+//     return 0;
+// }
 
-}
+// }
 
 /*
 EXTRA CREDIT

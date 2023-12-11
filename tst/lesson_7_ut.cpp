@@ -16,7 +16,7 @@ TEST(lesson_7, map) {
     const std::forward_list<int> fl{7,8,9};
 
     {
-        auto out = sc::map(v, [](int a, int b, int c){ return a+b+c; }, v, l, fl);
+        auto out = sca::map(v, [](int a, int b, int c){ return a+b+c; }, v, l, fl);
         auto is_same = std::is_same<std::vector<int>, decltype(out)>::value;
         EXPECT_TRUE(is_same);
         EXPECT_EQ(12, out[0]);
@@ -44,7 +44,7 @@ TEST(lesson_7, map) {
             return sum;
         };
 
-        auto out = sc::map(add_and_reset, cpv, cpl, cpfl);
+        auto out = sca::map(add_and_reset, cpv, cpl, cpfl);
 
         EXPECT_EQ(12, out[0]);
         EXPECT_EQ(15, out[1]);
@@ -77,7 +77,7 @@ TEST(lesson_7, fold) {
     const std::forward_list<int> fl{7,8,9};
 
     {
-        auto out = sc::fold(sum, 0, v, l, fl);
+        auto out = sca::fold(sum, 0, v, l, fl);
         auto is_same = std::is_same<int, decltype(out)>::value;
         EXPECT_TRUE(is_same);
         EXPECT_EQ(45, out);
@@ -91,7 +91,7 @@ TEST(lesson_7, fold) {
             return cur + ve + fle;
         };
 
-        auto out = sc::fold(concatenate, std::string(""), v, fl);
+        auto out = sca::fold(concatenate, std::string(""), v, fl);
         auto is_same = std::is_same<std::string, decltype(out)>::value;
         EXPECT_TRUE(is_same); 
         EXPECT_EQ("I am a stick!", out);
